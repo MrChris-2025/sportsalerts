@@ -3,40 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ESPN Multi-Sport Center</title>
+  <title>ESPN Live Sports Center</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
   <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
 
-  <header>
-    <div class="logo-container">
-      <span class="espn-badge">ESPN</span>
-      <span class="title">LIVE MULTI-SPORT</span>
-    </div>
-    <div class="action-buttons">
-      <button id="btnSubscribe" class="btn-push">Enable Push Alerts</button>
-      <button id="btnTestPush" class="btn-push btn-test">Test Push Now</button>
-    </div>
-  </header>
+  <div class="app-layout">
+    
+    <!-- STICKY SIDE NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-header">CATEGORIES</div>
+      <nav class="categories-nav" id="categoriesNav">
+        <button class="nav-btn active" data-sport="baseball/mlb" data-title="BASEBALL SCORES">Baseball (MLB)</button>
+        <button class="nav-btn" data-sport="football/nfl" data-title="FOOTBALL SCORES">Football (NFL)</button>
+        <button class="nav-btn" data-sport="basketball/nba" data-title="BASKETBALL SCORES">Basketball (NBA)</button>
+        <button class="nav-btn" data-sport="hockey/nhl" data-title="HOCKEY SCORES">Hockey (NHL)</button>
+        <button class="nav-btn" data-sport="soccer/eng.1" data-title="PREMIER LEAGUE SCORES">Premier League</button>
+        <button class="nav-btn" data-sport="soccer/usa.1" data-title="MAJOR LEAGUE SOCCER">Major League Soccer</button>
+        <button class="nav-btn" data-sport="mma/ufc" data-title="MMA / UFC SCORES">MMA / UFC</button>
+        <button class="nav-btn" data-sport="basketball/mens-college-basketball" data-title="NCAA BASKETBALL">NCAA Basketball</button>
+        <button class="nav-btn" data-sport="football/college-football" data-title="NCAA FOOTBALL">NCAA Football</button>
+      </nav>
+    </aside>
 
-  <nav class="sports-nav" id="sportsNav">
-    <button class="sport-tab active" data-sport="basketball/nba">NBA</button>
-    <button class="sport-tab" data-sport="football/nfl">NFL</button>
-    <button class="sport-tab" data-sport="baseball/mlb">MLB</button>
-    <button class="sport-tab" data-sport="hockey/nhl">NHL</button>
-    <button class="sport-tab" data-sport="soccer/eng.1">SOCCER</button>
-    <button class="sport-tab" data-sport="mma/ufc">MMA</button>
-    <button class="sport-tab" data-sport="basketball/mens-college-basketball">NCAA BSB</button>
-    <button class="sport-tab" data-sport="football/college-football">NCAA FB</button>
-  </nav>
+    <!-- MAIN BODY AREA -->
+    <div class="main-content">
+      
+      <!-- STICKY TOP HEADER -->
+      <header class="top-header">
+        <h1 class="page-title" id="pageTitle">BASEBALL SCORES</h1>
+        <div class="header-actions">
+          <span class="date-badge" id="currentDateBadge">Aug 13, 2026</span>
+          <button id="btnSubscribe" class="btn-action">Enable Global Push</button>
+          <button id="btnTestPush" class="btn-action btn-blue">Test Push Now</button>
+        </div>
+      </header>
 
-  <main id="scoreboardContainer">
-    <div class="card" style="text-align: center; color: var(--text-secondary);">
-      Connecting to ESPN API...
+      <!-- LIVE SCORE CARDS GRID -->
+      <main class="games-grid" id="scoreboardContainer">
+        <div class="card-btn" style="grid-column: 1/-1; text-align: center; padding: 40px;">
+          Connecting to Live Stream...
+        </div>
+      </main>
+
     </div>
-  </main>
+
+  </div>
 
   <script type="module" src="main.js"></script>
 </body>
