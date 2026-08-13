@@ -1,0 +1,113 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  /* Black to purple gradient color palette */
+  background: linear-gradient(135deg, #0d0d0d 0%, #2b005e 50%, #000000 100%);
+  background-attachment: fixed;
+  color: #ffffff;
+  min-height: 100vh;
+}
+
+.espn-header {
+  background-color: #000000;
+  border-bottom: 3px solid #8e2de2;
+  padding: 20px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.espn-header .logo {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.espn-header .subtitle {
+  color: #a0a0a0;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 25px;
+}
+
+/* Liquid Glass / Glassmorphism Cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(142, 45, 226, 0.5);
+}
+
+.matchup {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.score-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.game-status {
+  text-align: center;
+  font-size: 14px;
+  color: #b3b3b3;
+  margin-bottom: 20px;
+}
+
+.btn-subscribe {
+  width: 100%;
+  background: linear-gradient(90deg, #4a00e0 0%, #8e2de2 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-subscribe:hover {
+  opacity: 0.9;
+}
+
+.btn-subscribe:disabled {
+  background: #333;
+  color: #888;
+  cursor: not-allowed;
+}
