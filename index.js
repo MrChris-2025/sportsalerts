@@ -14,7 +14,8 @@ const categories = [
   { id: 'hockey/nhl', name: 'Hockey (NHL)' },
   { id: 'soccer/eng.1', name: 'Premier League' },
   { id: 'soccer/usa.1', name: 'Major League MLS' },
-  { id: 'mma/ufc', name: 'MMA / UFC' }
+  { id: 'mma/ufc', name: 'MMA / UFC' },
+  { id: 'football/college-football', name: 'NCAA Football' }
 ];
 
 let currentSportPath = 'baseball/mlb';
@@ -44,7 +45,7 @@ async function registerServiceWorker() {
   }
 }
 
-// Top Bar Clock Function (Split Date & Time, no "at")
+// Top Bar Clock Function
 function updateClock() {
   const now = new Date();
   
@@ -58,6 +59,23 @@ function updateClock() {
     <div class="date-str">${dateStr}</div>
     <div class="time-str">${timeStr}</div>
   `;
+}
+
+// Format "Starts in XXh XXm"
+function getCountdown(dateString) {
+  const gameTime = new Date(dateString).getTime();
+  const now = new Date().getTime();
+  const diff = gameTime - now;
+
+  if (diff <= 0) return "soon";
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
 }
 
 function renderSidebar() {
@@ -91,7 +109,7 @@ async function fetchScores() {
 
 function getBaseGraphicHTML(game) {
   const isBaseball = currentSportPath.includes('baseball');
-  if (!isBaseball) return '';
+  if (!isBaseball || game.status.type.state !== 'in') return '';
 
   let b1 = false, b2 = false, b3 = false;
   let outs = 0, balls = 0, strikes = 0;
@@ -130,6 +148,29 @@ function getBaseGraphicHTML(game) {
   `;
 }
 
+function getFootballGraphicHTML(game) {
+  const isFootball = currentSportPath.includes('football');
+  if (!isFootball || game.status.type.state !== 'in') return '';
+
+  let downDist = '';
+  let yardLine = '';
+
+  if (game.competitions && game.competitions[0].situation) {
+    const sit = game.competitions[0].situation;
+    downDist = sit.downDistanceText || '';
+    yardLine = sit.possessionText || '';
+  }
+
+  if (!downDist && !yardLine) return '';
+
+  return `
+    <div class="football-graphic">
+      <div class="down-dist">${downDist}</div>
+      <div class="yard-line">${yardLine}</div>
+    </div>
+  `;
+}
+
 function renderScoreboard(events) {
   const scoreboard = document.getElementById('scoreboard');
   scoreboard.innerHTML = '';
@@ -163,19 +204,31 @@ function renderScoreboard(events) {
     const isPre = game.status.type.state === 'pre';
     const isFinal = game.status.type.state === 'post';
 
+    // LEFT HEADER
     let headerLeftHTML = '';
     if (isLive) {
       headerLeftHTML = `<div class="live-indicator"><div class="live-dot"></div> LIVE</div>`;
     } else if (isPre) {
-      const date = new Date(game.date);
-      headerLeftHTML = `<span>starts ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>`;
+      headerLeftHTML = `<span>starts in ${getCountdown(game.date)}</span>`;
     } else {
       headerLeftHTML = `<span>FINAL</span>`;
     }
 
     let pillClass = 'status-pill';
-    if (isPre) pillClass += ' pregame';
-    if (isFinal) pillClass += ' final';
+    let metaText = '';
+
+    // RIGHT SIDE STATUS PILL
+    if (isPre) {
+      pillClass += ' pregame';
+      const d = new Date(game.date);
+      const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      metaText = `${datePart}<br>${timePart}`;
+    } else {
+      if (isFinal) pillClass += ' final';
+      // ESPN API provides Live Clock, Period, Inning natively inside .detail
+      metaText = game.status.type.detail.replace(' - ', '<br>');
+    }
 
     const isSubscribed = subscribedGames.has(game.id);
 
@@ -205,8 +258,9 @@ function renderScoreboard(events) {
         </div>
 
         <div class="game-meta">
-          <div class="${pillClass}">${game.status.type.detail.replace(' - ', '<br>')}</div>
+          <div class="${pillClass}">${metaText}</div>
           ${getBaseGraphicHTML(game)}
+          ${getFootballGraphicHTML(game)}
         </div>
       </div>
 
@@ -259,7 +313,6 @@ window.toggleAlert = async function(gameId, sportPath) {
     });
     
     // OPTIMISTIC UI UPDATE: Instantly turn green
-    // We do this here so API / DB timeouts don't snap the UI back visually.
     subscribedGames.add(gameId);
     localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
     btn.classList.add('active');
