@@ -1,4 +1,3 @@
-// Safely initialize Parse SDK if available
 if (typeof Parse !== 'undefined') {
   Parse.initialize("kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v", "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q");
   Parse.serverURL = "https://parseapi.back4app.com";
@@ -26,7 +25,6 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-// Format Date as YYYYMMDD for ESPN API
 function getFormattedApiDate(dateObj) {
   const yyyy = dateObj.getFullYear();
   const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -34,10 +32,18 @@ function getFormattedApiDate(dateObj) {
   return `${yyyy}${mm}${dd}`;
 }
 
-// Format Date for UI Display
 function updateDateDisplay() {
-  const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
-  document.getElementById('dateDisplay').innerText = currentDate.toLocaleDateString('en-US', options);
+  const fullOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+  const shortOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+
+  const dateStrFull = currentDate.toLocaleDateString('en-US', fullOptions).toUpperCase();
+  const dateStrShort = currentDate.toLocaleDateString('en-US', shortOptions);
+
+  const dateDisplay = document.getElementById('dateDisplay');
+  const currentDateBadge = document.getElementById('currentDateBadge');
+
+  if (dateDisplay) dateDisplay.innerText = dateStrFull;
+  if (currentDateBadge) currentDateBadge.innerText = dateStrShort;
 
   const datePicker = document.getElementById('datePicker');
   if (datePicker) {
@@ -49,27 +55,36 @@ function updateDateDisplay() {
 }
 
 function setupDateControls() {
-  document.getElementById('btnPrevDate').addEventListener('click', () => {
-    currentDate.setDate(currentDate.getDate() - 1);
-    updateDateDisplay();
-    fetchLiveScores();
-  });
-
-  document.getElementById('btnNextDate').addEventListener('click', () => {
-    currentDate.setDate(currentDate.getDate() + 1);
-    updateDateDisplay();
-    fetchLiveScores();
-  });
-
+  const prevBtn = document.getElementById('btnPrevDate');
+  const nextBtn = document.getElementById('btnNextDate');
   const datePicker = document.getElementById('datePicker');
-  datePicker.addEventListener('change', (e) => {
-    if (e.target.value) {
-      const parts = e.target.value.split('-');
-      currentDate = new Date(parts[0], parts[1] - 1, parts[2]);
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      currentDate.setDate(currentDate.getDate() - 1);
       updateDateDisplay();
       fetchLiveScores();
-    }
-  });
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      currentDate.setDate(currentDate.getDate() + 1);
+      updateDateDisplay();
+      fetchLiveScores();
+    });
+  }
+
+  if (datePicker) {
+    datePicker.addEventListener('change', (e) => {
+      if (e.target.value) {
+        const parts = e.target.value.split('-');
+        currentDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        updateDateDisplay();
+        fetchLiveScores();
+      }
+    });
+  }
 }
 
 async function initServiceWorker() {
@@ -93,20 +108,24 @@ async function checkExistingSubscription() {
     const btnUnsubscribe = document.getElementById('btnUnsubscribe');
 
     if (sub) {
-      btnSubscribe.innerText = "Alerts Active ✓";
-      btnSubscribe.style.background = "#16a34a";
-      btnUnsubscribe.style.display = "inline-block";
+      if (btnSubscribe) {
+        btnSubscribe.innerText = "Alerts Active ✓";
+        btnSubscribe.style.background = "#16a34a";
+      }
+      if (btnUnsubscribe) btnUnsubscribe.style.display = "inline-block";
     } else {
-      btnSubscribe.innerText = "Enable Push";
-      btnSubscribe.style.background = "#182238";
-      btnUnsubscribe.style.display = "none";
+      if (btnSubscribe) {
+        btnSubscribe.innerText = "Enable Push";
+        btnSubscribe.style.background = "#182238";
+      }
+      if (btnUnsubscribe) btnUnsubscribe.style.display = "none";
     }
   }
 }
 
 async function setupPushNotifications() {
   const pwaBanner = document.getElementById('pwaBanner');
-  if (!isStandalone()) {
+  if (pwaBanner && !isStandalone()) {
     pwaBanner.style.display = 'flex';
   }
 
@@ -119,91 +138,101 @@ async function setupPushNotifications() {
   const btnUnsubscribe = document.getElementById('btnUnsubscribe');
   const btnTestPush = document.getElementById('btnTestPush');
 
-  btnSubscribe.addEventListener('click', async () => {
-    if (!isStandalone()) {
-      alert('📱 Action Required:
+  if (btnSubscribe) {
+    btnSubscribe.addEventListener('click', async () => {
+      if (!isStandalone()) {
+        alert('📱 Action Required:
 You MUST add this app to your Home Screen first to subscribe to Push Alerts.
 
 Tap Share/Menu -> "Add to Home Screen".');
-      return;
-    }
-
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        alert('Notification permission rejected.');
         return;
       }
 
-      const subscription = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          alert('Notification permission rejected.');
+          return;
+        }
 
-      if (typeof Parse !== 'undefined') {
-        await Parse.Cloud.run('subscribeUser', { subscription: subscription.toJSON() });
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+
+        if (typeof Parse !== 'undefined') {
+          await Parse.Cloud.run('subscribeUser', { subscription: subscription.toJSON() });
+        }
+        btnSubscribe.innerText = "Alerts Active ✓";
+        btnSubscribe.style.background = "#16a34a";
+        if (btnUnsubscribe) btnUnsubscribe.style.display = "inline-block";
+        alert("Subscribed successfully to sports push alerts!");
+      } catch (err) {
+        console.error("Push Setup Error:", err);
+        alert("Failed to subscribe for push notifications.");
       }
-      btnSubscribe.innerText = "Alerts Active ✓";
-      btnSubscribe.style.background = "#16a34a";
-      btnUnsubscribe.style.display = "inline-block";
-      alert("Subscribed successfully to sports push alerts!");
-    } catch (err) {
-      console.error("Push Setup Error:", err);
-      alert("Failed to subscribe for push notifications.");
-    }
-  });
+    });
+  }
 
-  btnUnsubscribe.addEventListener('click', async () => {
-    if (!isStandalone()) {
-      alert('You must launch the app from your Home Screen to manage subscriptions.');
-      return;
-    }
-
-    try {
-      const sub = await reg.pushManager.getSubscription();
-      if (sub) {
-        await sub.unsubscribe();
-        btnSubscribe.innerText = "Enable Push";
-        btnSubscribe.style.background = "#182238";
-        btnUnsubscribe.style.display = "none";
-        alert("Unsubscribed successfully.");
+  if (btnUnsubscribe) {
+    btnUnsubscribe.addEventListener('click', async () => {
+      if (!isStandalone()) {
+        alert('You must launch the app from your Home Screen to manage subscriptions.');
+        return;
       }
-    } catch (err) {
-      console.error("Unsubscribe Error:", err);
-      alert("Failed to unsubscribe.");
-    }
-  });
 
-  btnTestPush.addEventListener('click', async () => {
-    try {
-      btnTestPush.innerText = "Sending...";
-      if (typeof Parse !== 'undefined') {
-        const res = await Parse.Cloud.run('sendTestPush');
-        alert(`Test Push Triggered! Delivered to ${res.sentCount} device(s).`);
-      } else {
-        alert("Parse SDK not loaded.");
+      try {
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await sub.unsubscribe();
+          if (btnSubscribe) {
+            btnSubscribe.innerText = "Enable Push";
+            btnSubscribe.style.background = "#182238";
+          }
+          btnUnsubscribe.style.display = "none";
+          alert("Unsubscribed successfully.");
+        }
+      } catch (err) {
+        console.error("Unsubscribe Error:", err);
+        alert("Failed to unsubscribe.");
       }
-      btnTestPush.innerText = "Test Push";
-    } catch (err) {
-      console.error("Test Push Error:", err);
-      alert("Failed to dispatch test push notification.");
-      btnTestPush.innerText = "Test Push";
-    }
-  });
+    });
+  }
+
+  if (btnTestPush) {
+    btnTestPush.addEventListener('click', async () => {
+      try {
+        btnTestPush.innerText = "Sending...";
+        if (typeof Parse !== 'undefined') {
+          const res = await Parse.Cloud.run('sendTestPush');
+          alert(`Test Push Triggered! Delivered to ${res.sentCount} device(s).`);
+        } else {
+          alert("Parse SDK not available.");
+        }
+        btnTestPush.innerText = "Test Push";
+      } catch (err) {
+        console.error("Test Push Error:", err);
+        alert("Failed to dispatch test push notification.");
+        btnTestPush.innerText = "Test Push";
+      }
+    });
+  }
 }
 
 function setupSportsNav() {
   const nav = document.getElementById('categoriesNav');
-  nav.addEventListener('click', (e) => {
-    const target = e.target.closest('.nav-btn');
-    if (target) {
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-      target.classList.add('active');
-      currentSportPath = target.getAttribute('data-sport');
-      document.getElementById('pageTitle').innerText = target.getAttribute('data-title');
-      fetchLiveScores();
-    }
-  });
+  if (nav) {
+    nav.addEventListener('click', (e) => {
+      const target = e.target.closest('.nav-btn');
+      if (target) {
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        target.classList.add('active');
+        currentSportPath = target.getAttribute('data-sport');
+        document.getElementById('pageTitle').innerText = target.getAttribute('data-title');
+        fetchLiveScores();
+      }
+    });
+  }
 }
 
 function renderBaseballDiamond(situation) {
@@ -257,6 +286,8 @@ function renderCounts(situation) {
 
 async function fetchLiveScores() {
   const container = document.getElementById('scoreboardContainer');
+  if (!container) return;
+
   const apiDate = getFormattedApiDate(currentDate);
 
   try {
@@ -284,17 +315,17 @@ async function fetchLiveScores() {
       const statusState = event.status?.type?.state || 'pre';
       const isLive = statusState === 'in';
 
-      const away = competition.competitors ? competition.competitors.find(c => c.homeAway === 'away') || competition.competitors[1] : null;
+      const away = competition.competitors ? competition.competitors.find(c => c.homeAway === 'away') || competition.competitors[1] || competition.competitors[0] : null;
       const home = competition.competitors ? competition.competitors.find(c => c.homeAway === 'home') || competition.competitors[0] : null;
 
-      const awayName = away?.team?.abbreviation || away?.team?.name || away?.athlete?.displayName || 'AWAY';
-      const homeName = home?.team?.abbreviation || home?.team?.name || home?.athlete?.displayName || 'HOME';
+      const awayName = away?.team?.abbreviation || away?.team?.name || away?.athlete?.displayName || away?.displayName || 'AWAY';
+      const homeName = home?.team?.abbreviation || home?.team?.name || home?.athlete?.displayName || home?.displayName || 'HOME';
 
       const awayRecord = away?.records ? `(${away.records[0]?.summary || ''})` : '';
       const homeRecord = home?.records ? `(${home.records[0]?.summary || ''})` : '';
 
-      const awayLogo = away?.team?.logo || away?.athlete?.headshot || 'https://a.espncdn.com/favicon.ico';
-      const homeLogo = home?.team?.logo || home?.athlete?.headshot || 'https://a.espncdn.com/favicon.ico';
+      const awayLogo = away?.team?.logo || away?.athlete?.headshot?.href || away?.athlete?.flag?.href || 'https://a.espncdn.com/favicon.ico';
+      const homeLogo = home?.team?.logo || home?.athlete?.headshot?.href || home?.athlete?.flag?.href || 'https://a.espncdn.com/favicon.ico';
 
       const awayScore = away?.score ?? '0';
       const homeScore = home?.score ?? '0';
@@ -346,7 +377,7 @@ async function fetchLiveScores() {
         </div>
 
         <div class="card-actions">
-          <button id="alertBtn_${event.id}" class="card-btn ${isAlertOn ? 'alert-active' : ''}" onclick="toggleGameAlert('${event.id}', '${currentSportPath}')">
+          <button id="alertBtn_${event.id}" class="card-btn ${isAlertOn ? 'alert-active' : ''}" onclick="window.toggleGameAlert('${event.id}', '${currentSportPath}')">
             ${isAlertOn ? 'Alert On 🔥' : 'Alert Off'}
           </button>
           <button class="card-btn btn-stream" onclick="window.open('${event.links ? event.links[0]?.href : '#'}', '_blank')">Watch Stream</button>
@@ -400,8 +431,7 @@ Tap Share/Menu -> "Add to Home Screen".');
   }
 };
 
-// Initialize Application
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   updateDateDisplay();
   setupDateControls();
   setupPushNotifications();
@@ -410,4 +440,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (autoRefreshInterval) clearInterval(autoRefreshInterval);
   autoRefreshInterval = setInterval(fetchLiveScores, 30000);
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
