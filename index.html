@@ -6,7 +6,8 @@
   <title>ESPN Live Sports Center</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
-  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+  <!-- Reliable Parse SDK CDN -->
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
 
@@ -31,14 +32,23 @@
     <!-- MAIN BODY AREA -->
     <div class="main-content">
       
-      <!-- STICKY TOP HEADER -->
+      <!-- STICKY TOP HEADER WITH DATE NAV -->
       <header class="top-header">
-        <h1 class="page-title" id="pageTitle">BASEBALL SCORES</h1>
-        <div class="header-actions">
-          <span class="date-badge" id="currentDateBadge">Today</span>
-          <button id="btnSubscribe" class="btn-action">Enable Push</button>
-          <button id="btnUnsubscribe" class="btn-action btn-danger" style="display: none;">Unsubscribe</button>
-          <button id="btnTestPush" class="btn-action btn-blue">Test Push</button>
+        <div class="header-top-row">
+          <h1 class="page-title" id="pageTitle">BASEBALL SCORES</h1>
+          <div class="header-actions">
+            <button id="btnSubscribe" class="btn-action">Enable Push</button>
+            <button id="btnUnsubscribe" class="btn-action btn-danger" style="display: none;">Unsubscribe</button>
+            <button id="btnTestPush" class="btn-action btn-blue">Test Push</button>
+          </div>
+        </div>
+
+        <!-- DATE NAVIGATION BAR -->
+        <div class="date-control-bar">
+          <button id="btnPrevDate" class="date-nav-btn">&lt;</button>
+          <span class="date-display" id="dateDisplay">LOADING DATE...</span>
+          <button id="btnNextDate" class="date-nav-btn">&gt;</button>
+          <input type="date" id="datePicker" class="date-picker-input">
         </div>
       </header>
 
@@ -49,9 +59,7 @@
 
       <!-- LIVE SCORE CARDS GRID (SIDE BY SIDE 2-COLUMN) -->
       <main class="games-grid" id="scoreboardContainer">
-        <div class="card-btn" style="grid-column: 1/-1; text-align: center; padding: 40px;">
-          Connecting to Live Stream...
-        </div>
+        <div class="empty-state">Connecting to Live ESPN Scoreboard Stream...</div>
       </main>
 
     </div>
