@@ -1,6 +1,6 @@
 {
-  "short_name": "ESPN Multi-Sport",
-  "name": "ESPN Live Multi-Sport Tracker",
+  "short_name": "Sports Live",
+  "name": "ESPN Live Multi-Sport Center",
   "icons": [
     {
       "src": "https://a.espncdn.com/favicon.ico",
@@ -9,8 +9,8 @@
     }
   ],
   "start_url": "./index.html",
-  "background_color": "#07020d",
-  "theme_color": "#a855f7",
+  "background_color": "#080c14",
+  "theme_color": "#0b101d",
   "display": "standalone",
   "orientation": "portrait"
 }
