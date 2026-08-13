@@ -179,7 +179,6 @@ body::before {
   position: relative;
 }
 
-/* Condensation Droplets Overlay */
 .game-card::after {
   content: "";
   position: absolute;
@@ -294,19 +293,21 @@ body::before {
   flex-direction: column;
   align-items: center;
   padding-top: 16px;
+  padding-bottom: 8px;
 }
 
 .status-pill {
   background-color: #2563eb;
   color: #ffffff;
-  padding: 4px 10px;
+  padding: 6px 10px;
   border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   margin-bottom: 12px;
   text-align: center;
-  width: 85%;
+  width: 90%;
+  line-height: 1.4;
 }
 
 .status-pill.pregame { background-color: #4b5563; }
@@ -373,6 +374,32 @@ body::before {
 .dot.filled-green { background-color: #10b981; box-shadow: 0 0 5px #10b981; }
 .dot.filled-red { background-color: #ef4444; box-shadow: 0 0 5px #ef4444; }
 .dot.filled-yellow { background-color: #fbbf24; box-shadow: 0 0 5px #fbbf24; }
+
+/* Fixed Football Graphic */
+.football-graphic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 0 5px;
+  text-align: center;
+}
+
+.down-dist {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fbbf24; /* highlight in yellow */
+  line-height: 1.2;
+}
+
+.yard-line {
+  font-size: 10px;
+  font-weight: 600;
+  color: #e5e7eb;
+  line-height: 1.2;
+}
+
 
 /* --- CARD ACTIONS --- */
 .card-actions {
