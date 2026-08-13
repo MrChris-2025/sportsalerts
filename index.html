@@ -1,49 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b1121">
-  <link rel="manifest" href="manifest.json">
-  <title>Sports Scoreboard</title>
-  
-  <!-- Poppins Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="styles.css">
-  <script type="text/javascript" src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Sports Scores - ESPN Style</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='-.1em' font-size='100'>⚽</text></svg>">
 </head>
 <body>
-  
-  <!-- Sticky Top Navigation -->
-  <header class="top-bar">
-    <div class="logo">SPORTS ALERT</div>
-    <div class="datetime" id="datetimeDisplay">
-      <!-- Injected via JS -->
-    </div>
-  </header>
+    <header>
+        <div class="logo">SPORTS LIVE</div>
+        <nav>
+            <ul>
+                <li><a href="#">Scores</a></li>
+                <li><a href="#">News</a></li>
+                <li><a href="#">My Teams</a></li>
+            </ul>
+        </nav>
+    </header>
 
-  <div class="app-container">
-    
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <h2 class="sidebar-title">CATEGORIES</h2>
-      <ul class="category-list" id="categoryList">
-        <!-- Categories injected via JS -->
-      </ul>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content">
-      <div id="scoreboard" class="games-grid">
-        <!-- Game Cards injected via JS -->
-      </div>
+    <main id="app">
+        <h1>Live Scores</h1>
+        <div id="scores-container" class="scores-container">
+            <!-- Live score cards will be injected here by index.js -->
+            <div class="loading-message">Loading live scores...</div>
+        </div>
+        <button id="subscribeButton" class="subscribe-button">Enable Push Notifications</button>
     </main>
 
-  </div>
+    <footer>
+        &copy; 2026 Sports Live. All rights reserved.
+    </footer>
 
-  <script type="module" src="main.js"></script>
+    <script type="module" src="index.js"></script>
 </body>
 </html>
