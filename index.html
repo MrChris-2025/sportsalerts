@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ESPN Live Sports Center</title>
+  <title>ESPN Multi-Sport Center</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
   <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
@@ -13,14 +13,28 @@
   <header>
     <div class="logo-container">
       <span class="espn-badge">ESPN</span>
-      <span class="title">LIVE CENTER</span>
+      <span class="title">LIVE MULTI-SPORT</span>
     </div>
-    <button id="btnSubscribe" class="btn-push">Enable Push Alerts</button>
+    <div class="action-buttons">
+      <button id="btnSubscribe" class="btn-push">Enable Push Alerts</button>
+      <button id="btnTestPush" class="btn-push btn-test">Test Push Now</button>
+    </div>
   </header>
+
+  <nav class="sports-nav" id="sportsNav">
+    <button class="sport-tab active" data-sport="basketball/nba">NBA</button>
+    <button class="sport-tab" data-sport="football/nfl">NFL</button>
+    <button class="sport-tab" data-sport="baseball/mlb">MLB</button>
+    <button class="sport-tab" data-sport="hockey/nhl">NHL</button>
+    <button class="sport-tab" data-sport="soccer/eng.1">SOCCER</button>
+    <button class="sport-tab" data-sport="mma/ufc">MMA</button>
+    <button class="sport-tab" data-sport="basketball/mens-college-basketball">NCAA BSB</button>
+    <button class="sport-tab" data-sport="football/college-football">NCAA FB</button>
+  </nav>
 
   <main id="scoreboardContainer">
     <div class="card" style="text-align: center; color: var(--text-secondary);">
-      Connecting to ESPN Live API...
+      Connecting to ESPN API...
     </div>
   </main>
 
