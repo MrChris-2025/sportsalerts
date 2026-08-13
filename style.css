@@ -216,3 +216,28 @@ body {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
+
+/* Individual Game Tracking Button */
+.track-btn {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid var(--purple-primary);
+  color: var(--purple-bright);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.track-btn:hover {
+  background: var(--purple-dark);
+  color: #fff;
+}
+
+.track-btn.active {
+  background: var(--accent-pink);
+  border-color: var(--accent-pink);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
+}
