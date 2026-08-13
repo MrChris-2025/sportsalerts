@@ -16,25 +16,55 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
   background-color: var(--bg-app);
   color: var(--text-main);
   height: 100vh;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
+/* --- TOP BAR --- */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--bg-card-header);
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.top-bar .logo {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--text-main);
+}
+
+.top-bar .datetime {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* --- LAYOUT --- */
 .app-container {
   display: flex;
-  height: 100vh;
-  width: 100%;
+  flex: 1;
+  overflow: hidden;
 }
 
 /* --- SIDEBAR --- */
 .sidebar {
-  width: 280px;
+  width: 260px;
   background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border-color);
   padding: 30px 20px;
@@ -67,7 +97,7 @@ body {
   padding: 14px 20px;
   border-radius: 12px;
   text-align: left;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -94,7 +124,8 @@ body {
 
 .games-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  /* Forces TWO columns side-by-side on desktop */
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   align-items: start;
 }
@@ -124,7 +155,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -161,14 +192,14 @@ body {
 .team-row {
   display: flex;
   align-items: center;
-  height: 70px;
+  height: 75px;
   padding: 0 16px;
-  width: calc(100% - 100px); /* Leave space for game-meta sidebar */
+  width: calc(100% - 110px); 
 }
 
 .team-logo {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
   margin-right: 14px;
 }
@@ -180,8 +211,8 @@ body {
 }
 
 .team-name {
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
   color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -198,16 +229,16 @@ body {
   font-size: 28px;
   font-weight: 800;
   color: #ffffff;
-  padding-right: 20px;
+  padding-right: 10px;
 }
 
-/* Right Side Stats (Inning, Time, Base Graphic) */
+/* Right Side Stats */
 .game-meta {
   position: absolute;
   right: 0;
   top: 0;
   bottom: 0;
-  width: 100px;
+  width: 110px;
   background-color: var(--bg-app);
   border-left: 1px solid var(--border-color);
   display: flex;
@@ -221,47 +252,46 @@ body {
   color: #ffffff;
   padding: 4px 10px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   margin-bottom: 12px;
   text-align: center;
-  width: 80%;
+  width: 85%;
 }
 
-.status-pill.pregame {
-  background-color: #4b5563;
-}
+.status-pill.pregame { background-color: #4b5563; }
+.status-pill.final { background-color: #374151; }
 
-.status-pill.final {
-  background-color: #374151;
-}
-
-/* Baseball specific graphics placeholder */
+/* Fixed Baseball Graphic */
 .baseball-graphic {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
-.bases {
-  width: 24px;
-  height: 24px;
+.diamond {
   position: relative;
-  transform: rotate(45deg);
+  width: 32px;
+  height: 32px;
 }
 
 .base {
-  width: 8px;
-  height: 8px;
-  background-color: #374151;
   position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #374151;
+  transform: rotate(45deg);
+  border-radius: 2px;
 }
+
 .base.active { background-color: #fbbf24; }
-.base.top { top: 0; left: 8px; }
-.base.right { top: 8px; right: 0; }
-.base.left { top: 8px; left: 0; }
+
+/* 2nd base top, 1st base right, 3rd base left */
+.base-2 { top: 0; left: 11px; }
+.base-1 { top: 11px; right: 0; }
+.base-3 { top: 11px; left: 0; }
 
 .counts {
   display: flex;
@@ -269,18 +299,18 @@ body {
   gap: 4px;
   font-size: 10px;
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .count-row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .count-dots {
   display: flex;
-  gap: 2px;
+  gap: 3px;
 }
 
 .dot {
@@ -289,10 +319,10 @@ body {
   border-radius: 50%;
   background-color: #374151;
 }
+
 .dot.filled-green { background-color: #10b981; }
 .dot.filled-red { background-color: #ef4444; }
 .dot.filled-yellow { background-color: #fbbf24; }
-
 
 /* --- CARD ACTIONS --- */
 .card-actions {
@@ -308,10 +338,10 @@ body {
   padding: 10px;
   border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, background-color 0.2s;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -341,4 +371,49 @@ body {
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 992px) {
+  .games-grid {
+    grid-template-columns: 1fr; /* Single column on smaller screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .top-bar {
+    padding: 15px 20px;
+  }
+  
+  .app-container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 15px 20px;
+  }
+  
+  .sidebar-title {
+    display: none; /* Hide on mobile to save space */
+  }
+  
+  .category-list {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .category-btn {
+    white-space: nowrap;
+    padding: 10px 16px;
+  }
+  
+  .main-content {
+    padding: 20px;
+  }
 }
