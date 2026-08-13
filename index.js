@@ -5,6 +5,12 @@ const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-
 
 let currentSportPath = "baseball/mlb";
 let autoRefreshInterval = null;
+const trackedGames = new Set();
+
+// Check if app is launched in standalone / added to Home Screen
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -35,14 +41,50 @@ async function initServiceWorker() {
   return null;
 }
 
+async function checkExistingSubscription() {
+  const reg = await navigator.serviceWorker.getRegistration();
+  if (reg && reg.pushManager) {
+    const sub = await reg.pushManager.getSubscription();
+    const btnSubscribe = document.getElementById('btnSubscribe');
+    const btnUnsubscribe = document.getElementById('btnUnsubscribe');
+
+    if (sub) {
+      btnSubscribe.innerText = "Alerts Active ✓";
+      btnSubscribe.style.background = "#16a34a";
+      btnUnsubscribe.style.display = "inline-block";
+    } else {
+      btnSubscribe.innerText = "Enable Push";
+      btnSubscribe.style.background = "#182238";
+      btnUnsubscribe.style.display = "none";
+    }
+  }
+}
+
 async function setupPushNotifications() {
+  const pwaBanner = document.getElementById('pwaBanner');
+  if (!isStandalone()) {
+    pwaBanner.style.display = 'flex';
+  }
+
   const reg = await initServiceWorker();
   if (!reg) return;
 
+  await checkExistingSubscription();
+
   const btnSubscribe = document.getElementById('btnSubscribe');
+  const btnUnsubscribe = document.getElementById('btnUnsubscribe');
   const btnTestPush = document.getElementById('btnTestPush');
 
   btnSubscribe.addEventListener('click', async () => {
+    // ENFORCE HOME SCREEN REQUIREMENT
+    if (!isStandalone()) {
+      alert('📱 Action Required:
+You MUST add this app to your Home Screen first to subscribe to Push Alerts.
+
+Tap Share/Menu -> "Add to Home Screen".');
+      return;
+    }
+
     try {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
@@ -58,9 +100,32 @@ async function setupPushNotifications() {
       await Parse.Cloud.run('subscribeUser', { subscription: subscription.toJSON() });
       btnSubscribe.innerText = "Alerts Active ✓";
       btnSubscribe.style.background = "#16a34a";
+      btnUnsubscribe.style.display = "inline-block";
+      alert("Subscribed successfully to sports push alerts!");
     } catch (err) {
       console.error("Push Setup Error:", err);
       alert("Failed to subscribe for push notifications.");
+    }
+  });
+
+  btnUnsubscribe.addEventListener('click', async () => {
+    if (!isStandalone()) {
+      alert('You must launch the app from your Home Screen to manage subscriptions.');
+      return;
+    }
+
+    try {
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        await sub.unsubscribe();
+        btnSubscribe.innerText = "Enable Push";
+        btnSubscribe.style.background = "#182238";
+        btnUnsubscribe.style.display = "none";
+        alert("Unsubscribed successfully.");
+      }
+    } catch (err) {
+      console.error("Unsubscribe Error:", err);
+      alert("Failed to unsubscribe.");
     }
   });
 
@@ -69,11 +134,11 @@ async function setupPushNotifications() {
       btnTestPush.innerText = "Sending...";
       const res = await Parse.Cloud.run('sendTestPush');
       alert(`Test Push Triggered! Delivered to ${res.sentCount} device(s).`);
-      btnTestPush.innerText = "Test Push Now";
+      btnTestPush.innerText = "Test Push";
     } catch (err) {
       console.error("Test Push Error:", err);
       alert("Failed to dispatch test push notification.");
-      btnTestPush.innerText = "Test Push Now";
+      btnTestPush.innerText = "Test Push";
     }
   });
 }
@@ -180,6 +245,8 @@ async function fetchLiveScores() {
 
       const situation = competition.situation;
 
+      const isAlertOn = trackedGames.has(event.id);
+
       const card = document.createElement('div');
       card.className = 'game-card';
       card.innerHTML = `
@@ -221,8 +288,8 @@ async function fetchLiveScores() {
         </div>
 
         <div class="card-actions">
-          <button class="card-btn" onclick="startTrackingGame('${event.id}', '${currentSportPath}')">
-            ${isLive ? 'Track Push' : 'Alert Off'}
+          <button id="alertBtn_${event.id}" class="card-btn ${isAlertOn ? 'alert-active' : ''}" onclick="toggleGameAlert('${event.id}', '${currentSportPath}')">
+            ${isAlertOn ? 'Alert On 🔥' : 'Alert Off'}
           </button>
           <button class="card-btn btn-stream" onclick="window.open('${event.links ? event.links[0]?.href : '#'}', '_blank')">Watch Stream</button>
         </div>
@@ -235,13 +302,38 @@ async function fetchLiveScores() {
   }
 }
 
-window.startTrackingGame = async function(gameId, sportPath) {
-  try {
-    await Parse.Cloud.run('startGameLoop', { gameId, sportPath });
-    alert(`Tracking loop initialized for Event ID #${gameId}. Background updates will run via QStash even if app is closed.`);
-  } catch (e) {
-    console.error(e);
-    alert('Failed to start tracking loop.');
+window.toggleGameAlert = async function(gameId, sportPath) {
+  // ENFORCE HOME SCREEN REQUIREMENT
+  if (!isStandalone()) {
+    alert('📱 Action Required:
+You MUST add this app to your Home Screen first to enable game alerts.
+
+Tap Share/Menu -> "Add to Home Screen".');
+    return;
+  }
+
+  const btn = document.getElementById(`alertBtn_${gameId}`);
+
+  if (trackedGames.has(gameId)) {
+    trackedGames.delete(gameId);
+    if (btn) {
+      btn.classList.remove('alert-active');
+      btn.innerText = 'Alert Off';
+    }
+    alert(`Alerts disabled for Game ID #${gameId}.`);
+  } else {
+    try {
+      await Parse.Cloud.run('startGameLoop', { gameId, sportPath });
+      trackedGames.add(gameId);
+      if (btn) {
+        btn.classList.add('alert-active');
+        btn.innerText = 'Alert On 🔥';
+      }
+      alert(`Alert On! Red glassmorphism active. Live score updates will be pushed via QStash even if app is closed.`);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to start tracking loop.');
+    }
   }
 };
 
