@@ -1,52 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Inside public/index.html <head> tag -->
-<link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#120924" />
-
-  
-  <title>ESPN Live Scoreboard</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- Parse SDK -->
-  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Sports Scores</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <!-- ESPN Top Navigation Bar -->
-  <header class="espn-header">
-    <div class="header-content">
-      <div class="logo-group">
-        <span class="espn-brand">ESPN</span>
-        <span class="espn-sub">LIVE SCOREBOARD</span>
-      </div>
-      <div class="header-actions">
-        <select id="sport-selector" class="glass-select">
-          <option value="basketball/nba">NBA Basketball</option>
-          <option value="football/nfl">NFL Football</option>
-          <option value="baseball/mlb">MLB Baseball</option>
-        </select>
-        <button id="push-btn" class="glow-button">🔔 Enable Live Alerts</button>
-      </div>
-    </div>
-  </header>
+    <header class="app-header">
+        <div class="logo">SportsScores</div>
+        <nav>
+            <!-- Navigation elements if needed -->
+        </nav>
+    </header>
 
-  <!-- Live Ticker Banner -->
-  <section class="ticker-container">
-    <div class="ticker-badge"><span class="pulse-dot"></span> LIVE NOW</div>
-    <div class="ticker-text" id="ticker-status">Fetching ESPN Real-time Feeds...</div>
-  </section>
+    <main id="scores-container">
+        <!-- Sports score cards will be dynamically loaded here -->
+        <div class="loading-message">Loading live scores...</div>
+    </main>
 
-  <!-- Main Game Grid -->
-  <main class="container">
-    <div id="games-grid" class="games-grid">
-      <!-- Dynamic Liquid Glass Game Cards Loaded via index.js -->
-    </div>
-  </main>
-
-  <!-- Entry point loader script -->
-  <script type="module" src="main.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>
