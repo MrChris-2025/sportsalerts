@@ -3,20 +3,10 @@ self.addEventListener('push', function(event) {
     
     const options = {
         body: data.body,
-        icon: '/icon.png',
-        tag: data.gameId, // Overwrites previous notification for same game
-        renotify: false,
-        data: { url: '/' }
+        icon: 'https://cdn-icons-png.flaticon.com/512/5358/5358656.png',
+        tag: data.gameId, // Overwrites previous score for same game
+        renotify: false
     };
 
     event.waitUntil(
-        self.registration.showNotification(data.title, options)
-    );
-});
-
-self.addEventListener('notificationclick', function(event) {
-    event.notification.close();
-    event.waitUntil(
-        clients.openWindow('/')
-    );
-});
+        self.registration.showNotification(
