@@ -1,193 +1,79 @@
+:root {
+    --bg-dark: #000000;
+    --bg-gradient: linear-gradient(135deg, #000000 0%, #1a0033 50%, #4b0082 100%);
+    --accent-purple: #bc13fe;
+    --text-white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.1);
+}
+
 body {
-    font-family: 'ESPN Sans', 'Roboto', sans-serif; /* Placeholder font, replace with actual ESPN font if available */
     margin: 0;
-    padding: 0;
-    background: linear-gradient(135deg, #1A002A 0%, #0D001A 100%); /* Black-Purple Gradient */
-    color: #E0E0E0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--text-white);
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+}
+
+.app-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 header {
-    background-color: #000000;
-    padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #5A008A; /* Purple accent */
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--glass);
 }
 
 .logo {
-    font-size: 2.2em;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.logo span {
+    color: var(--accent-purple);
+}
+
+#subscribe-btn {
+    background: var(--accent-purple);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
     font-weight: bold;
-    color: #9A00FF; /* Bright purple */
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
-nav ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
+#subscribe-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px var(--accent-purple);
 }
 
-nav ul li {
-    margin-left: 25px;
-}
-
-nav ul li a {
-    color: #E0E0E0;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1.1em;
-    transition: color 0.3s ease;
-}
-
-nav ul li a:hover {
-    color: #9A00FF;
-}
-
-main {
-    flex-grow: 1;
-    padding: 30px;
-    max-width: 1200px;
-    margin: 20px auto;
-    background-color: rgba(0, 0, 0, 0.6); /* Slightly transparent background for content */
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    border: 1px solid #33004F;
-}
-
-h1 {
-    color: #E0E0E0;
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 2.5em;
-    border-bottom: 2px solid #5A008A;
-    padding-bottom: 15px;
-}
-
-.scores-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 25px;
-    margin-top: 30px;
-}
-
-.score-card {
-    background: linear-gradient(145deg, #2A004F, #1A002A); /* Darker gradient for cards */
-    border-radius: 12px;
+.game-card {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 15px;
     padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    transition: transform 0.2s ease-in-out;
-    border: 1px solid #4A007A;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.score-card:hover {
-    transform: translateY(-5px);
-}
-
-.game-info {
-    font-size: 0.9em;
-    color: #BBBBBB;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-.teams {
+    margin-top: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    animation: fadeIn 0.5s ease-in;
 }
 
-.team {
-    text-align: center;
-    flex: 1;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.team-name {
-    font-size: 1.5em;
+.score {
+    font-size: 1.5rem;
     font-weight: bold;
-    color: #FFFFFF;
-    margin-bottom: 5px;
-}
-
-.team-score {
-    font-size: 2.5em;
-    font-weight: bolder;
-    color: #9A00FF; /* Bright purple for scores */
-}
-
-.vs {
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #BBBBBB;
-    margin: 0 10px;
-}
-
-.game-status {
-    text-align: center;
-    font-weight: 600;
-    font-size: 1.1em;
-    padding: 8px 0;
-    border-top: 1px solid #33004F;
-    color: #AAAAAA;
-}
-
-.game-status.live {
-    color: #FFD700; /* Gold for live games */
-}
-
-.game-status.final {
-    color: #00FF99; /* Green for final games */
-}
-
-.loading-message {
-    grid-column: 1 / -1; /* Span across all columns */
-    text-align: center;
-    font-size: 1.2em;
-    color: #BBBBBB;
-    padding: 40px;
-}
-
-.subscribe-button {
-    display: block;
-    margin: 30px auto 0;
-    padding: 15px 30px;
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #FFFFFF;
-    background-color: #9A00FF; /* Bright purple button */
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 5px 15px rgba(154, 0, 255, 0.4);
-}
-
-.subscribe-button:hover {
-    background-color: #7A00CC;
-    transform: translateY(-2px);
-}
-
-.subscribe-button:disabled {
-    background-color: #555;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-footer {
-    text-align: center;
-    padding: 20px;
-    margin-top: 40px;
-    color: #888;
-    font-size: 0.9em;
-    border-top: 1px solid #33004F;
-    background-color: rgba(0, 0, 0, 0.3);
 }
