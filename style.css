@@ -13,6 +13,9 @@
   --text-muted: #64748b;
   --text-sub: #94a3b8;
   --live-red: #ef4444;
+  --red-glass-bg: rgba(239, 68, 68, 0.22);
+  --red-glass-border: rgba(239, 68, 68, 0.6);
+  --red-glass-glow: rgba(239, 68, 68, 0.4);
 }
 
 * {
@@ -91,7 +94,7 @@ body {
   box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
 }
 
-/* MAIN CONTENT CONTAINER */
+/* MAIN CONTENT */
 .main-content {
   flex: 1;
   display: flex;
@@ -145,7 +148,7 @@ body {
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .btn-action:hover {
@@ -161,11 +164,35 @@ body {
   background-color: #1d4ed8;
 }
 
-/* GAMES GRID */
+.btn-action.btn-danger {
+  background-color: var(--red-glass-bg);
+  border-color: var(--red-glass-border);
+  color: #fca5a5;
+  box-shadow: 0 0 10px var(--red-glass-glow);
+}
+
+.btn-action.btn-danger:hover {
+  background-color: rgba(239, 68, 68, 0.4);
+}
+
+/* PWA INSTALL BANNER */
+.pwa-notice {
+  background-color: #1e1b4b;
+  border: 1px solid #4338ca;
+  color: #c7d2fe;
+  padding: 12px 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* SIDE BY SIDE GRID (STRICT 2 COLUMNS) */
 .games-grid {
   padding: 30px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
@@ -211,7 +238,6 @@ body {
   100% { opacity: 1; }
 }
 
-/* TEAMS AND MIDDLE STATUS CONTAINER */
 .card-body {
   display: flex;
   gap: 10px;
@@ -272,7 +298,6 @@ body {
   padding-left: 10px;
 }
 
-/* RIGHT SIDE STATUS BOX */
 .status-box {
   width: 100px;
   background-color: var(--bg-box);
@@ -297,7 +322,6 @@ body {
   width: 100%;
 }
 
-/* BASEBALL DIAMOND & COUNT DOTS */
 .diamond-svg {
   width: 24px;
   height: 24px;
@@ -346,7 +370,7 @@ body {
   background-color: #f59e0b;
 }
 
-/* BOTTOM ACTION BUTTONS */
+/* CARD BUTTONS & RED GLASSMORPHISM STATE */
 .card-actions {
   display: flex;
   gap: 10px;
@@ -363,12 +387,28 @@ body {
   font-weight: 700;
   cursor: pointer;
   text-align: center;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-btn:hover {
   background-color: #1c2a42;
   color: #ffffff;
+}
+
+/* RED GLASSMORPHISM ALERT ON BUTTON */
+.card-btn.alert-active {
+  background: var(--red-glass-bg) !important;
+  border: 1px solid var(--red-glass-border) !important;
+  color: #ef4444 !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 15px var(--red-glass-glow), inset 0 0 10px rgba(239, 68, 68, 0.2);
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.card-btn.alert-active:hover {
+  background: rgba(239, 68, 68, 0.35) !important;
+  box-shadow: 0 0 20px var(--red-glass-glow);
 }
 
 .card-btn.btn-stream {
@@ -421,8 +461,10 @@ body {
   .header-actions {
     width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
   }
 
+  /* Single Column on Small Mobile Screens */
   .games-grid {
     grid-template-columns: 1fr;
     padding: 16px;
