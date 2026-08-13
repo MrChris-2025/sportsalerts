@@ -13,13 +13,15 @@ const categories = [
   { id: 'basketball/nba', name: 'Basketball (NBA)' },
   { id: 'hockey/nhl', name: 'Hockey (NHL)' },
   { id: 'soccer/eng.1', name: 'Premier League' },
-  { id: 'soccer/usa.1', name: 'Major League Soccer' },
+  { id: 'soccer/usa.1', name: 'Major League MLS' },
   { id: 'mma/ufc', name: 'MMA / UFC' }
 ];
 
 let currentSportPath = 'baseball/mlb';
 let pollingInterval;
-let subscribedGames = new Set(); // Track UI state of alerts
+
+// Load subbed games from local storage to keep UI state instant & persistent across reloads
+let subscribedGames = new Set(JSON.parse(localStorage.getItem('subscribedGames') || '[]'));
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -42,6 +44,13 @@ async function registerServiceWorker() {
   }
 }
 
+// Top Bar Clock Function
+function updateClock() {
+  const now = new Date();
+  const options = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+  document.getElementById('datetimeDisplay').innerText = now.toLocaleString('en-US', options);
+}
+
 function renderSidebar() {
   const list = document.getElementById('categoryList');
   list.innerHTML = '';
@@ -53,7 +62,7 @@ function renderSidebar() {
     btn.innerText = cat.name;
     btn.onclick = () => {
       currentSportPath = cat.id;
-      renderSidebar(); // Update active state
+      renderSidebar();
       fetchScores();
     };
     li.appendChild(btn);
@@ -71,19 +80,43 @@ async function fetchScores() {
   }
 }
 
-function getBaseGraphicHTML(isBaseball) {
+function getBaseGraphicHTML(game) {
+  const isBaseball = currentSportPath.includes('baseball');
   if (!isBaseball) return '';
+
+  let b1 = false, b2 = false, b3 = false;
+  let outs = 0, balls = 0, strikes = 0;
+
+  // Extract real live baseball data from ESPN situation payload
+  if (game.competitions && game.competitions[0].situation) {
+    const sit = game.competitions[0].situation;
+    if (sit.onFirst) b1 = true;
+    if (sit.onSecond) b2 = true;
+    if (sit.onThird) b3 = true;
+    outs = sit.outs || 0;
+    balls = sit.balls || 0;
+    strikes = sit.strikes || 0;
+  }
+
+  const getDots = (count, max, colorClass) => {
+    let dots = '';
+    for(let i=0; i<max; i++) {
+      dots += `<div class="dot ${i < count ? colorClass : ''}"></div>`;
+    }
+    return `<div class="count-dots">${dots}</div>`;
+  };
+
   return `
     <div class="baseball-graphic">
-      <div class="bases">
-        <div class="base top"></div>
-        <div class="base left"></div>
-        <div class="base right"></div>
+      <div class="diamond">
+        <div class="base base-2 ${b2 ? 'active' : ''}"></div>
+        <div class="base base-3 ${b3 ? 'active' : ''}"></div>
+        <div class="base base-1 ${b1 ? 'active' : ''}"></div>
       </div>
       <div class="counts">
-        <div class="count-row">B: <div class="count-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
-        <div class="count-row">S: <div class="count-dots"><div class="dot"></div><div class="dot"></div></div></div>
-        <div class="count-row">O: <div class="count-dots"><div class="dot"></div><div class="dot"></div></div></div>
+        <div class="count-row">B: ${getDots(balls, 4, 'filled-green')}</div>
+        <div class="count-row">S: ${getDots(strikes, 3, 'filled-red')}</div>
+        <div class="count-row">O: ${getDots(outs, 3, 'filled-yellow')}</div>
       </div>
     </div>
   `;
@@ -97,17 +130,14 @@ function renderScoreboard(events) {
     scoreboard.innerHTML = '<div class="no-games">No games scheduled.</div>';
     return;
   }
-  
-  const isBaseball = currentSportPath.includes('baseball');
 
   events.forEach(game => {
     const card = document.createElement('div');
     card.className = 'game-card';
     
-    // ESPN API format: away team is index 0, home team is index 1
     const comps = game.competitions[0].competitors;
-    const team1 = comps[0]; // Away (Top)
-    const team2 = comps[1] || comps[0]; // Home (Bottom)
+    const team1 = comps[0]; // Away
+    const team2 = comps[1] || comps[0]; // Home
 
     const t1Name = team1.team ? (team1.team.name || team1.team.shortDisplayName) : (team1.athlete ? team1.athlete.lastName : 'TBD');
     const t2Name = team2.team ? (team2.team.name || team2.team.shortDisplayName) : (team2.athlete ? team2.athlete.lastName : 'TBD');
@@ -129,7 +159,6 @@ function renderScoreboard(events) {
     if (isLive) {
       headerLeftHTML = `<div class="live-indicator"><div class="live-dot"></div> LIVE</div>`;
     } else if (isPre) {
-      // Simple date formatting for pregame
       const date = new Date(game.date);
       headerLeftHTML = `<span>starts ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>`;
     } else {
@@ -169,7 +198,7 @@ function renderScoreboard(events) {
 
         <div class="game-meta">
           <div class="${pillClass}">${game.status.type.detail.replace(' - ', '<br>')}</div>
-          ${getBaseGraphicHTML(isBaseball)}
+          ${getBaseGraphicHTML(game)}
         </div>
       </div>
 
@@ -188,17 +217,18 @@ function renderScoreboard(events) {
 }
 
 window.toggleAlert = async function(gameId, sportPath) {
-  if (!('serviceWorker' in navigator)) return;
   const btn = document.getElementById(`alert-btn-${gameId}`);
   
-  // If already subscribed visually, toggle off (UI only for this scope, real removal requires backend endpoint)
+  // Toggle off instantly in UI
   if (subscribedGames.has(gameId)) {
     subscribedGames.delete(gameId);
+    localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
     btn.classList.remove('active');
     btn.innerText = 'Alert Off';
     return;
   }
 
+  if (!('serviceWorker' in navigator)) return;
   const registration = await navigator.serviceWorker.ready;
   const permission = await Notification.requestPermission();
   
@@ -224,7 +254,10 @@ window.toggleAlert = async function(gameId, sportPath) {
     
     await Parse.Cloud.run("trackGame", { gameId: gameId, sportPath: sportPath });
     
+    // Toggle on instantly in UI & Save
     subscribedGames.add(gameId);
+    localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
+    
     btn.classList.add('active');
     btn.innerText = 'Alert On';
   } catch (err) {
@@ -233,10 +266,12 @@ window.toggleAlert = async function(gameId, sportPath) {
   }
 };
 
-// Initialization
+// Initialization Sequence
+updateClock();
+setInterval(updateClock, 60000); // Update time every minute
+
 renderSidebar();
 registerServiceWorker();
 fetchScores();
 
-// 30s UI polling for live data matching target aesthetics
 pollingInterval = setInterval(fetchScores, 30000);
