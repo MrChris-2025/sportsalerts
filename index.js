@@ -1,18 +1,10 @@
-if (typeof Parse !== 'undefined') {
-  Parse.initialize("kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v", "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q");
-  Parse.serverURL = "https://parseapi.back4app.com";
-}
+Parse.initialize("kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v", "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q");
+Parse.serverURL = "https://parseapi.back4app.com";
 
 const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E";
 
 let currentSportPath = "baseball/mlb";
-let currentDate = new Date();
 let autoRefreshInterval = null;
-const trackedGames = new Set();
-
-function isStandalone() {
-  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-}
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -25,66 +17,10 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-function getFormattedApiDate(dateObj) {
-  const yyyy = dateObj.getFullYear();
-  const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const dd = String(dateObj.getDate()).padStart(2, '0');
-  return `${yyyy}${mm}${dd}`;
-}
-
-function updateDateDisplay() {
-  const fullOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
-  const shortOptions = { month: 'short', day: 'numeric', year: 'numeric' };
-
-  const dateStrFull = currentDate.toLocaleDateString('en-US', fullOptions).toUpperCase();
-  const dateStrShort = currentDate.toLocaleDateString('en-US', shortOptions);
-
-  const dateDisplay = document.getElementById('dateDisplay');
-  const currentDateBadge = document.getElementById('currentDateBadge');
-
-  if (dateDisplay) dateDisplay.innerText = dateStrFull;
-  if (currentDateBadge) currentDateBadge.innerText = dateStrShort;
-
-  const datePicker = document.getElementById('datePicker');
-  if (datePicker) {
-    const yyyy = currentDate.getFullYear();
-    const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
-    const dd = String(currentDate.getDate()).padStart(2, '0');
-    datePicker.value = `${yyyy}-${mm}-${dd}`;
-  }
-}
-
-function setupDateControls() {
-  const prevBtn = document.getElementById('btnPrevDate');
-  const nextBtn = document.getElementById('btnNextDate');
-  const datePicker = document.getElementById('datePicker');
-
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      currentDate.setDate(currentDate.getDate() - 1);
-      updateDateDisplay();
-      fetchLiveScores();
-    });
-  }
-
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      currentDate.setDate(currentDate.getDate() + 1);
-      updateDateDisplay();
-      fetchLiveScores();
-    });
-  }
-
-  if (datePicker) {
-    datePicker.addEventListener('change', (e) => {
-      if (e.target.value) {
-        const parts = e.target.value.split('-');
-        currentDate = new Date(parts[0], parts[1] - 1, parts[2]);
-        updateDateDisplay();
-        fetchLiveScores();
-      }
-    });
-  }
+function updateHeaderDate() {
+  const dateObj = new Date();
+  const options = { month: 'short', day: 'numeric', year: 'numeric' };
+  document.getElementById('currentDateBadge').innerText = dateObj.toLocaleDateString('en-US', options);
 }
 
 async function initServiceWorker() {
@@ -99,140 +35,61 @@ async function initServiceWorker() {
   return null;
 }
 
-async function checkExistingSubscription() {
-  if (!('serviceWorker' in navigator)) return;
-  const reg = await navigator.serviceWorker.getRegistration();
-  if (reg && reg.pushManager) {
-    const sub = await reg.pushManager.getSubscription();
-    const btnSubscribe = document.getElementById('btnSubscribe');
-    const btnUnsubscribe = document.getElementById('btnUnsubscribe');
-
-    if (sub) {
-      if (btnSubscribe) {
-        btnSubscribe.innerText = "Alerts Active ✓";
-        btnSubscribe.style.background = "#16a34a";
-      }
-      if (btnUnsubscribe) btnUnsubscribe.style.display = "inline-block";
-    } else {
-      if (btnSubscribe) {
-        btnSubscribe.innerText = "Enable Push";
-        btnSubscribe.style.background = "#182238";
-      }
-      if (btnUnsubscribe) btnUnsubscribe.style.display = "none";
-    }
-  }
-}
-
 async function setupPushNotifications() {
-  const pwaBanner = document.getElementById('pwaBanner');
-  if (pwaBanner && !isStandalone()) {
-    pwaBanner.style.display = 'flex';
-  }
-
   const reg = await initServiceWorker();
   if (!reg) return;
 
-  await checkExistingSubscription();
-
   const btnSubscribe = document.getElementById('btnSubscribe');
-  const btnUnsubscribe = document.getElementById('btnUnsubscribe');
   const btnTestPush = document.getElementById('btnTestPush');
 
-  if (btnSubscribe) {
-    btnSubscribe.addEventListener('click', async () => {
-      if (!isStandalone()) {
-        alert('📱 Action Required:
-You MUST add this app to your Home Screen first to subscribe to Push Alerts.
-
-Tap Share/Menu -> "Add to Home Screen".');
+  btnSubscribe.addEventListener('click', async () => {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        alert('Notification permission rejected.');
         return;
       }
 
-      try {
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-          alert('Notification permission rejected.');
-          return;
-        }
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
 
-        const subscription = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-        });
+      await Parse.Cloud.run('subscribeUser', { subscription: subscription.toJSON() });
+      btnSubscribe.innerText = "Alerts Active ✓";
+      btnSubscribe.style.background = "#16a34a";
+    } catch (err) {
+      console.error("Push Setup Error:", err);
+      alert("Failed to subscribe for push notifications.");
+    }
+  });
 
-        if (typeof Parse !== 'undefined') {
-          await Parse.Cloud.run('subscribeUser', { subscription: subscription.toJSON() });
-        }
-        btnSubscribe.innerText = "Alerts Active ✓";
-        btnSubscribe.style.background = "#16a34a";
-        if (btnUnsubscribe) btnUnsubscribe.style.display = "inline-block";
-        alert("Subscribed successfully to sports push alerts!");
-      } catch (err) {
-        console.error("Push Setup Error:", err);
-        alert("Failed to subscribe for push notifications.");
-      }
-    });
-  }
-
-  if (btnUnsubscribe) {
-    btnUnsubscribe.addEventListener('click', async () => {
-      if (!isStandalone()) {
-        alert('You must launch the app from your Home Screen to manage subscriptions.');
-        return;
-      }
-
-      try {
-        const sub = await reg.pushManager.getSubscription();
-        if (sub) {
-          await sub.unsubscribe();
-          if (btnSubscribe) {
-            btnSubscribe.innerText = "Enable Push";
-            btnSubscribe.style.background = "#182238";
-          }
-          btnUnsubscribe.style.display = "none";
-          alert("Unsubscribed successfully.");
-        }
-      } catch (err) {
-        console.error("Unsubscribe Error:", err);
-        alert("Failed to unsubscribe.");
-      }
-    });
-  }
-
-  if (btnTestPush) {
-    btnTestPush.addEventListener('click', async () => {
-      try {
-        btnTestPush.innerText = "Sending...";
-        if (typeof Parse !== 'undefined') {
-          const res = await Parse.Cloud.run('sendTestPush');
-          alert(`Test Push Triggered! Delivered to ${res.sentCount} device(s).`);
-        } else {
-          alert("Parse SDK not available.");
-        }
-        btnTestPush.innerText = "Test Push";
-      } catch (err) {
-        console.error("Test Push Error:", err);
-        alert("Failed to dispatch test push notification.");
-        btnTestPush.innerText = "Test Push";
-      }
-    });
-  }
+  btnTestPush.addEventListener('click', async () => {
+    try {
+      btnTestPush.innerText = "Sending...";
+      const res = await Parse.Cloud.run('sendTestPush');
+      alert(`Test Push Triggered! Delivered to ${res.sentCount} device(s).`);
+      btnTestPush.innerText = "Test Push Now";
+    } catch (err) {
+      console.error("Test Push Error:", err);
+      alert("Failed to dispatch test push notification.");
+      btnTestPush.innerText = "Test Push Now";
+    }
+  });
 }
 
 function setupSportsNav() {
   const nav = document.getElementById('categoriesNav');
-  if (nav) {
-    nav.addEventListener('click', (e) => {
-      const target = e.target.closest('.nav-btn');
-      if (target) {
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        target.classList.add('active');
-        currentSportPath = target.getAttribute('data-sport');
-        document.getElementById('pageTitle').innerText = target.getAttribute('data-title');
-        fetchLiveScores();
-      }
-    });
-  }
+  nav.addEventListener('click', (e) => {
+    const target = e.target.closest('.nav-btn');
+    if (target) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      target.classList.add('active');
+      currentSportPath = target.getAttribute('data-sport');
+      document.getElementById('pageTitle').innerText = target.getAttribute('data-title');
+      fetchLiveScores();
+    }
+  });
 }
 
 function renderBaseballDiamond(situation) {
@@ -286,46 +143,34 @@ function renderCounts(situation) {
 
 async function fetchLiveScores() {
   const container = document.getElementById('scoreboardContainer');
-  if (!container) return;
-
-  const apiDate = getFormattedApiDate(currentDate);
-
   try {
-    const url = `https://site.api.espn.com/apis/site/v2/sports/${currentSportPath}/scoreboard?dates=${apiDate}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${currentSportPath}/scoreboard`);
     const data = await res.json();
     
     container.innerHTML = '';
 
     if (!data.events || data.events.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state">
-          No games scheduled for ${document.getElementById('dateDisplay').innerText}.<br>
-          <span style="font-size: 0.8rem; opacity: 0.7; margin-top: 8px; display: inline-block;">Use the date arrows above to navigate to scheduled game dates.</span>
-        </div>`;
+      container.innerHTML = `<div class="card-btn" style="grid-column: 1/-1; text-align: center; padding: 40px;">No active games scheduled for this category today.</div>`;
       return;
     }
 
     data.events.forEach(event => {
-      const competition = event.competitions ? event.competitions[0] : null;
-      if (!competition) return;
-
-      const statusText = event.status?.type?.shortDetail ? event.status.type.shortDetail.toUpperCase() : 'SCHEDULED';
-      const statusState = event.status?.type?.state || 'pre';
+      const competition = event.competitions[0];
+      const statusText = event.status.type.shortDetail.toUpperCase();
+      const statusState = event.status.type.state;
       const isLive = statusState === 'in';
 
-      const away = competition.competitors ? competition.competitors.find(c => c.homeAway === 'away') || competition.competitors[1] || competition.competitors[0] : null;
+      const away = competition.competitors ? competition.competitors.find(c => c.homeAway === 'away') || competition.competitors[1] : null;
       const home = competition.competitors ? competition.competitors.find(c => c.homeAway === 'home') || competition.competitors[0] : null;
 
-      const awayName = away?.team?.abbreviation || away?.team?.name || away?.athlete?.displayName || away?.displayName || 'AWAY';
-      const homeName = home?.team?.abbreviation || home?.team?.name || home?.athlete?.displayName || home?.displayName || 'HOME';
+      const awayName = away?.team?.name || away?.team?.abbreviation || away?.athlete?.displayName || 'AWAY';
+      const homeName = home?.team?.name || home?.team?.abbreviation || home?.athlete?.displayName || 'HOME';
 
       const awayRecord = away?.records ? `(${away.records[0]?.summary || ''})` : '';
       const homeRecord = home?.records ? `(${home.records[0]?.summary || ''})` : '';
 
-      const awayLogo = away?.team?.logo || away?.athlete?.headshot?.href || away?.athlete?.flag?.href || 'https://a.espncdn.com/favicon.ico';
-      const homeLogo = home?.team?.logo || home?.athlete?.headshot?.href || home?.athlete?.flag?.href || 'https://a.espncdn.com/favicon.ico';
+      const awayLogo = away?.team?.logo || away?.athlete?.headshot || 'https://a.espncdn.com/favicon.ico';
+      const homeLogo = home?.team?.logo || home?.athlete?.headshot || 'https://a.espncdn.com/favicon.ico';
 
       const awayScore = away?.score ?? '0';
       const homeScore = home?.score ?? '0';
@@ -334,14 +179,13 @@ async function fetchLiveScores() {
       const homeColor = home?.team?.color ? `#${home.team.color}` : '#121a2a';
 
       const situation = competition.situation;
-      const isAlertOn = trackedGames.has(event.id);
 
       const card = document.createElement('div');
       card.className = 'game-card';
       card.innerHTML = `
         <div class="card-top-bar">
           <span>${isLive ? '<span class="live-tag"><span class="live-dot"></span>LIVE</span>' : statusState.toUpperCase()}</span>
-          <span>${event.status?.type?.detail ? event.status.type.detail.toUpperCase() : 'GAME'}</span>
+          <span>${event.status.type.detail ? event.status.type.detail.toUpperCase() : 'GAME'}</span>
         </div>
 
         <div class="card-body">
@@ -377,8 +221,8 @@ async function fetchLiveScores() {
         </div>
 
         <div class="card-actions">
-          <button id="alertBtn_${event.id}" class="card-btn ${isAlertOn ? 'alert-active' : ''}" onclick="window.toggleGameAlert('${event.id}', '${currentSportPath}')">
-            ${isAlertOn ? 'Alert On 🔥' : 'Alert Off'}
+          <button class="card-btn" onclick="startTrackingGame('${event.id}', '${currentSportPath}')">
+            ${isLive ? 'Track Push' : 'Alert Off'}
           </button>
           <button class="card-btn btn-stream" onclick="window.open('${event.links ? event.links[0]?.href : '#'}', '_blank')">Watch Stream</button>
         </div>
@@ -387,63 +231,24 @@ async function fetchLiveScores() {
     });
   } catch (err) {
     console.error("ESPN Fetch Error:", err);
-    container.innerHTML = `
-      <div class="empty-state" style="color:#ef4444;">
-        Failed to load live scoreboards for this category.<br>
-        <span style="font-size:0.8rem; color:#94a3b8; margin-top:8px; display:inline-block;">Detail: ${err.message}</span>
-      </div>`;
+    container.innerHTML = `<div class="card-btn" style="grid-column: 1/-1; text-align: center; color:#ef4444; padding: 40px;">Error connecting to ESPN stream.</div>`;
   }
 }
 
-window.toggleGameAlert = async function(gameId, sportPath) {
-  if (!isStandalone()) {
-    alert('📱 Action Required:
-You MUST add this app to your Home Screen first to enable game alerts.
-
-Tap Share/Menu -> "Add to Home Screen".');
-    return;
-  }
-
-  const btn = document.getElementById(`alertBtn_${gameId}`);
-
-  if (trackedGames.has(gameId)) {
-    trackedGames.delete(gameId);
-    if (btn) {
-      btn.classList.remove('alert-active');
-      btn.innerText = 'Alert Off';
-    }
-    alert(`Alerts disabled for Game ID #${gameId}.`);
-  } else {
-    try {
-      if (typeof Parse !== 'undefined') {
-        await Parse.Cloud.run('startGameLoop', { gameId, sportPath });
-      }
-      trackedGames.add(gameId);
-      if (btn) {
-        btn.classList.add('alert-active');
-        btn.innerText = 'Alert On 🔥';
-      }
-      alert(`Alert On! Red glassmorphism active. Live updates will be pushed via QStash even if app is closed.`);
-    } catch (e) {
-      console.error(e);
-      alert('Failed to start tracking loop.');
-    }
+window.startTrackingGame = async function(gameId, sportPath) {
+  try {
+    await Parse.Cloud.run('startGameLoop', { gameId, sportPath });
+    alert(`Tracking loop initialized for Event ID #${gameId}. Background updates will run via QStash even if app is closed.`);
+  } catch (e) {
+    console.error(e);
+    alert('Failed to start tracking loop.');
   }
 };
 
-function initApp() {
-  updateDateDisplay();
-  setupDateControls();
-  setupPushNotifications();
-  setupSportsNav();
-  fetchLiveScores();
+updateHeaderDate();
+setupPushNotifications();
+setupSportsNav();
+fetchLiveScores();
 
-  if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-  autoRefreshInterval = setInterval(fetchLiveScores, 30000);
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
+if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+autoRefreshInterval = setInterval(fetchLiveScores, 30000);
