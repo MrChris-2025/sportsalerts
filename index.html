@@ -35,13 +35,19 @@
       <header class="top-header">
         <h1 class="page-title" id="pageTitle">BASEBALL SCORES</h1>
         <div class="header-actions">
-          <span class="date-badge" id="currentDateBadge">Aug 13, 2026</span>
-          <button id="btnSubscribe" class="btn-action">Enable Global Push</button>
-          <button id="btnTestPush" class="btn-action btn-blue">Test Push Now</button>
+          <span class="date-badge" id="currentDateBadge">Today</span>
+          <button id="btnSubscribe" class="btn-action">Enable Push</button>
+          <button id="btnUnsubscribe" class="btn-action btn-danger" style="display: none;">Unsubscribe</button>
+          <button id="btnTestPush" class="btn-action btn-blue">Test Push</button>
         </div>
       </header>
 
-      <!-- LIVE SCORE CARDS GRID -->
+      <!-- PWA NOTICE BANNER -->
+      <div id="pwaBanner" class="pwa-notice" style="display: none;">
+        <span>📲 Please add this app to your Home Screen to enable live push notifications.</span>
+      </div>
+
+      <!-- LIVE SCORE CARDS GRID (SIDE BY SIDE 2-COLUMN) -->
       <main class="games-grid" id="scoreboardContainer">
         <div class="card-btn" style="grid-column: 1/-1; text-align: center; padding: 40px;">
           Connecting to Live Stream...
