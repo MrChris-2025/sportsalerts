@@ -1,7 +1,7 @@
 {
   "name": "Sports Live Scoreboard",
   "short_name": "Sports Live",
-  "description": "Live NBA Scores and Push Notifications",
+  "description": "Live Scores and Push Notifications for NFL, MLB, NHL, Soccer, MMA, NCAA, and NBA",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
@@ -9,13 +9,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "./nba-logo.png",
+      "src": "./logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./nba-logo.png",
+      "src": "./logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }
