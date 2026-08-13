@@ -1,12 +1,31 @@
+// public/sw.js - Service Worker for Background Web Push
+
 self.addEventListener('push', function(event) {
-    const data = event.data.json();
+  if (!event.data) return;
+
+  try {
+    const payload = event.data.json();
     
+    const title = payload.title || 'ESPN Live Alert';
     const options = {
-        body: data.body,
-        icon: 'https://cdn-icons-png.flaticon.com/512/5358/5358656.png',
-        tag: data.gameId, // Overwrites previous score for same game
-        renotify: false
+      body: payload.body || 'Score Update Received',
+      icon: payload.icon || 'https://a.espncdn.com/favicon.ico',
+      tag: payload.tag || 'espn-game-update', // Tag ensures only ONE lockscreen notification per game
+      renotify: false,                       // Does not vibrate repeatedly for every minor score increment
+      data: { url: payload.url || '/' }
     };
 
     event.waitUntil(
-        self.registration.showNotification(
+      self.registration.showNotification(title, options)
+    );
+  } catch (e) {
+    console.error('Error rendering push notification payload:', e);
+  }
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow(event.notification.data.url)
+  );
+});
