@@ -20,7 +20,7 @@ const categories = [
 let currentSportPath = 'baseball/mlb';
 let pollingInterval;
 
-// Load subbed games from local storage to keep UI state instant & persistent across reloads
+// Local storage ensures UI stays active immediately across reloads
 let subscribedGames = new Set(JSON.parse(localStorage.getItem('subscribedGames') || '[]'));
 
 function urlBase64ToUint8Array(base64String) {
@@ -44,11 +44,20 @@ async function registerServiceWorker() {
   }
 }
 
-// Top Bar Clock Function
+// Top Bar Clock Function (Split Date & Time, no "at")
 function updateClock() {
   const now = new Date();
-  const options = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
-  document.getElementById('datetimeDisplay').innerText = now.toLocaleString('en-US', options);
+  
+  const dateOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+  const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+  
+  const dateStr = now.toLocaleDateString('en-US', dateOptions);
+  const timeStr = now.toLocaleTimeString('en-US', timeOptions);
+  
+  document.getElementById('datetimeDisplay').innerHTML = `
+    <div class="date-str">${dateStr}</div>
+    <div class="time-str">${timeStr}</div>
+  `;
 }
 
 function renderSidebar() {
@@ -87,7 +96,6 @@ function getBaseGraphicHTML(game) {
   let b1 = false, b2 = false, b3 = false;
   let outs = 0, balls = 0, strikes = 0;
 
-  // Extract real live baseball data from ESPN situation payload
   if (game.competitions && game.competitions[0].situation) {
     const sit = game.competitions[0].situation;
     if (sit.onFirst) b1 = true;
@@ -142,8 +150,8 @@ function renderScoreboard(events) {
     const t1Name = team1.team ? (team1.team.name || team1.team.shortDisplayName) : (team1.athlete ? team1.athlete.lastName : 'TBD');
     const t2Name = team2.team ? (team2.team.name || team2.team.shortDisplayName) : (team2.athlete ? team2.athlete.lastName : 'TBD');
     
-    const t1Color = team1.team && team1.team.color ? `#${team1.team.color}` : '#1f2937';
-    const t2Color = team2.team && team2.team.color ? `#${team2.team.color}` : '#1f2937';
+    const t1Color = team1.team && team1.team.color ? `#${team1.team.color}` : 'rgba(255,255,255,0.05)';
+    const t2Color = team2.team && team2.team.color ? `#${team2.team.color}` : 'rgba(255,255,255,0.05)';
     
     const t1Record = team1.records ? `(${team1.records[0].summary})` : '';
     const t2Record = team2.records ? `(${team2.records[0].summary})` : '';
@@ -216,10 +224,10 @@ function renderScoreboard(events) {
   });
 }
 
+// Modified to handle errors gracefully & update UI optimistically so it doesn't revert
 window.toggleAlert = async function(gameId, sportPath) {
   const btn = document.getElementById(`alert-btn-${gameId}`);
   
-  // Toggle off instantly in UI
   if (subscribedGames.has(gameId)) {
     subscribedGames.delete(gameId);
     localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
@@ -228,23 +236,36 @@ window.toggleAlert = async function(gameId, sportPath) {
     return;
   }
 
-  if (!('serviceWorker' in navigator)) return;
-  const registration = await navigator.serviceWorker.ready;
-  const permission = await Notification.requestPermission();
-  
-  if (permission !== 'granted') {
-    alert('Permission denied for notifications.');
+  if (!('serviceWorker' in navigator)) {
+    alert("Service workers are not supported in your browser.");
     return;
   }
-  
+
   try {
     btn.innerText = 'Setting up...';
+    
+    const registration = await navigator.serviceWorker.ready;
+    const permission = await Notification.requestPermission();
+    
+    if (permission !== 'granted') {
+      btn.innerText = 'Alert Off';
+      alert('Permission denied for push notifications.');
+      return;
+    }
     
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
     });
     
+    // OPTIMISTIC UI UPDATE: Instantly turn green
+    // We do this here so API / DB timeouts don't snap the UI back visually.
+    subscribedGames.add(gameId);
+    localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
+    btn.classList.add('active');
+    btn.innerText = 'Alert On';
+    
+    // 1. Save to Back4App DB
     const SubscriberModel = Parse.Object.extend("Subscriber");
     const sub = new SubscriberModel();
     sub.set("gameId", gameId);
@@ -252,23 +273,26 @@ window.toggleAlert = async function(gameId, sportPath) {
     sub.set("subscription", JSON.parse(JSON.stringify(subscription)));
     await sub.save();
     
-    await Parse.Cloud.run("trackGame", { gameId: gameId, sportPath: sportPath });
-    
-    // Toggle on instantly in UI & Save
-    subscribedGames.add(gameId);
-    localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
-    
-    btn.classList.add('active');
-    btn.innerText = 'Alert On';
+    // 2. Trigger QStash loop (Catch error independently so it doesn't rollback UI)
+    Parse.Cloud.run("trackGame", { gameId: gameId, sportPath: sportPath })
+      .catch(cloudErr => {
+        console.warn('Cloud trackGame function warning (loop might not start):', cloudErr);
+      });
+      
   } catch (err) {
     console.error('Failed to subscribe:', err);
+    // Only revert if the actual browser prompt or Save fundamentally fails
+    subscribedGames.delete(gameId);
+    localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
+    btn.classList.remove('active');
     btn.innerText = 'Alert Off';
+    alert('Failed to set alert. Check browser notification settings.');
   }
 };
 
 // Initialization Sequence
 updateClock();
-setInterval(updateClock, 60000); // Update time every minute
+setInterval(updateClock, 60000); 
 
 renderSidebar();
 registerServiceWorker();
