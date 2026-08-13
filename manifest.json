@@ -1,29 +1,21 @@
 {
-  "short_name": "ESPN Live",
-  "name": "ESPN Live Scoreboard Tracker",
-  "description": "Real-time ESPN sports scoreboard with live background score update notifications.",
+  "name": "Live Sports Scores",
+  "short_name": "SportsScores",
+  "description": "Get live scores for your favorite sports.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a0033",
+  "theme_color": "#6a00cc",
   "icons": [
     {
-      "src": "https://a.espncdn.com/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "https://a.espncdn.com/i/espn/espn_logos/espn_red.png",
-      "type": "image/png",
+      "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "https://a.espncdn.com/i/espn/espn_logos/espn_red.png",
-      "type": "image/png",
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
-  ],
-  "start_url": "./index.html",
-  "background_color": "#09070f",
-  "theme_color": "#120924",
-  "display": "standalone",
-  "orientation": "portrait"
+  ]
 }
