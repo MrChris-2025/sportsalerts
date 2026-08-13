@@ -1,14 +1,13 @@
 :root {
   --bg-app: #0b1121;
   --bg-sidebar: #0f1629;
-  --bg-card: #151b2b;
-  --bg-card-header: #121827;
-  --bg-card-actions: #151b2b;
-  --bg-btn-dark: #1f2937;
+  --bg-card: rgba(21, 27, 43, 0.65);
+  --bg-card-header: rgba(18, 24, 39, 0.85);
+  --bg-card-actions: rgba(21, 27, 43, 0.9);
   --bg-btn-blue: #1e3a8a;
   --text-main: #ffffff;
   --text-muted: #9ca3af;
-  --border-color: #1f2937;
+  --border-color: rgba(255, 255, 255, 0.1);
   --live-red: #ef4444;
 }
 
@@ -26,6 +25,18 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+}
+
+/* --- LIQUID CONDENSATION OVERLAY (ENTIRE APP) --- */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+  z-index: 9999;
+  mix-blend-mode: overlay;
 }
 
 /* --- TOP BAR --- */
@@ -34,12 +45,14 @@ body {
   top: 0;
   z-index: 100;
   background-color: var(--bg-card-header);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border-bottom: 1px solid var(--border-color);
-  padding: 16px 30px;
+  padding: 14px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
 .top-bar .logo {
@@ -49,10 +62,23 @@ body {
   color: var(--text-main);
 }
 
-.top-bar .datetime {
-  font-size: 14px;
+.datetime {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.date-str {
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
+}
+
+.time-str {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-main);
 }
 
 /* --- LAYOUT --- */
@@ -60,6 +86,8 @@ body {
   display: flex;
   flex: 1;
   overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 /* --- SIDEBAR --- */
@@ -119,12 +147,11 @@ body {
   flex: 1;
   padding: 30px;
   overflow-y: auto;
-  background-color: var(--bg-app);
+  background-color: transparent;
 }
 
 .games-grid {
   display: grid;
-  /* Forces TWO columns side-by-side on desktop */
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   align-items: start;
@@ -138,15 +165,34 @@ body {
   color: var(--text-muted);
 }
 
-/* --- CARD DESIGN --- */
+/* --- CARD DESIGN WITH LIQUID GLASS / CONDENSATION --- */
 .game-card {
   background-color: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 12px;
   border: 1px solid var(--border-color);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  box-shadow: inset 0 0 15px rgba(255,255,255,0.03), 0 8px 24px rgba(0,0,0,0.4);
+  position: relative;
+}
+
+/* Condensation Droplets Overlay */
+.game-card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(circle at 15% 35%, rgba(255,255,255,0.15) 0%, transparent 4px),
+    radial-gradient(circle at 80% 65%, rgba(255,255,255,0.1) 0%, transparent 3px),
+    radial-gradient(circle at 45% 85%, rgba(255,255,255,0.12) 0%, transparent 5px),
+    radial-gradient(circle at 85% 20%, rgba(255,255,255,0.08) 0%, transparent 4px),
+    radial-gradient(circle at 10% 75%, rgba(255,255,255,0.1) 0%, transparent 3px);
+  filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.5));
+  opacity: 0.6;
 }
 
 .card-header {
@@ -160,6 +206,8 @@ body {
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  position: relative;
+  z-index: 2;
 }
 
 .live-indicator {
@@ -187,6 +235,7 @@ body {
   display: flex;
   position: relative;
   flex-direction: column;
+  z-index: 2;
 }
 
 .team-row {
@@ -239,7 +288,7 @@ body {
   top: 0;
   bottom: 0;
   width: 110px;
-  background-color: var(--bg-app);
+  background-color: rgba(11, 17, 33, 0.5);
   border-left: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -281,12 +330,13 @@ body {
   position: absolute;
   width: 10px;
   height: 10px;
-  background-color: #374151;
+  background-color: rgba(255,255,255,0.2);
   transform: rotate(45deg);
   border-radius: 2px;
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
-.base.active { background-color: #fbbf24; }
+.base.active { background-color: #fbbf24; border-color: #f59e0b; box-shadow: 0 0 5px rgba(251, 191, 36, 0.5); }
 
 /* 2nd base top, 1st base right, 3rd base left */
 .base-2 { top: 0; left: 11px; }
@@ -317,12 +367,12 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #374151;
+  background-color: rgba(255,255,255,0.2);
 }
 
-.dot.filled-green { background-color: #10b981; }
-.dot.filled-red { background-color: #ef4444; }
-.dot.filled-yellow { background-color: #fbbf24; }
+.dot.filled-green { background-color: #10b981; box-shadow: 0 0 5px #10b981; }
+.dot.filled-red { background-color: #ef4444; box-shadow: 0 0 5px #ef4444; }
+.dot.filled-yellow { background-color: #fbbf24; box-shadow: 0 0 5px #fbbf24; }
 
 /* --- CARD ACTIONS --- */
 .card-actions {
@@ -331,6 +381,8 @@ body {
   padding: 16px;
   background-color: var(--bg-card-actions);
   border-top: 1px solid var(--border-color);
+  position: relative;
+  z-index: 2;
 }
 
 .btn {
@@ -341,26 +393,30 @@ body {
   font-weight: 700;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: opacity 0.2s, background-color 0.2s;
+  transition: all 0.2s ease;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .btn:hover {
-  opacity: 0.8;
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .btn-alert {
-  background-color: transparent;
-  border-color: #374151;
+  background-color: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.2);
   color: #d1d5db;
 }
 
+/* Distinctive Active Color for Subscriptions */
 .btn-alert.active {
-  background-color: rgba(16, 185, 129, 0.1);
-  border-color: #10b981;
-  color: #10b981;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-color: #059669;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .btn-stream {
@@ -371,18 +427,19 @@ body {
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 /* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 992px) {
   .games-grid {
-    grid-template-columns: 1fr; /* Single column on smaller screens */
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
   .top-bar {
-    padding: 15px 20px;
+    padding: 12px 20px;
   }
   
   .app-container {
@@ -398,7 +455,7 @@ body {
   }
   
   .sidebar-title {
-    display: none; /* Hide on mobile to save space */
+    display: none;
   }
   
   .category-list {
