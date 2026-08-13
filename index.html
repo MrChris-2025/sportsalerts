@@ -1,25 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Sports Scores</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESPN Live Sports Center</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
 </head>
 <body>
-    <header class="app-header">
-        <div class="logo">SportsScores</div>
-        <nav>
-            <!-- Navigation elements if needed -->
-        </nav>
-    </header>
 
-    <main id="scores-container">
-        <!-- Sports score cards will be dynamically loaded here -->
-        <div class="loading-message">Loading live scores...</div>
-    </main>
+  <header>
+    <div class="logo-container">
+      <span class="espn-badge">ESPN</span>
+      <span class="title">LIVE CENTER</span>
+    </div>
+    <button id="btnSubscribe" class="btn-push">Enable Push Alerts</button>
+  </header>
 
-    <script src="index.js"></script>
+  <main id="scoreboardContainer">
+    <div class="card" style="text-align: center; color: var(--text-secondary);">
+      Connecting to ESPN Live API...
+    </div>
+  </main>
+
+  <script type="module" src="main.js"></script>
 </body>
 </html>
