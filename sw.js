@@ -8,7 +8,7 @@ self.addEventListener('push', function(event) {
     icon: data.icon || 'https://a.espncdn.com/favicon.ico',
     badge: 'https://a.espncdn.com/favicon.ico',
     tag: data.gameId,
-    renotify: false,
+    renotify: true,
     data: { url: data.url || '/' }
   };
 
