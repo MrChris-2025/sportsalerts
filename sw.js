@@ -1,34 +1,30 @@
+// -------------------------------------------------------
+// sw.js – Handles incoming push notifications
+// -------------------------------------------------------
 self.addEventListener('push', function(event) {
   if (!event.data) return;
 
-  try {
-    const data = event.data.json();
-    const options = {
-      body: data.body,
-      icon: data.icon || 'https://a.espncdn.com/favicon.ico',
-      tag: data.gameId || 'espn-score-update',
-      renotify: true,
-      data: {
-        gameId: data.gameId
-      }
-    };
+  const data = event.data.json();
 
-    event.waitUntil(
-      self.registration.showNotification(data.title, options)
-    );
-  } catch (err) {
-    console.error('Push handling error:', err);
-  }
+  const options = {
+    body: data.body,
+    icon: data.icon || './icon-192.png',     // optional custom icon
+    tag: data.tag,            // matches the game‑ID tag → auto‑overwrites old notifications
+    renotify: data.vibrate,   // only buzz the phone when vibrate:true (i.e. game over)
+    vibrate: [200, 100, 200],
+    data: {
+      url: '/'                // where to navigate when the user clicks
+    }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
 });
 
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-      if (clientList.length > 0) {
-        return clientList[0].focus();
-      }
-      return clients.openWindow('/');
-    })
+    clients.openWindow(event.notification.data.url)
   );
 });
