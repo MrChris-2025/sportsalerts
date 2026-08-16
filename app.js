@@ -12,8 +12,8 @@
 // (see the "Netlify environment variables" box later in this answer).
 
 Parse.initialize(
-  "YOUR_PARSE_APP_ID",          // <-- replace or use process.env.PARSE_APP_ID
-  "YOUR_PARSE_JS_KEY",          // <-- replace or use process.env.PARSE_JAVASCRIPT_KEY
+  "kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v",          // <-- replace or use process.env.PARSE_APP_ID
+  "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q",          // <-- replace or use process.env.PARSE_JAVASCRIPT_KEY
   "optional third arg"
 );
 
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // The VAPID public key must be supplied so Back4App can verify the payload.
           // We'll read it from a meta tag or Netlify env var (see below).
           applicationServerKey: urlBase64ToUint8(
-            'YOUR_VAPID_PUBLIC_KEY_GOES_HERE'   // <-- replace or use Netlify env
+            'BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E'   // <-- replace or use Netlify env
           )
         });
         // After subscribing, re‑query so `sub` is non‑null
