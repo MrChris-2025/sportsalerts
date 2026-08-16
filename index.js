@@ -1,4 +1,3 @@
-// Initialize Back4App
 Parse.initialize(
   "kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v",
   "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q"
@@ -281,6 +280,15 @@ window.toggleAlert = async function(gameId, sportPath) {
       btn.classList.remove('active');
       btn.innerText = 'Alert Off';
     }
+    
+    // Remove record from Back4App
+    const PushSub = Parse.Object.extend("PushSubscriptions");
+    const query = new Parse.Query(PushSub);
+    query.equalTo("gameId", gameId);
+    const existing = await query.first();
+    if (existing) {
+      await existing.destroy();
+    }
     return;
   }
 
@@ -313,13 +321,22 @@ window.toggleAlert = async function(gameId, sportPath) {
       btn.innerText = 'Alert On';
     }
     
-    const SubscriberModel = Parse.Object.extend("PushSubscriptions");
-    const sub = new SubscriberModel();
-    sub.set("gameId", gameId);
-    sub.set("sportPath", sportPath);
-    sub.set("endpoint", subscription.endpoint);
-    sub.set("subscription", JSON.parse(JSON.stringify(subscription)));
-    await sub.save();
+    // Upsert single record per endpoint + gameId
+    const PushSub = Parse.Object.extend("PushSubscriptions");
+    const query = new Parse.Query(PushSub);
+    query.equalTo("endpoint", subscription.endpoint);
+    query.equalTo("gameId", gameId);
+
+    let subRecord = await query.first();
+    if (!subRecord) {
+      subRecord = new PushSub();
+    }
+
+    subRecord.set("gameId", gameId);
+    subRecord.set("sportPath", sportPath);
+    subRecord.set("endpoint", subscription.endpoint);
+    subRecord.set("subscription", JSON.parse(JSON.stringify(subscription)));
+    await subRecord.save();
     
     Parse.Cloud.run("startGameLoop", { gameId: gameId, sportPath: sportPath })
       .catch(cloudErr => {
