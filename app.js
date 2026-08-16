@@ -7,8 +7,8 @@
 // If you prefer hard‑coding, replace the two lines below with:
 //   Parse.initialize("YOUR_APP_ID","YOUR_JS_KEY");
 Parse.initialize(
-  process.env.PARSE_APP_ID || "YOUR_FALLBACK_APP_ID",   // <-- Back4App env var (recommended)
-  process.env.PARSE_JS_KEY   || "YOUR_FALLBACK_JS_KEY", // <-- Back4App env var (recommended)
+  process.env.PARSE_APP_ID || "kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v",   // <-- Back4App env var (recommended)
+  process.env.PARSE_JS_KEY   || "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q", // <-- Back4App env var (recommended)
   "optional third arg"
 );
 Parse.serverURL = 'https://parseapi.back4app.com'; // your Back4App URL
