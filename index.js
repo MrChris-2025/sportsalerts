@@ -1,310 +1,222 @@
-Parse.initialize(
-  "kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v",
-  "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q"
+// -------------------------------------------------------
+// index.js – All Parse.Cloud functions for the live‑sports system
+// -------------------------------------------------------
+
+const webpush = require('web-push');
+
+// -------------------------------------------------------
+// 0️⃣  Helper: ensure required env vars exist (early crash)
+// -------------------------------------------------------
+function requireEnv(...vars) {
+  const missing = vars.filter(v => !process.env[v]);
+  if (missing.length) {
+    console.error(
+      `❌ Missing Back4App environment variables: ${missing.join(', ')}. ` +
+      `Add them in Back4App → Server Settings → Environment Variables.`
+    );
+    // Stop the module from loading further – Back4App will show the error in the function logs.
+    throw new Error('Missing required environment variables');
+  }
+}
+
+// Run the check once when the module is loaded.
+requireEnv(
+  'VAPID_PUBLIC_KEY',
+  'VAPID_PRIVATE_KEY',
+  'QSTASH_TOKEN',
+  'PARSE_APP_ID',
+  'PARSE_REST_API_KEY'
 );
-Parse.serverURL = 'https://parseapi.back4app.com/';
 
-const VAPID_PUBLIC_KEY = 'BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E';
+// -------------------------------------------------------
+// 1️⃣  Initialise Web‑Push with VAPID keys from env vars
+// -------------------------------------------------------
+webpush.setVapidDetails(
+  'mailto:your-email@example.com',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
-const categories = [
-  { id: 'baseball/mlb', name: 'Baseball (MLB)' },
-  { id: 'football/nfl', name: 'Football (NFL)' },
-  { id: 'basketball/nba', name: 'Basketball (NBA)' },
-  { id: 'hockey/nhl', name: 'Hockey (NHL)' },
-  { id: 'soccer/eng.1', name: 'Premier League' },
-  { id: 'soccer/usa.1', name: 'Major League MLS' },
-  { id: 'mma/ufc', name: 'MMA / UFC' },
-  { id: 'football/college-football', name: 'NCAA Football' }
-];
+// -------------------------------------------------------
+// 2️⃣  Helper: queue the next poll on QStash
+// -------------------------------------------------------
+async function scheduleNextPoll(sport, league, gameId, lastScore, delaySeconds = 240) {
+  const qstashToken = process.env.QSTASH_TOKEN;
+  const appId = process.env.PARSE_APP_ID;
+  const restApiKey = process.env.PARSE_REST_API_KEY;
+  const webhookUrl = `https://parseapi.back4app.com/functions/liveSportsPoller`;
 
-let currentSportPath = 'baseball/mlb';
-let pollingInterval;
-
-let subscribedGames = new Set(JSON.parse(localStorage.getItem('subscribedGames') || '[]'));
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
-async function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    try {
-      await navigator.serviceWorker.register('./sw.js');
-    } catch (error) {
-      console.error('SW Registration Failed:', error);
-    }
-  }
-}
-
-function updateClock() {
-  const now = new Date();
-  const dateOptions = { weekday: 'short', month: 'short', day: 'numeric' };
-  const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
-  
-  const dateStr = now.toLocaleDateString('en-US', dateOptions);
-  const timeStr = now.toLocaleTimeString('en-US', timeOptions);
-  
-  const dateBadge = document.getElementById('currentDateBadge');
-  if (dateBadge) {
-    dateBadge.innerHTML = `${dateStr} • ${timeStr}`;
-  }
-}
-
-function getCountdown(dateString) {
-  const gameTime = new Date(dateString).getTime();
-  const now = new Date().getTime();
-  const diff = gameTime - now;
-
-  if (diff <= 0) return "soon";
-
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-  if (days > 0) return `${days}d ${hours}h`;
-  if (hours > 0) return `${hours}h ${mins}m`;
-  return `${mins}m`;
-}
-
-function renderCategories() {
-  const list = document.getElementById('categoriesNav');
-  if (!list) return;
-  list.innerHTML = '';
-  
-  categories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = `nav-btn ${cat.id === currentSportPath ? 'active' : ''}`;
-    btn.innerText = cat.name;
-    btn.onclick = () => {
-      currentSportPath = cat.id;
-      renderCategories();
-      fetchScores();
-    };
-    list.appendChild(btn);
-  });
-}
-
-async function fetchScores() {
   try {
-    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${currentSportPath}/scoreboard`);
-    const data = await response.json();
-    renderScoreboard(data.events || []);
-  } catch (err) {
-    console.error('Failed to fetch ESPN API:', err);
-  }
-}
-
-function renderScoreboard(events) {
-  const scoreboard = document.getElementById('scoreboardContainer');
-  if (!scoreboard) return;
-  scoreboard.innerHTML = '';
-  
-  if (events.length === 0) {
-    scoreboard.innerHTML = '<div class="no-games">No games scheduled.</div>';
-    return;
-  }
-
-  events.forEach(game => {
-    const card = document.createElement('div');
-    card.className = 'game-card';
-    
-    const comps = game.competitions[0].competitors;
-    const team1 = comps[0];
-    const team2 = comps[1] || comps[0];
-
-    const t1Name = team1.team ? (team1.team.name || team1.team.shortDisplayName) : (team1.athlete ? team1.athlete.lastName : 'TBD');
-    const t2Name = team2.team ? (team2.team.name || team2.team.shortDisplayName) : (team2.athlete ? team2.athlete.lastName : 'TBD');
-    
-    const t1Record = team1.records ? `(${team1.records[0].summary})` : '';
-    const t2Record = team2.records ? `(${team2.records[0].summary})` : '';
-
-    const t1Logo = team1.team && team1.team.logo ? team1.team.logo : '';
-    const t2Logo = team2.team && team2.team.logo ? team2.team.logo : '';
-
-    const isLive = game.status.type.state === 'in';
-    const isPre = game.status.type.state === 'pre';
-    const isFinal = game.status.type.state === 'post';
-
-    let headerLeftHTML = '';
-    if (isLive) {
-      headerLeftHTML = `<div class="live-indicator"><div class="live-dot"></div> LIVE</div>`;
-    } else if (isPre) {
-      headerLeftHTML = `<span>starts in ${getCountdown(game.date)}</span>`;
-    } else {
-      headerLeftHTML = `<span>FINAL</span>`;
-    }
-
-    let pillClass = 'status-pill';
-    let metaText = '';
-
-    if (isPre) {
-      pillClass += ' pregame';
-      const d = new Date(game.date);
-      const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-      metaText = `${datePart} ${timePart}`;
-    } else {
-      metaText = game.status.type.detail;
-    }
-
-    const isSubscribed = subscribedGames.has(game.id);
-
-    card.innerHTML = `
-      <div class="card-header">
-        ${headerLeftHTML}
-        <span>${isPre ? 'PRE' : (isFinal ? 'END' : 'IN')}</span>
-      </div>
-      
-      <div class="card-body">
-        <div class="team-row">
-          ${t1Logo ? `<img src="${t1Logo}" class="team-logo" alt="logo">` : ''}
-          <div class="team-info">
-            <span class="team-name">${t1Name}</span>
-            <span class="team-record">${t1Record}</span>
-          </div>
-          <div class="team-score">${team1.score || '0'}</div>
-        </div>
-        
-        <div class="team-row">
-          ${t2Logo ? `<img src="${t2Logo}" class="team-logo" alt="logo">` : ''}
-          <div class="team-info">
-            <span class="team-name">${t2Name}</span>
-            <span class="team-record">${t2Record}</span>
-          </div>
-          <div class="team-score">${team2.score || '0'}</div>
-        </div>
-
-        <div class="game-meta">
-          <div class="${pillClass}">${metaText}</div>
-        </div>
-      </div>
-
-      <div class="card-actions">
-        <button id="alert-btn-${game.id}" class="btn btn-alert ${isSubscribed ? 'active' : ''}" 
-                onclick="window.toggleAlert('${game.id}', '${currentSportPath}')" 
-                ${isFinal ? 'disabled' : ''}>
-          ${isSubscribed ? 'Alert On' : 'Alert Off'}
-        </button>
-        <button class="btn btn-stream">Watch Stream</button>
-      </div>
-    `;
-    
-    scoreboard.appendChild(card);
-  });
-}
-
-window.toggleAlert = async function(gameId, sportPath) {
-  const btn = document.getElementById(`alert-btn-${gameId}`);
-  
-  if (subscribedGames.has(gameId)) {
-    subscribedGames.delete(gameId);
-    localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
-    if (btn) {
-      btn.classList.remove('active');
-      btn.innerText = 'Alert Off';
-    }
-    
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-    
-    if (subscription) {
-      const PushSub = Parse.Object.extend("PushSubscriptions");
-      const query = new Parse.Query(PushSub);
-      query.equalTo("endpoint", subscription.endpoint);
-      query.equalTo("gameId", gameId);
-      const existing = await query.first();
-      if (existing) {
-        await existing.destroy();
+    await Parse.Cloud.httpRequest({
+      method: 'POST',
+      url: `https://qstash.upstash.io/v1/publish/${webhookUrl}`,
+      headers: {
+        'Authorization': `Bearer ${qstashToken}`,
+        'Upstash-Delay': `${delaySeconds}s`,
+        'Content-Type': 'application/json',
+        'Upstash-Forward-X-Parse-Application-Id': appId,
+        'Upstash-Forward-X-Parse-REST-API-Key': restApiKey
+      },
+      body: {
+        sport,
+        league,
+        gameId,
+        lastScore
       }
-    }
-    return;
-  }
-
-  if (!('serviceWorker' in navigator)) {
-    alert("Service workers are not supported in your browser.");
-    return;
-  }
-
-  try {
-    if (btn) btn.innerText = 'Setting up...';
-    
-    const registration = await navigator.serviceWorker.ready;
-    const permission = await Notification.requestPermission();
-    
-    if (permission !== 'granted') {
-      if (btn) btn.innerText = 'Alert Off';
-      alert('Permission denied for push notifications.');
-      return;
-    }
-    
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
     });
-    
-    subscribedGames.add(gameId);
-    localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
-    if (btn) {
-      btn.classList.add('active');
-      btn.innerText = 'Alert On';
-    }
-    
-    const PushSub = Parse.Object.extend("PushSubscriptions");
-    const query = new Parse.Query(PushSub);
-    query.equalTo("endpoint", subscription.endpoint);
-    query.equalTo("gameId", gameId);
-
-    let subRecord = await query.first();
-    if (!subRecord) {
-      subRecord = new PushSub();
-    }
-
-    subRecord.set("gameId", gameId);
-    subRecord.set("sportPath", sportPath);
-    subRecord.set("endpoint", subscription.endpoint);
-    subRecord.set("subscription", JSON.parse(JSON.stringify(subscription)));
-    await subRecord.save();
-    
-    Parse.Cloud.run("startGameLoop", { gameId: gameId, sportPath: sportPath })
-      .catch(cloudErr => {
-        console.warn('Cloud startGameLoop function warning:', cloudErr);
-      });
-      
   } catch (err) {
-    console.error('Failed to subscribe:', err);
-    subscribedGames.delete(gameId);
-    localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
-    if (btn) {
-      btn.classList.remove('active');
-      btn.innerText = 'Alert Off';
-    }
-    alert('Failed to set alert. Check browser notification settings.');
+    console.error("QStash Schedule Error:", err);
   }
-};
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-  const btnTest = document.getElementById('btnTestPush');
-  if (btnTest) {
-    btnTest.onclick = () => {
-      Parse.Cloud.run("sendTestPush")
-        .then(res => alert(`Test push sent! Delivered to ${res.sentCount} subscriber(s).`))
-        .catch(err => console.error("Test push failed:", err));
-    };
+// -------------------------------------------------------
+// 3️⃣  Subscription Cloud Function
+// -------------------------------------------------------
+Parse.Cloud.define("subscribeToGame", async (request) => {
+  const { gameId, sport, league, subscription } = request.params;
+
+  if (!gameId || !sport || !league || !subscription) {
+    throw new Error("Missing parameters.");
   }
+
+  // Save the client Web Push Subscription
+  const GameSubscription = Parse.Object.extend("GameSubscription");
+  const subQuery = new Parse.Query("GameSubscription");
+  subQuery.equalTo("gameId", gameId);
+  subQuery.equalTo("endpoint", subscription.endpoint);
+  let subRecord = await subQuery.first({ useMasterKey: true });
+
+  if (!subRecord) {
+    subRecord = new GameSubscription();
+    subRecord.set("gameId", gameId);
+    subRecord.set("subscription", subscription);
+    subRecord.set("endpoint", subscription.endpoint);
+    await subRecord.save(null, { useMasterKey: true });
+  }
+
+  // Manage Active Game State & Trigger QStash
+  const gameQuery = new Parse.Query("ActiveGame");
+  gameQuery.equalTo("gameId", gameId);
+  let gameRecord = await gameQuery.first({ useMasterKey: true });
+
+  if (!gameRecord) {
+    const ActiveGame = Parse.Object.extend("ActiveGame");
+    gameRecord = new ActiveGame();
+    gameRecord.set("gameId", gameId);
+    gameRecord.set("sport", sport);
+    gameRecord.set("league", league);
+    gameRecord.set("scoreText", "Starting soon...");
+    gameRecord.set("status", "pre");
+    gameRecord.set("isPolling", true);
+    await gameRecord.save(null, { useMasterKey: true });
+
+    // Kick‑start the QStash loop immediately
+    await scheduleNextPoll(sport, league, gameId, "Initial", 0);
+  } else if (!gameRecord.get("isPolling")) {
+    gameRecord.set("isPolling", true);
+    await gameRecord.save(null, { useMasterKey: true });
+    await scheduleNextPoll(sport, league, gameId, gameRecord.get("scoreText") || "Initial", 0);
+  }
+
+  return { success: true };
 });
 
-updateClock();
-setInterval(updateClock, 60000); 
+// -------------------------------------------------------
+// 4️⃣  The Live Poller – triggered by QStash every ~4 min
+// -------------------------------------------------------
+Parse.Cloud.define("liveSportsPoller", async (request) => {
+  const { sport, league, gameId, lastScore } = request.params;
 
-renderCategories();
-registerServiceWorker();
-fetchScores();
+  try {
+    // ---- fetch live scoreboard from ESPN ----
+    const espnUrl = `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/scoreboard`;
+    const apiResponse = await Parse.Cloud.httpRequest({ url: espnUrl });
+    const events = apiResponse.data.events;
 
-pollingInterval = setInterval(fetchScores, 30000);
+    if (!events) return "No events running.";
+
+    const event = events.find(e => e.id === gameId);
+    if (!event) return "Game not found in today's list. Stopping loop.";
+
+    const competition = event.competitions[0];
+    const homeTeam = competition.competitors.find(c => c.homeAway === 'home');
+    const awayTeam = competition.competitors.find(c => c.homeAway === 'away');
+
+    const homeScore = homeTeam.score;
+    const awayScore = awayTeam.score;
+    const homeName = homeTeam.team.abbreviation || homeTeam.team.displayName;
+    const awayName = awayTeam.team.abbreviation || awayTeam.team.displayName;
+
+    const currentScore = `${awayName} ${awayScore} - ${homeScore} ${homeName}`;
+    const gameState = event.status.type.state;          // "pre" | "in" | "post"
+    const gameDetail = event.status.type.detail;       // e.g. "4:15 - 4th"
+
+    const isCompleted = gameState === 'post' || event.status.type.completed === true;
+    const scoreChanged = (lastScore === "Initial") || (currentScore !== lastScore);
+
+    /* -------------------------------------------------
+       ZERO‑WASTE OPTIMISATION
+       -------------------------------------------------
+       If the score hasn't changed and the game isn't over,
+       we reschedule the poll *without* touching the DB.
+       This costs 0 Back4App requests for non‑scoring periods.
+       ------------------------------------------------- */
+    if (!scoreChanged && !isCompleted) {
+      await scheduleNextPoll(sport, league, gameId, lastScore, 240); // 4 min delay
+      return "Score unchanged. Re‑enqueued loop.";
+    }
+
+    // ---- Score changed or game finished – send pushes ----
+    const subscriptionQuery = new Parse.Query("GameSubscription");
+    subscriptionQuery.equalTo("gameId", gameId);
+    subscriptionQuery.limit(1000);
+    const subscriptions = await subscriptionQuery.find({ useMasterKey: true });
+
+    const pushPayload = {
+      title: isCompleted ? `FINAL: ${currentScore}` : `Live Score: ${currentScore}`,
+      body: gameDetail,
+      tag: `game-${gameId}`,               // overwrites older notifications for this game
+      icon: homeTeam.team.logo || awayTeam.team.logo,
+      vibrate: isCompleted ? true : false // only buzz when the game ends
+    };
+
+    // Send notifications concurrently
+    const pushPromises = subscriptions.map(async (subRecord) => {
+      try {
+        await webpush.sendNotification(subRecord.get("subscription"), JSON.stringify(pushPayload));
+      } catch (error) {
+        // Clean up dead subscriptions (410 = gone, 404 = not found)
+        if (error.statusCode === 410 || error.statusCode === 404) {
+          await subRecord.destroy({ useMasterKey: true });
+        }
+      }
+    });
+    await Promise.all(pushPromises);
+
+    // ---- Persist updated state to DB (for the UI board) ----
+    const gameQuery = new Parse.Query("ActiveGame");
+    gameQuery.equalTo("gameId", gameId);
+    const gameRecord = await gameQuery.first({ useMasterKey: true });
+
+    if (gameRecord) {
+      gameRecord.set("scoreText", currentScore);
+      gameRecord.set("status", gameState);
+      if (isCompleted) {
+        gameRecord.set("isPolling", false);
+      }
+      await gameRecord.save(null, { useMasterKey: true });
+    }
+
+    // ---- Recursive poll if the game is still active ----
+    if (!isCompleted) {
+      await scheduleNextPoll(sport, league, gameId, currentScore, 240);
+    }
+
+    return "Alerts dispatched, state synchronized.";
+  } catch (error) {
+    console.error("Poller Error:", error);
+    // On unexpected faults, retry in 1 min so the queue doesn’t break
+    await scheduleNextPoll(sport, league, gameId, lastScore, 60);
+    throw error;
+  }
+});
