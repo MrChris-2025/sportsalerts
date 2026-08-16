@@ -73,7 +73,7 @@ function getCountdown(dateString) {
   return `${mins}m`;
 }
 
-function renderCategories() {
+function renderSidebar() {
   const list = document.getElementById('categoriesNav');
   if (!list) return;
   list.innerHTML = '';
@@ -84,7 +84,7 @@ function renderCategories() {
     btn.innerText = cat.name;
     btn.onclick = () => {
       currentSportPath = cat.id;
-      renderCategories();
+      renderSidebar();
       fetchScores();
     };
     list.appendChild(btn);
@@ -99,6 +99,70 @@ async function fetchScores() {
   } catch (err) {
     console.error('Failed to fetch ESPN API:', err);
   }
+}
+
+function getBaseGraphicHTML(game) {
+  const isBaseball = currentSportPath.includes('baseball');
+  if (!isBaseball) return ''; 
+
+  let b1 = false, b2 = false, b3 = false;
+  let outs = 0, balls = 0, strikes = 0;
+
+  if (game.status.type.state === 'in' && game.competitions && game.competitions[0].situation) {
+    const sit = game.competitions[0].situation;
+    if (sit.onFirst) b1 = true;
+    if (sit.onSecond) b2 = true;
+    if (sit.onThird) b3 = true;
+    outs = sit.outs || 0;
+    balls = sit.balls || 0;
+    strikes = sit.strikes || 0;
+  }
+
+  const getDots = (count, max, colorClass) => {
+    let dots = '';
+    for(let i=0; i<max; i++) {
+      dots += `<div class="dot ${i < count ? colorClass : ''}"></div>`;
+    }
+    return `<div class="count-dots">${dots}</div>`;
+  };
+
+  return `
+    <div class="baseball-graphic">
+      <div class="diamond">
+        <div class="base base-2 ${b2 ? 'active' : ''}"></div>
+        <div class="base base-3 ${b3 ? 'active' : ''}"></div>
+        <div class="base base-1 ${b1 ? 'active' : ''}"></div>
+      </div>
+      <div class="counts">
+        <div class="count-row">B: ${getDots(balls, 4, 'filled-green')}</div>
+        <div class="count-row">S: ${getDots(strikes, 3, 'filled-red')}</div>
+        <div class="count-row">O: ${getDots(outs, 3, 'filled-yellow')}</div>
+      </div>
+    </div>
+  `;
+}
+
+function getFootballGraphicHTML(game) {
+  const isFootball = currentSportPath.includes('football');
+  if (!isFootball || game.status.type.state !== 'in') return '';
+
+  let downDist = '';
+  let yardLine = '';
+
+  if (game.competitions && game.competitions[0].situation) {
+    const sit = game.competitions[0].situation;
+    downDist = sit.downDistanceText || '';
+    yardLine = sit.possessionText || '';
+  }
+
+  if (!downDist && !yardLine) return '';
+
+  return `
+    <div class="football-graphic">
+      <div class="down-dist">${downDist}</div>
+      <div class="yard-line">${yardLine}</div>
+    </div>
+  `;
 }
 
 function renderScoreboard(events) {
@@ -121,6 +185,9 @@ function renderScoreboard(events) {
 
     const t1Name = team1.team ? (team1.team.name || team1.team.shortDisplayName) : (team1.athlete ? team1.athlete.lastName : 'TBD');
     const t2Name = team2.team ? (team2.team.name || team2.team.shortDisplayName) : (team2.athlete ? team2.athlete.lastName : 'TBD');
+    
+    const t1Color = team1.team && team1.team.color ? `#${team1.team.color}` : 'rgba(255,255,255,0.05)';
+    const t2Color = team2.team && team2.team.color ? `#${team2.team.color}` : 'rgba(255,255,255,0.05)';
     
     const t1Record = team1.records ? `(${team1.records[0].summary})` : '';
     const t2Record = team2.records ? `(${team2.records[0].summary})` : '';
@@ -149,9 +216,10 @@ function renderScoreboard(events) {
       const d = new Date(game.date);
       const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-      metaText = `${datePart} ${timePart}`;
+      metaText = `${datePart}<br>${timePart}`;
     } else {
-      metaText = game.status.type.detail;
+      if (isFinal) pillClass += ' final';
+      metaText = game.status.type.detail.replace(' - ', '<br>');
     }
 
     const isSubscribed = subscribedGames.has(game.id);
@@ -163,26 +231,28 @@ function renderScoreboard(events) {
       </div>
       
       <div class="card-body">
-        <div class="team-row">
+        <div class="team-row" style="background-color: ${t1Color};">
           ${t1Logo ? `<img src="${t1Logo}" class="team-logo" alt="logo">` : ''}
           <div class="team-info">
-            <span class="team-name">${t1Name}</span>
-            <span class="team-record">${t1Record}</span>
+            <div class="team-name">${t1Name}</div>
+            <div class="team-record">${t1Record}</div>
           </div>
           <div class="team-score">${team1.score || '0'}</div>
         </div>
         
-        <div class="team-row">
+        <div class="team-row" style="background-color: ${t2Color};">
           ${t2Logo ? `<img src="${t2Logo}" class="team-logo" alt="logo">` : ''}
           <div class="team-info">
-            <span class="team-name">${t2Name}</span>
-            <span class="team-record">${t2Record}</span>
+            <div class="team-name">${t2Name}</div>
+            <div class="team-record">${t2Record}</div>
           </div>
           <div class="team-score">${team2.score || '0'}</div>
         </div>
 
         <div class="game-meta">
           <div class="${pillClass}">${metaText}</div>
+          ${getBaseGraphicHTML(game)}
+          ${getFootballGraphicHTML(game)}
         </div>
       </div>
 
@@ -211,6 +281,7 @@ window.toggleAlert = async function(gameId, sportPath) {
       btn.innerText = 'Alert Off';
     }
     
+    // Remove record from Back4App
     const PushSub = Parse.Object.extend("PushSubscriptions");
     const query = new Parse.Query(PushSub);
     query.equalTo("gameId", gameId);
@@ -250,6 +321,7 @@ window.toggleAlert = async function(gameId, sportPath) {
       btn.innerText = 'Alert On';
     }
     
+    // Upsert single record per endpoint + gameId
     const PushSub = Parse.Object.extend("PushSubscriptions");
     const query = new Parse.Query(PushSub);
     query.equalTo("endpoint", subscription.endpoint);
@@ -297,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
 updateClock();
 setInterval(updateClock, 60000); 
 
-renderCategories();
+renderSidebar();
 registerServiceWorker();
 fetchScores();
 
