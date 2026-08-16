@@ -7,20 +7,18 @@
 // -------------------------------------------------------
 
 // ---- 1️⃣ Initialise Parse -------------------------------------------------
+// Replace the two strings below with your Back4App App ID and JavaScript Key.
+// You can either hard‑code them here or expose them via Netlify env vars
+// (see the "Netlify environment variables" box later in this answer).
+
 Parse.initialize(
-  process.env.PARSE_APP_ID,           // <-- set later via Netlify env var
-  process.env.PARSE_JAVASCRIPT_KEY,   // <-- REST API key (read‑only)
-  // Parse doesn't require a third "clientKey" argument in newer SDKs,
-  // but we pass the REST key as the second param for compatibility.
-  "web356"   // dummy third arg – not used
+  "YOUR_PARSE_APP_ID",          // <-- replace or use process.env.PARSE_APP_ID
+  "YOUR_PARSE_JS_KEY",          // <-- replace or use process.env.PARSE_JAVASCRIPT_KEY
+  "optional third arg"
 );
 
-// The SDK version from the CDN sets these automatically;
-// if you are using your own keys, replace the values below:
-Parse.serverURL = 'https://parseapi.back4app.com'; // your Back4App URL
-
-// (If you don’t want to store keys in the HTML, you can set them via
-//  Netlify environment variables – see the “Netlify env vars” box below.)
+// Use your Back4App parse server URL (default is *.back4app.com)
+Parse.serverURL = 'https://parseapi.back4app.com';
 
 // ---- 2️⃣ ESPN config -------------------------------------------------------
 const SPORT = "basketball";
@@ -88,7 +86,7 @@ startPolling();
 /*
    This function is called from a UI button (or from your own flow).
    It sends the user's Push‑Subscription (obtained from the Service Worker)
-   to the Back4App Cloud Function `subscribeToGame`.
+   to the Back4App cloud function `subscribeToGame`.
 */
 async function subscribeToGame(gameId, sport, league, pushSubscription) {
   // Convert the subscription object to the shape Back4App expects:
@@ -139,21 +137,18 @@ document.addEventListener('DOMContentLoaded', () => {
       // 3️⃣ Get the push subscription
       const sub = await reg.pushManager.getSubscription();
       if (!sub) {
+        // If we don't have a subscription yet, create one (user‑visible only)
         const newSub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
           // The VAPID public key must be supplied so Back4App can verify the payload.
-          // We'll pull it from a meta tag or Netlify env var (see below).
-          // For simplicity we embed it here:
+          // We'll read it from a meta tag or Netlify env var (see below).
           applicationServerKey: urlBase64ToUint8(
             'YOUR_VAPID_PUBLIC_KEY_GOES_HERE'   // <-- replace or use Netlify env
           )
         });
         // After subscribing, re‑query so `sub` is non‑null
         // (the above block re‑runs automatically, but we keep it tidy.)
-        // We'll just use the newly created subscription.
         // For this example we simply assign it to `sub` variable below.
-        // (In a real app you'd store it and pass it to `subscribeToGame`.)
-        // For brevity we will just proceed with a dummy sub object.
         sub = {
           endpoint: newSub.endpoint,
           keys: {
@@ -164,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       // 4️⃣ Pick a game – for demo we hard‑code a gameId you already created
       //    (normally you’d let the user pick from the scoreboard.)
-      const gameId = '12345'; // <-- replace with a real gameId from ESPN
+      const gameId = '33186025';   // example NBA game ID – replace dynamically
       const sport = 'basketball';
       const league = 'nba';
       await subscribeToGame(gameId, sport, league, sub);
