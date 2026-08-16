@@ -1,68 +1,65 @@
 // -------------------------------------------------------
-// app.js – Front‑end that
-//   1️⃣ initialises the Parse SDK with your Back4App keys
-//   2️⃣ fetches ESPN scoreboard directly (CORS‑enabled)
-//   3️⃣ lets the user subscribe to a game (calls cloud function)
-//   4️⃣ respects the Page‑Visibility API to save battery
+// app.js – Front‑end for the live‑sports‑alert system
 // -------------------------------------------------------
 
-// ---- 1️⃣ Initialise Parse -------------------------------------------------
-// Replace the two strings below with your Back4App App ID and JavaScript Key.
-// You can either hard‑code them here or expose them via Netlify env vars
-// (see the "Netlify environment variables" box later in this answer).
-
+// ------------------- Parse initialisation -------------------
+// The SDK reads the keys from Back4App environment variables.
+// If you prefer hard‑coding, replace the two lines below with:
+//   Parse.initialize("YOUR_APP_ID","YOUR_JS_KEY");
 Parse.initialize(
-  "kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v",          // <-- replace or use process.env.PARSE_APP_ID
-  "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q",          // <-- replace or use process.env.PARSE_JAVASCRIPT_KEY
+  process.env.PARSE_APP_ID || "YOUR_FALLBACK_APP_ID",   // <-- Back4App env var (recommended)
+  process.env.PARSE_JS_KEY   || "YOUR_FALLBACK_JS_KEY", // <-- Back4App env var (recommended)
   "optional third arg"
 );
+Parse.serverURL = 'https://parseapi.back4app.com'; // your Back4App URL
 
-// Use your Back4App parse server URL (default is *.back4app.com)
-Parse.serverURL = 'https://parseapi.back4app.com';
-
-// ---- 2️⃣ ESPN config -------------------------------------------------------
+// ------------------- ESPN config ---------------------------
 const SPORT = "basketball";
 const LEAGUE  = "nba";
 
-// ---- 3️⃣ Render scoreboard (direct ESPN fetch) ---------------------------
+// ------------------- Render scoreboard (direct ESPN) -----
 async function updateScoreboardCards() {
-  const resp = await fetch(
-    `https://site.api.espn.com/apis/site/v2/sports/${SPORT}/${LEAGUE}/scoreboard`
-  );
-  const data = await resp.json();
+  try {
+    const resp = await fetch(
+      `https://site.api.espn.com/apis/site/v2/sports/${SPORT}/${LEAGUE}/scoreboard`
+    );
+    const data = await resp.json();
 
-  const container = document.getElementById('games');
-  container.innerHTML = ''; // clear old cards
+    const container = document.getElementById('games');
+    container.innerHTML = ''; // clear old cards
 
-  data.events.forEach(ev => {
-    const gameId = ev.id;
-    const status = ev.status.type.detail;
-    const homeScore = ev.competitions[0].competitors[0].score;
-    const awayScore = ev.competitions[0].competitors[1].score;
+    data.events.forEach(ev => {
+      const gameId = ev.id;
+      const status = ev.status.type.detail;
+      const homeScore = ev.competitions[0].competitors[0].score;
+      const awayScore = ev.competitions[0].competitors[1].score;
 
-    const homeName = ev.competitions[0].competitors[0].team.abbreviation ||
-                     ev.competitions[0].competitors[0].team.displayName;
-    const awayName = ev.competitions[0].competitors[1].team.abbreviation ||
-                     ev.competitions[0].competitors[1].team.displayName;
+      const homeName = ev.competitions[0].competitors[0].team.abbreviation ||
+                       ev.competitions[0].competitors[0].team.displayName;
+      const awayName = ev.competitions[0].competitors[1].team.abbreviation ||
+                       ev.competitions[0].competitors[1].team.displayName;
 
-    const card = document.createElement('div');
-    card.className = 'game-card';
-    card.innerHTML = `
-      <strong>${awayName}</strong>
-      <span class="score" id="score-${gameId}">${awayScore} - ${homeScore}</span>
-      <span class="status" id="status-${gameId}">${status}</span>
-    `;
-    container.appendChild(card);
-  });
+      const card = document.createElement('div');
+      card.className = 'game-card';
+      card.innerHTML = `
+        <strong>${awayName}</strong>
+        <span class="score" id="score-${gameId}">${awayScore} - ${homeScore}</span>
+        <span class="status" id="status-${gameId}">${status}</span>
+      `;
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.error("Direct score fetching error:", err);
+  }
 }
 
-// ---- 4️⃣ Polling loop, respecting visibility -----------------------------
+// ------------------- Polling loop, visibility aware -----
 let fetchInterval = null;
 
 function startPolling() {
   if (fetchInterval) clearInterval(fetchInterval);
   updateScoreboardCards(); // immediate first load
-  // 30 s interval – adjust up/down if you hit ESPN rate limits
+  // 30 s interval – increase if you hit ESPN rate limits
   fetchInterval = setInterval(updateScoreboardCards, 30000);
 }
 
@@ -70,7 +67,7 @@ function stopPolling() {
   clearInterval(fetchInterval);
 }
 
-// When the user switches tabs/minimises, stop polling
+// Stop polling when the tab becomes background / hidden
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     startPolling();
@@ -79,17 +76,15 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-// kickoff once the page loads
+// Kick‑off once the page loads
 startPolling();
 
-// ---- 5️⃣ Subscribe a user to a game --------------------------------------
+// ------------------- Push‑subscription helper -------------
 /*
-   This function is called from a UI button (or from your own flow).
-   It sends the user's Push‑Subscription (obtained from the Service Worker)
-   to the Back4App cloud function `subscribeToGame`.
+   Calls the Back4App Cloud Function `subscribeToGame`.
+   The pushSubscription object must come from the Service Worker’s PushManager.
 */
 async function subscribeToGame(gameId, sport, league, pushSubscription) {
-  // Convert the subscription object to the shape Back4App expects:
   const subscription = {
     endpoint: pushSubscription.endpoint,
     keys: {
@@ -98,8 +93,6 @@ async function subscribeToGame(gameId, sport, league, pushSubscription) {
     }
   };
 
-  // Call the cloud function – the function signature expects:
-  //   request.params = { gameId, sport, league, subscription }
   const result = await Parse.Cloud.run('subscribeToGame', {
     gameId,
     sport,
@@ -107,68 +100,77 @@ async function subscribeToGame(gameId, sport, league, pushSubscription) {
     subscription
   });
 
-  // `result` is { success: true } (or throws)
   if (result.success) {
     alert(`✅ Subscribed to game ${gameId}!`);
   } else {
-    alert('❌ Subscription failed – check the console.');
+    alert('❌ Subscription failed – see the Back4App logs.');
   }
 }
 
-// -------------------------------------------------------
-// OPTIONAL: a tiny UI to let the visitor subscribe
-// -------------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-  // If the browser supports service workers & push, we can get the subscription
-  if ('serviceWorker' in navigator && 'PushManager' in window) {
-    // Simple "Subscribe" button – you can style it anyway you like
-    const btn = document.createElement('button');
-    btn.textContent = 'Subscribe to alerts';
-    btn.style.marginTop = '1rem';
-    btn.addEventListener('click', async () => {
-      // 1️⃣ Register the SW (if not already registered)
-      const reg = await navigator.serviceWorker.register('/sw.js', {scope: '/'});
-      // 2️⃣ Ask the user for permission
-      const perm = await Notification.requestPermission();
-      if (perm !== 'granted') {
-        alert('Notification permission denied.');
-        return;
-      }
-      // 3️⃣ Get the push subscription
-      const sub = await reg.pushManager.getSubscription();
-      if (!sub) {
-        // If we don't have a subscription yet, create one (user‑visible only)
-        const newSub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          // The VAPID public key must be supplied so Back4App can verify the payload.
-          // We'll read it from a meta tag or Netlify env var (see below).
-          applicationServerKey: urlBase64ToUint8(
-            'BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E'   // <-- replace or use Netlify env
-          )
-        });
-        // After subscribing, re‑query so `sub` is non‑null
-        // (the above block re‑runs automatically, but we keep it tidy.)
-        // For this example we simply assign it to `sub` variable below.
-        sub = {
-          endpoint: newSub.endpoint,
-          keys: {
-            p256dh: btoa(newSub.keys.p256dh).replace(/=/,''),
-            auth:   btoa(newSub.keys.auth).replace(/=/,'')
-          }
-        };
-      }
-      // 4️⃣ Pick a game – for demo we hard‑code a gameId you already created
-      //    (normally you’d let the user pick from the scoreboard.)
-      const gameId = '33186025';   // example NBA game ID – replace dynamically
-      const sport = 'basketball';
-      const league = 'nba';
-      await subscribeToGame(gameId, sport, league, sub);
-    });
-    document.body.appendChild(btn);
+// ------------------- Register Service Worker & get VAPID key ----------
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1️⃣  If we are not on HTTPS the SW cannot be registered – warn the user.
+  if (location.protocol !== 'https:') {
+    console.warn('⚠️ Service Worker requires HTTPS. Open the site via https://…');
+    return;
   }
+
+  // 2️⃣  Register the SW
+  const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+  console.log('✅ Service Worker registered, scope:', reg.scope);
+
+  // 3️⃣  Ask the user for notification permission
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') {
+    alert('Notification permission denied.');
+    return;
+  }
+
+  // 4️⃣  Retrieve the VAPID public key.
+  //    We first try the Back4App env var, then fall back to a <meta> tag.
+  let vapidKey = process.env.VAPID_PUBLIC_KEY; // coming from Netlify env (if you set it)
+  if (!vapidKey) {
+    const meta = document.querySelector('meta[name="vapid-key"]');
+    if (meta) vapidKey = meta.content;
+  }
+  if (!vapidKey) {
+    console.error('❌ VAPID public key not found – push will not work.');
+    alert('Push notifications are disabled because the VAPID key is missing.');
+    return;
+  }
+
+  // 5️⃣  Get (or create) a push subscription from the SW
+  const sub = await reg.pushManager.getSubscription();
+  if (!sub) {
+    // No existing subscription → create a new one
+    const newSub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8(vapidKey)
+    });
+    // Refresh the reference so we can use it below
+    // (the newly created sub is stored in `newSub`; we’ll just reuse it.)
+    // For simplicity we assign it to `sub` after the block.
+    sub = {
+      endpoint: newSub.endpoint,
+      keys: {
+        p256dh: btoa(newSub.keys.p256dh).replace(/=/,''),
+        auth:   btoa(newSub.keys.auth).replace(/=/,'')
+      }
+    };
+  }
+
+  // 6️⃣  Pick a game to subscribe to.
+  //    In a real app you would let the user pick from the scoreboard.
+  //    Here we just use a static ESPN game ID as an example.
+  const exampleGameId = '33186025';   // replace with a real ID or let the user choose
+  const sport = 'basketball';
+  const league = 'nba';
+
+  // 7️⃣  Call the Back4App cloud function to store the subscription
+  await subscribeToGame(exampleGameId, sport, league, sub);
 });
 
-// Helper: convert a base64 string to a Uint8Array (required by PushManager)
+// Helper: base64 → Uint8Array (required by PushManager)
 function urlBase64ToUint8(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
@@ -178,4 +180,4 @@ function urlBase64ToUint8(base64String) {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray;
-}
+});
