@@ -8,8 +8,8 @@
 // If you haven’t added them to Netlify, the fallback values below will be used.
 //   Replace the fallback strings with your real keys before production.
 Parse.initialize(
-  process.env.PARSE_APP_ID || "YOUR_PARSE_APP_ID_FALLBACK",
-  process.env.PARSE_JS_KEY   || "YOUR_PARSE_JS_KEY_FALLBACK",
+  process.env.PARSE_APP_ID || "kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v",
+  process.env.PARSE_JS_KEY   || "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q",
   "optional third arg"
 );
 Parse.serverURL = 'https://parseapi.back4app.com'; // your Back4App URL
