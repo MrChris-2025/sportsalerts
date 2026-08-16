@@ -6,17 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="./favicon.ico" type="image/x-icon">
   <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; background:#f5f5f5; }
-    .game-card { background:#fff; margin-bottom:1rem; padding:1rem; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,.1); }
-    .score { font-size:1.2rem; margin:.2rem 0; }
-    .status { color:#555; font-size:.9rem; }
+    body {font-family:Arial,sans-serif;margin:2rem;background:#f5f5f5;}
+    .game-card {background:#fff;margin-bottom:1rem;padding:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1);}
+    .score {font-size:1.2rem;margin:.2rem 0;}
+    .status {color:#555;font-size:.9rem;}
   </style>
 </head>
 <body>
   <h1>Live Sports Scoreboard</h1>
-
   <div id="games">Loading games…</div>
 
+  <!-- Parse SDK (loaded from a CDN – no build step required) -->
+  <script src="https://cdn.parse.com/js/parse-sdk-3.1.1.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
