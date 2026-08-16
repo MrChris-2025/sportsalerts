@@ -1,14 +1,31 @@
-Parse.initialize("kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v", "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q");
-Parse.serverURL = "https://parseapi.back4app.com";
+// Initialize Back4App
+Parse.initialize(
+  "kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v",
+  "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q"
+);
+Parse.serverURL = 'https://parseapi.back4app.com/';
 
-const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E";
+const VAPID_PUBLIC_KEY = 'BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E';
 
-let currentSportPath = "baseball/mlb";
-let autoRefreshInterval = null;
+const categories = [
+  { id: 'baseball/mlb', name: 'Baseball (MLB)' },
+  { id: 'football/nfl', name: 'Football (NFL)' },
+  { id: 'basketball/nba', name: 'Basketball (NBA)' },
+  { id: 'hockey/nhl', name: 'Hockey (NHL)' },
+  { id: 'soccer/eng.1', name: 'Premier League' },
+  { id: 'soccer/usa.1', name: 'Major League MLS' },
+  { id: 'mma/ufc', name: 'MMA / UFC' },
+  { id: 'football/college-football', name: 'NCAA Football' }
+];
+
+let currentSportPath = 'baseball/mlb';
+let pollingInterval;
+
+let subscribedGames = new Set(JSON.parse(localStorage.getItem('subscribedGames') || '[]'));
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
   for (let i = 0; i < rawData.length; ++i) {
@@ -17,238 +34,326 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-function updateHeaderDate() {
-  const dateObj = new Date();
-  const options = { month: 'short', day: 'numeric', year: 'numeric' };
-  document.getElementById('currentDateBadge').innerText = dateObj.toLocaleDateString('en-US', options);
-}
-
-async function initServiceWorker() {
-  if ('serviceWorker' in navigator && 'PushManager' in window) {
+async function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
     try {
-      const reg = await navigator.serviceWorker.register('./sw.js');
-      return reg;
-    } catch (err) {
-      console.error('Service Worker registration error:', err);
+      await navigator.serviceWorker.register('./sw.js');
+    } catch (error) {
+      console.error('SW Registration Failed:', error);
     }
   }
-  return null;
 }
 
-async function setupPushNotifications() {
-  const reg = await initServiceWorker();
-  if (!reg) return;
-
-  const btnSubscribe = document.getElementById('btnSubscribe');
-  const btnTestPush = document.getElementById('btnTestPush');
-
-  btnSubscribe.addEventListener('click', async () => {
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        alert('Notification permission rejected.');
-        return;
-      }
-
-      const subscription = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
-
-      await Parse.Cloud.run('subscribeUser', { subscription: subscription.toJSON() });
-      btnSubscribe.innerText = "Alerts Active ✓";
-      btnSubscribe.style.background = "#16a34a";
-    } catch (err) {
-      console.error("Push Setup Error:", err);
-      alert("Failed to subscribe for push notifications.");
-    }
-  });
-
-  btnTestPush.addEventListener('click', async () => {
-    try {
-      btnTestPush.innerText = "Sending...";
-      const res = await Parse.Cloud.run('sendTestPush');
-      alert(`Test Push Triggered! Delivered to ${res.sentCount} device(s).`);
-      btnTestPush.innerText = "Test Push Now";
-    } catch (err) {
-      console.error("Test Push Error:", err);
-      alert("Failed to dispatch test push notification.");
-      btnTestPush.innerText = "Test Push Now";
-    }
-  });
+function updateClock() {
+  const now = new Date();
+  const dateOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+  const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+  
+  const dateStr = now.toLocaleDateString('en-US', dateOptions);
+  const timeStr = now.toLocaleTimeString('en-US', timeOptions);
+  
+  const dateBadge = document.getElementById('currentDateBadge');
+  if (dateBadge) {
+    dateBadge.innerHTML = `${dateStr} • ${timeStr}`;
+  }
 }
 
-function setupSportsNav() {
-  const nav = document.getElementById('categoriesNav');
-  nav.addEventListener('click', (e) => {
-    const target = e.target.closest('.nav-btn');
-    if (target) {
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-      target.classList.add('active');
-      currentSportPath = target.getAttribute('data-sport');
-      document.getElementById('pageTitle').innerText = target.getAttribute('data-title');
-      fetchLiveScores();
-    }
+function getCountdown(dateString) {
+  const gameTime = new Date(dateString).getTime();
+  const now = new Date().getTime();
+  const diff = gameTime - now;
+
+  if (diff <= 0) return "soon";
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+}
+
+function renderSidebar() {
+  const list = document.getElementById('categoriesNav');
+  if (!list) return;
+  list.innerHTML = '';
+  
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = `nav-btn ${cat.id === currentSportPath ? 'active' : ''}`;
+    btn.innerText = cat.name;
+    btn.onclick = () => {
+      currentSportPath = cat.id;
+      renderSidebar();
+      fetchScores();
+    };
+    list.appendChild(btn);
   });
 }
 
-function renderBaseballDiamond(situation) {
-  if (!situation) return '';
-  const onFirst = situation.onFirst ? 'active' : '';
-  const onSecond = situation.onSecond ? 'active' : '';
-  const onThird = situation.onThird ? 'active' : '';
+async function fetchScores() {
+  try {
+    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${currentSportPath}/scoreboard`);
+    const data = await response.json();
+    renderScoreboard(data.events || []);
+  } catch (err) {
+    console.error('Failed to fetch ESPN API:', err);
+  }
+}
+
+function getBaseGraphicHTML(game) {
+  const isBaseball = currentSportPath.includes('baseball');
+  if (!isBaseball) return ''; 
+
+  let b1 = false, b2 = false, b3 = false;
+  let outs = 0, balls = 0, strikes = 0;
+
+  if (game.status.type.state === 'in' && game.competitions && game.competitions[0].situation) {
+    const sit = game.competitions[0].situation;
+    if (sit.onFirst) b1 = true;
+    if (sit.onSecond) b2 = true;
+    if (sit.onThird) b3 = true;
+    outs = sit.outs || 0;
+    balls = sit.balls || 0;
+    strikes = sit.strikes || 0;
+  }
+
+  const getDots = (count, max, colorClass) => {
+    let dots = '';
+    for(let i=0; i<max; i++) {
+      dots += `<div class="dot ${i < count ? colorClass : ''}"></div>`;
+    }
+    return `<div class="count-dots">${dots}</div>`;
+  };
 
   return `
-    <svg class="diamond-svg" viewBox="0 0 100 100">
-      <path class="base ${onSecond}" d="M50 15 L65 30 L50 45 L35 30 Z" />
-      <path class="base ${onThird}" d="M25 40 L40 55 L25 70 L10 55 Z" />
-      <path class="base ${onFirst}" d="M75 40 L90 55 L75 70 L60 55 Z" />
-    </svg>
-  `;
-}
-
-function renderCounts(situation) {
-  if (!situation) {
-    return `
-      <div class="count-rows">
-        <div class="count-row">B: <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
-        <div class="count-row">S: <div class="dots"><div class="dot"></div><div class="dot"></div></div></div>
-        <div class="count-row">O: <div class="dots"><div class="dot"></div><div class="dot"></div></div></div>
+    <div class="baseball-graphic">
+      <div class="diamond">
+        <div class="base base-2 ${b2 ? 'active' : ''}"></div>
+        <div class="base base-3 ${b3 ? 'active' : ''}"></div>
+        <div class="base base-1 ${b1 ? 'active' : ''}"></div>
       </div>
-    `;
-  }
-
-  const balls = situation.balls || 0;
-  const strikes = situation.strikes || 0;
-  const outs = situation.outs || 0;
-
-  return `
-    <div class="count-rows">
-      <div class="count-row">B: <div class="dots">
-        <div class="dot ${balls >= 1 ? 'active' : ''}"></div>
-        <div class="dot ${balls >= 2 ? 'active' : ''}"></div>
-        <div class="dot ${balls >= 3 ? 'active' : ''}"></div>
-      </div></div>
-      <div class="count-row">S: <div class="dots">
-        <div class="dot ${strikes >= 1 ? 'active' : ''}"></div>
-        <div class="dot ${strikes >= 2 ? 'active' : ''}"></div>
-      </div></div>
-      <div class="count-row">O: <div class="dots">
-        <div class="dot ${outs >= 1 ? 'active' : ''}"></div>
-        <div class="dot ${outs >= 2 ? 'active' : ''}"></div>
-      </div></div>
+      <div class="counts">
+        <div class="count-row">B: ${getDots(balls, 4, 'filled-green')}</div>
+        <div class="count-row">S: ${getDots(strikes, 3, 'filled-red')}</div>
+        <div class="count-row">O: ${getDots(outs, 3, 'filled-yellow')}</div>
+      </div>
     </div>
   `;
 }
 
-async function fetchLiveScores() {
-  const container = document.getElementById('scoreboardContainer');
-  try {
-    const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${currentSportPath}/scoreboard`);
-    const data = await res.json();
-    
-    container.innerHTML = '';
+function getFootballGraphicHTML(game) {
+  const isFootball = currentSportPath.includes('football');
+  if (!isFootball || game.status.type.state !== 'in') return '';
 
-    if (!data.events || data.events.length === 0) {
-      container.innerHTML = `<div class="card-btn" style="grid-column: 1/-1; text-align: center; padding: 40px;">No active games scheduled for this category today.</div>`;
-      return;
-    }
+  let downDist = '';
+  let yardLine = '';
 
-    data.events.forEach(event => {
-      const competition = event.competitions[0];
-      const statusText = event.status.type.shortDetail.toUpperCase();
-      const statusState = event.status.type.state;
-      const isLive = statusState === 'in';
-
-      const away = competition.competitors ? competition.competitors.find(c => c.homeAway === 'away') || competition.competitors[1] : null;
-      const home = competition.competitors ? competition.competitors.find(c => c.homeAway === 'home') || competition.competitors[0] : null;
-
-      const awayName = away?.team?.name || away?.team?.abbreviation || away?.athlete?.displayName || 'AWAY';
-      const homeName = home?.team?.name || home?.team?.abbreviation || home?.athlete?.displayName || 'HOME';
-
-      const awayRecord = away?.records ? `(${away.records[0]?.summary || ''})` : '';
-      const homeRecord = home?.records ? `(${home.records[0]?.summary || ''})` : '';
-
-      const awayLogo = away?.team?.logo || away?.athlete?.headshot || 'https://a.espncdn.com/favicon.ico';
-      const homeLogo = home?.team?.logo || home?.athlete?.headshot || 'https://a.espncdn.com/favicon.ico';
-
-      const awayScore = away?.score ?? '0';
-      const homeScore = home?.score ?? '0';
-
-      const awayColor = away?.team?.color ? `#${away.team.color}` : '#121a2a';
-      const homeColor = home?.team?.color ? `#${home.team.color}` : '#121a2a';
-
-      const situation = competition.situation;
-
-      const card = document.createElement('div');
-      card.className = 'game-card';
-      card.innerHTML = `
-        <div class="card-top-bar">
-          <span>${isLive ? '<span class="live-tag"><span class="live-dot"></span>LIVE</span>' : statusState.toUpperCase()}</span>
-          <span>${event.status.type.detail ? event.status.type.detail.toUpperCase() : 'GAME'}</span>
-        </div>
-
-        <div class="card-body">
-          <div class="teams-container">
-            <div class="team-row" style="background-color: ${awayColor}22; border-left: 4px solid ${awayColor};">
-              <div class="team-info">
-                <img class="team-logo" src="${awayLogo}" alt="${awayName}" onerror="this.src='https://a.espncdn.com/favicon.ico'">
-                <div class="team-details">
-                  <span class="team-name">${awayName}</span>
-                  <span class="team-record">${awayRecord}</span>
-                </div>
-              </div>
-              <div class="team-score">${awayScore}</div>
-            </div>
-
-            <div class="team-row" style="background-color: ${homeColor}22; border-left: 4px solid ${homeColor};">
-              <div class="team-info">
-                <img class="team-logo" src="${homeLogo}" alt="${homeName}" onerror="this.src='https://a.espncdn.com/favicon.ico'">
-                <div class="team-details">
-                  <span class="team-name">${homeName}</span>
-                  <span class="team-record">${homeRecord}</span>
-                </div>
-              </div>
-              <div class="team-score">${homeScore}</div>
-            </div>
-          </div>
-
-          <div class="status-box">
-            <div class="status-badge">${statusText}</div>
-            ${currentSportPath.includes('baseball') ? renderBaseballDiamond(situation) : ''}
-            ${currentSportPath.includes('baseball') ? renderCounts(situation) : ''}
-          </div>
-        </div>
-
-        <div class="card-actions">
-          <button class="card-btn" onclick="startTrackingGame('${event.id}', '${currentSportPath}')">
-            ${isLive ? 'Track Push' : 'Alert Off'}
-          </button>
-          <button class="card-btn btn-stream" onclick="window.open('${event.links ? event.links[0]?.href : '#'}', '_blank')">Watch Stream</button>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  } catch (err) {
-    console.error("ESPN Fetch Error:", err);
-    container.innerHTML = `<div class="card-btn" style="grid-column: 1/-1; text-align: center; color:#ef4444; padding: 40px;">Error connecting to ESPN stream.</div>`;
+  if (game.competitions && game.competitions[0].situation) {
+    const sit = game.competitions[0].situation;
+    downDist = sit.downDistanceText || '';
+    yardLine = sit.possessionText || '';
   }
+
+  if (!downDist && !yardLine) return '';
+
+  return `
+    <div class="football-graphic">
+      <div class="down-dist">${downDist}</div>
+      <div class="yard-line">${yardLine}</div>
+    </div>
+  `;
 }
 
-window.startTrackingGame = async function(gameId, sportPath) {
+function renderScoreboard(events) {
+  const scoreboard = document.getElementById('scoreboardContainer');
+  if (!scoreboard) return;
+  scoreboard.innerHTML = '';
+  
+  if (events.length === 0) {
+    scoreboard.innerHTML = '<div class="no-games">No games scheduled.</div>';
+    return;
+  }
+
+  events.forEach(game => {
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    
+    const comps = game.competitions[0].competitors;
+    const team1 = comps[0];
+    const team2 = comps[1] || comps[0];
+
+    const t1Name = team1.team ? (team1.team.name || team1.team.shortDisplayName) : (team1.athlete ? team1.athlete.lastName : 'TBD');
+    const t2Name = team2.team ? (team2.team.name || team2.team.shortDisplayName) : (team2.athlete ? team2.athlete.lastName : 'TBD');
+    
+    const t1Color = team1.team && team1.team.color ? `#${team1.team.color}` : 'rgba(255,255,255,0.05)';
+    const t2Color = team2.team && team2.team.color ? `#${team2.team.color}` : 'rgba(255,255,255,0.05)';
+    
+    const t1Record = team1.records ? `(${team1.records[0].summary})` : '';
+    const t2Record = team2.records ? `(${team2.records[0].summary})` : '';
+
+    const t1Logo = team1.team && team1.team.logo ? team1.team.logo : '';
+    const t2Logo = team2.team && team2.team.logo ? team2.team.logo : '';
+
+    const isLive = game.status.type.state === 'in';
+    const isPre = game.status.type.state === 'pre';
+    const isFinal = game.status.type.state === 'post';
+
+    let headerLeftHTML = '';
+    if (isLive) {
+      headerLeftHTML = `<div class="live-indicator"><div class="live-dot"></div> LIVE</div>`;
+    } else if (isPre) {
+      headerLeftHTML = `<span>starts in ${getCountdown(game.date)}</span>`;
+    } else {
+      headerLeftHTML = `<span>FINAL</span>`;
+    }
+
+    let pillClass = 'status-pill';
+    let metaText = '';
+
+    if (isPre) {
+      pillClass += ' pregame';
+      const d = new Date(game.date);
+      const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      metaText = `${datePart}<br>${timePart}`;
+    } else {
+      if (isFinal) pillClass += ' final';
+      metaText = game.status.type.detail.replace(' - ', '<br>');
+    }
+
+    const isSubscribed = subscribedGames.has(game.id);
+
+    card.innerHTML = `
+      <div class="card-header">
+        ${headerLeftHTML}
+        <span>${isPre ? 'PRE' : (isFinal ? 'END' : 'IN')}</span>
+      </div>
+      
+      <div class="card-body">
+        <div class="team-row" style="background-color: ${t1Color};">
+          ${t1Logo ? `<img src="${t1Logo}" class="team-logo" alt="logo">` : ''}
+          <div class="team-info">
+            <div class="team-name">${t1Name}</div>
+            <div class="team-record">${t1Record}</div>
+          </div>
+          <div class="team-score">${team1.score || '0'}</div>
+        </div>
+        
+        <div class="team-row" style="background-color: ${t2Color};">
+          ${t2Logo ? `<img src="${t2Logo}" class="team-logo" alt="logo">` : ''}
+          <div class="team-info">
+            <div class="team-name">${t2Name}</div>
+            <div class="team-record">${t2Record}</div>
+          </div>
+          <div class="team-score">${team2.score || '0'}</div>
+        </div>
+
+        <div class="game-meta">
+          <div class="${pillClass}">${metaText}</div>
+          ${getBaseGraphicHTML(game)}
+          ${getFootballGraphicHTML(game)}
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button id="alert-btn-${game.id}" class="btn btn-alert ${isSubscribed ? 'active' : ''}" 
+                onclick="window.toggleAlert('${game.id}', '${currentSportPath}')" 
+                ${isFinal ? 'disabled' : ''}>
+          ${isSubscribed ? 'Alert On' : 'Alert Off'}
+        </button>
+        <button class="btn btn-stream">Watch Stream</button>
+      </div>
+    `;
+    
+    scoreboard.appendChild(card);
+  });
+}
+
+window.toggleAlert = async function(gameId, sportPath) {
+  const btn = document.getElementById(`alert-btn-${gameId}`);
+  
+  if (subscribedGames.has(gameId)) {
+    subscribedGames.delete(gameId);
+    localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
+    if (btn) {
+      btn.classList.remove('active');
+      btn.innerText = 'Alert Off';
+    }
+    return;
+  }
+
+  if (!('serviceWorker' in navigator)) {
+    alert("Service workers are not supported in your browser.");
+    return;
+  }
+
   try {
-    await Parse.Cloud.run('startGameLoop', { gameId, sportPath });
-    alert(`Tracking loop initialized for Event ID #${gameId}. Background updates will run via QStash even if app is closed.`);
-  } catch (e) {
-    console.error(e);
-    alert('Failed to start tracking loop.');
+    if (btn) btn.innerText = 'Setting up...';
+    
+    const registration = await navigator.serviceWorker.ready;
+    const permission = await Notification.requestPermission();
+    
+    if (permission !== 'granted') {
+      if (btn) btn.innerText = 'Alert Off';
+      alert('Permission denied for push notifications.');
+      return;
+    }
+    
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    
+    subscribedGames.add(gameId);
+    localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
+    if (btn) {
+      btn.classList.add('active');
+      btn.innerText = 'Alert On';
+    }
+    
+    const SubscriberModel = Parse.Object.extend("PushSubscriptions");
+    const sub = new SubscriberModel();
+    sub.set("gameId", gameId);
+    sub.set("sportPath", sportPath);
+    sub.set("endpoint", subscription.endpoint);
+    sub.set("subscription", JSON.parse(JSON.stringify(subscription)));
+    await sub.save();
+    
+    Parse.Cloud.run("startGameLoop", { gameId: gameId, sportPath: sportPath })
+      .catch(cloudErr => {
+        console.warn('Cloud startGameLoop function warning:', cloudErr);
+      });
+      
+  } catch (err) {
+    console.error('Failed to subscribe:', err);
+    subscribedGames.delete(gameId);
+    localStorage.setItem('subscribedGames', JSON.stringify([...subscribedGames]));
+    if (btn) {
+      btn.classList.remove('active');
+      btn.innerText = 'Alert Off';
+    }
+    alert('Failed to set alert. Check browser notification settings.');
   }
 };
 
-updateHeaderDate();
-setupPushNotifications();
-setupSportsNav();
-fetchLiveScores();
+document.addEventListener('DOMContentLoaded', () => {
+  const btnTest = document.getElementById('btnTestPush');
+  if (btnTest) {
+    btnTest.onclick = () => {
+      Parse.Cloud.run("sendTestPush")
+        .then(res => alert(`Test push sent! Delivered to ${res.sentCount} subscriber(s).`))
+        .catch(err => console.error("Test push failed:", err));
+    };
+  }
+});
 
-if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-autoRefreshInterval = setInterval(fetchLiveScores, 30000);
+updateClock();
+setInterval(updateClock, 60000); 
+
+renderSidebar();
+registerServiceWorker();
+fetchScores();
+
+pollingInterval = setInterval(fetchScores, 30000);
