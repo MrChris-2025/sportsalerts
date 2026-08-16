@@ -10,47 +10,26 @@
 </head>
 <body>
 
-  <div class="app-layout">
-    
-    <!-- STICKY SIDE NAVIGATION -->
-    <aside class="sidebar">
-      <div class="sidebar-header">CATEGORIES</div>
-      <nav class="categories-nav" id="categoriesNav">
-        <button class="nav-btn active" data-sport="baseball/mlb" data-title="BASEBALL SCORES">Baseball (MLB)</button>
-        <button class="nav-btn" data-sport="football/nfl" data-title="FOOTBALL SCORES">Football (NFL)</button>
-        <button class="nav-btn" data-sport="basketball/nba" data-title="BASKETBALL SCORES">Basketball (NBA)</button>
-        <button class="nav-btn" data-sport="hockey/nhl" data-title="HOCKEY SCORES">Hockey (NHL)</button>
-        <button class="nav-btn" data-sport="soccer/eng.1" data-title="PREMIER LEAGUE SCORES">Premier League</button>
-        <button class="nav-btn" data-sport="soccer/usa.1" data-title="MAJOR LEAGUE SOCCER">Major League Soccer</button>
-        <button class="nav-btn" data-sport="mma/ufc" data-title="MMA / UFC SCORES">MMA / UFC</button>
-        <button class="nav-btn" data-sport="basketball/mens-college-basketball" data-title="NCAA BASKETBALL">NCAA Basketball</button>
-        <button class="nav-btn" data-sport="football/college-football" data-title="NCAA FOOTBALL">NCAA Football</button>
-      </nav>
-    </aside>
-
-    <!-- MAIN BODY AREA -->
-    <div class="main-content">
-      
-      <!-- STICKY TOP HEADER -->
-      <header class="top-header">
-        <h1 class="page-title" id="pageTitle">BASEBALL SCORES</h1>
-        <div class="header-actions">
-          <span class="date-badge" id="currentDateBadge">Aug 13, 2026</span>
-          <button id="btnSubscribe" class="btn-action">Enable Global Push</button>
-          <button id="btnTestPush" class="btn-action btn-blue">Test Push Now</button>
-        </div>
-      </header>
-
-      <!-- LIVE SCORE CARDS GRID -->
-      <main class="games-grid" id="scoreboardContainer">
-        <div class="card-btn" style="grid-column: 1/-1; text-align: center; padding: 40px;">
-          Connecting to Live Stream...
-        </div>
-      </main>
-
+  <header class="top-header">
+    <div class="header-left">
+      <h1 class="page-title">ESPN LIVE</h1>
+      <span class="date-badge" id="currentDateBadge">Loading...</span>
     </div>
+    <div class="header-actions">
+      <button id="btnSubscribe" class="btn-action">Enable Push</button>
+      <button id="btnTestPush" class="btn-action btn-blue">Test Push</button>
+    </div>
+  </header>
 
-  </div>
+  <nav class="categories-bar" id="categoriesNav">
+    <!-- Category Pills Injected Here -->
+  </nav>
+
+  <main class="games-grid" id="scoreboardContainer">
+    <div class="loading-card">
+      Connecting to Live Stream...
+    </div>
+  </main>
 
   <script type="module" src="main.js"></script>
 </body>
