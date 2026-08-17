@@ -1,6 +1,6 @@
 {
-  "short_name": "SportsAlerts",
-  "name": "Live Sports Score Alerts",
+  "short_name": "ESPN Alerts",
+  "name": "ESPN Live Score Alerts",
   "icons": [
     {
       "src": "sports-icon.png",
@@ -10,6 +10,6 @@
   ],
   "start_url": "/",
   "background_color": "#0f172a",
-  "theme_color": "#0284c7",
+  "theme_color": "#cc0000",
   "display": "standalone"
 }
