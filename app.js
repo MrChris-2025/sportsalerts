@@ -1,7 +1,6 @@
-// Initialize Parse with Client Key included to resolve authorization errors
 Parse.initialize(
   "kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v",
-  "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q" // Add your Back4App Client Key here if required in App Settings
+  "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q"
 );
 Parse.serverURL = 'https://parseapi.back4app.com/';
 
@@ -27,6 +26,18 @@ function updateClock() {
     hour12: true
   });
   document.getElementById("clock").innerText = `${etTimeString} ET`;
+}
+
+function getSubscribedGames() {
+  return JSON.parse(localStorage.getItem('subscribedGames') || '[]');
+}
+
+function saveSubscribedGame(gameId) {
+  const subs = getSubscribedGames();
+  if (!subs.includes(gameId)) {
+    subs.push(gameId);
+    localStorage.setItem('subscribedGames', JSON.stringify(subs));
+  }
 }
 
 function selectLeague(button) {
@@ -78,6 +89,8 @@ async function subscribeToAlerts(gameId) {
       subscription: subscription.toJSON()
     });
 
+    saveSubscribedGame(gameId);
+
     const btn = document.getElementById(`btn-${gameId}`);
     if (btn) {
       btn.innerText = "ALERTS ENABLED ✓";
@@ -85,7 +98,7 @@ async function subscribeToAlerts(gameId) {
     }
   } catch (err) {
     console.error("Subscription Error:", err);
-    alert("Failed to subscribe: " + (err.message || "Unauthorized access. Check Back4App Client Key settings."));
+    alert("Failed to subscribe: " + (err.message || "Unauthorized access."));
   }
 }
 
@@ -100,6 +113,7 @@ function getTeamRecord(competitor) {
 async function updateScoreboardCards() {
   const selectedDate = document.getElementById("gameDatePicker").value.replace(/-/g, "");
   const container = document.getElementById('scoreboard');
+  const subscribedGames = getSubscribedGames();
 
   try {
     const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${currentSport}/${currentLeague}/scoreboard?dates=${selectedDate}`);
@@ -119,7 +133,6 @@ async function updateScoreboardCards() {
       const state = statusType.state;
       const gameDate = new Date(event.date);
 
-      // 12-hour format, no seconds, New York / US Eastern Time
       const etTime = gameDate.toLocaleTimeString('en-US', {
         timeZone: 'America/New_York',
         hour: 'numeric',
@@ -153,6 +166,8 @@ async function updateScoreboardCards() {
         startDisplay = `<div class="details-box">Starts at <span class="start-time">${etTime} ET</span></div>`;
       }
 
+      const isSubscribed = subscribedGames.includes(gameId);
+
       card.innerHTML = `
         <div class="card-header">
           <span>${etDate} • ${etTime} ET</span>
@@ -180,7 +195,9 @@ async function updateScoreboardCards() {
         ${extraInfo ? `<div class="details-box">${extraInfo}</div>` : ''}
         ${startDisplay}
 
-        <button class="alert-btn" id="btn-${gameId}" onclick="subscribeToAlerts('${gameId}')">ENABLE ALERTS</button>
+        <button class="alert-btn" id="btn-${gameId}" ${isSubscribed ? 'disabled' : ''} onclick="subscribeToAlerts('${gameId}')">
+          ${isSubscribed ? 'ALERTS ENABLED ✓' : 'ENABLE ALERTS'}
+        </button>
       `;
 
       container.appendChild(card);
