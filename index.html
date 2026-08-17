@@ -3,42 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi-Sport Live Scoreboard</title>
+  <title>ESPN ScoreCenter</title>
   <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; margin: 0; }
-    h1 { text-align: center; margin-bottom: 10px; }
-    .controls { display: flex; justify-content: center; margin-bottom: 24px; }
-    select { background: #1e293b; color: #f8fafc; border: 1px solid #334155; padding: 10px 16px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; outline: none; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; max-width: 1000px; margin: 0 auto; }
-    .card { background: #1e293b; border-radius: 12px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); border: 1px solid #334155; display: flex; flex-direction: column; justify-content: space-between; }
-    .teams { font-weight: bold; font-size: 1.1em; margin-bottom: 8px; }
-    .score { font-size: 1.5em; color: #38bdf8; margin: 8px 0; }
-    .status { font-size: 0.85em; color: #94a3b8; margin-bottom: 12px; }
-    button { background: #0284c7; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: Auto; }
-    button:disabled { background: #475569; cursor: not-allowed; }
-    .empty-state { text-align: center; grid-column: 1 / -1; color: #94a3b8; }
-  </style>
 </head>
 <body>
-  <h1>Live Scoreboard</h1>
-  
-  <div class="controls">
-    <select id="leagueSelector" onchange="changeLeague()">
-      <option value="basketball/nba">NBA Basketball</option>
-      <option value="basketball/mens-college-basketball">NCAA Men's Basketball</option>
-      <option value="football/nfl">NFL Football</option>
-      <option value="football/college-football">NCAA College Football</option>
-      <option value="baseball/mlb">MLB Baseball</option>
-      <option value="hockey/nhl">NHL Hockey</option>
-      <option value="soccer/eng.1">Premier League Soccer</option>
-      <option value="soccer/usa.1">MLS Soccer</option>
-      <option value="soccer/uefa.champions">UEFA Champions League</option>
-    </select>
-  </div>
+  <header class="top-nav glass">
+    <div class="brand">
+      <span class="espn-red">ESPN</span>
+      <span class="brand-sub">ALERT HUB</span>
+    </div>
+    <div class="nav-center">
+      <input type="date" id="gameDatePicker" class="glass-input" onchange="onDateOrLeagueChange()">
+    </div>
+    <div class="clock-display" id="clock">12:00 PM</div>
+  </header>
 
-  <div id="scoreboard" class="grid"></div>
+  <div class="app-layout">
+    <aside class="sidebar glass">
+      <div class="sidebar-title">LEAGUES</div>
+      <nav class="league-menu">
+        <button class="league-btn active" data-sport="basketball" data-league="nba" onclick="selectLeague(this)">NBA</button>
+        <button class="league-btn" data-sport="basketball" data-league="mens-college-basketball" onclick="selectLeague(this)">NCAAB</button>
+        <button class="league-btn" data-sport="football" data-league="nfl" onclick="selectLeague(this)">NFL</button>
+        <button class="league-btn" data-sport="football" data-league="college-football" onclick="selectLeague(this)">NCAAF</button>
+        <button class="league-btn" data-sport="baseball" data-league="mlb" onclick="selectLeague(this)">MLB</button>
+        <button class="league-btn" data-sport="hockey" data-league="nhl" onclick="selectLeague(this)">NHL</button>
+        <button class="league-btn" data-sport="soccer" data-league="eng.1" onclick="selectLeague(this)">EPL</button>
+        <button class="league-btn" data-sport="soccer" data-league="usa.1" onclick="selectLeague(this)">MLS</button>
+        <button class="league-btn" data-sport="soccer" data-league="uefa.champions" onclick="selectLeague(this)">UCL</button>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div id="scoreboard" class="grid"></div>
+    </main>
+  </div>
 
   <script src="app.js"></script>
 </body>
