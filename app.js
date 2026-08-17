@@ -6,8 +6,8 @@ Parse.initialize(
 Parse.serverURL = 'https://parseapi.back4app.com/';
 
 const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E";
-let currentSport = "basketball";
-let currentLeague = "nba";
+let currentSport = "baseball";
+let currentLeague = "mlb";
 let fetchInterval = null;
 
 document.addEventListener("DOMContentLoaded", () => {
