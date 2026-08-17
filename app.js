@@ -1,10 +1,13 @@
-// Fix unauthorized error by initializing Parse correctly without REST key conflicts
-Parse.initialize("kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v");
+// Initialize Parse with Client Key included to resolve authorization errors
+Parse.initialize(
+  "kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v",
+  "YOUR_PARSE_CLIENT_KEY" // Add your Back4App Client Key here if required in App Settings
+);
 Parse.serverURL = 'https://parseapi.back4app.com/';
 
 const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E";
-let currentSport = "baseball";
-let currentLeague = "mlb";
+let currentSport = "basketball";
+let currentLeague = "nba";
 let fetchInterval = null;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -116,7 +119,7 @@ async function updateScoreboardCards() {
       const state = statusType.state;
       const gameDate = new Date(event.date);
 
-      // Format game date and time specifically in US Eastern Time (12-hour format, no seconds)
+      // 12-hour format, no seconds, New York / US Eastern Time
       const etTime = gameDate.toLocaleTimeString('en-US', {
         timeZone: 'America/New_York',
         hour: 'numeric',
