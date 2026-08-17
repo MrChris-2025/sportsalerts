@@ -3,7 +3,7 @@ Parse.initialize("kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v");
 Parse.serverURL = 'https://parseapi.back4app.com/';
 
 const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E";
-let currentSport = "basketball";
+let currentSport = "baseball";
 let currentLeague = "nba";
 let fetchInterval = null;
 
