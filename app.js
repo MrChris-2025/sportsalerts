@@ -40,11 +40,6 @@ function saveSubscribedGame(gameId) {
   }
 }
 
-function removeSubscribedGame(gameId) {
-  const subs = getSubscribedGames().filter(id => id !== gameId);
-  localStorage.setItem('subscribedGames', JSON.stringify(subs));
-}
-
 function selectLeague(button) {
   document.querySelectorAll(".league-btn").forEach(btn => btn.classList.remove("active"));
   button.classList.add("active");
@@ -66,15 +61,6 @@ function urlBase64ToUint8Array(base64String) {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray;
-}
-
-async function toggleAlerts(gameId) {
-  const isSubscribed = getSubscribedGames().includes(gameId);
-  if (isSubscribed) {
-    await unsubscribeFromAlerts(gameId);
-  } else {
-    await subscribeToAlerts(gameId);
-  }
 }
 
 async function subscribeToAlerts(gameId) {
@@ -108,37 +94,11 @@ async function subscribeToAlerts(gameId) {
     const btn = document.getElementById(`btn-${gameId}`);
     if (btn) {
       btn.innerText = "ALERTS ENABLED ✓";
-      btn.classList.add("active");
+      btn.disabled = true;
     }
   } catch (err) {
     console.error("Subscription Error:", err);
     alert("Failed to subscribe: " + (err.message || "Unauthorized access."));
-  }
-}
-
-async function unsubscribeFromAlerts(gameId) {
-  try {
-    if (!('serviceWorker' in navigator)) return;
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-
-    if (subscription) {
-      await Parse.Cloud.run("unsubscribeFromGame", {
-        gameId,
-        subscription: subscription.toJSON()
-      });
-    }
-
-    removeSubscribedGame(gameId);
-
-    const btn = document.getElementById(`btn-${gameId}`);
-    if (btn) {
-      btn.innerText = "ENABLE ALERTS";
-      btn.classList.remove("active");
-    }
-  } catch (err) {
-    console.error("Unsubscribe Error:", err);
-    alert("Failed to unsubscribe: " + (err.message || "Error occurred."));
   }
 }
 
@@ -235,7 +195,7 @@ async function updateScoreboardCards() {
         ${extraInfo ? `<div class="details-box">${extraInfo}</div>` : ''}
         ${startDisplay}
 
-        <button class="alert-btn ${isSubscribed ? 'active' : ''}" id="btn-${gameId}" onclick="toggleAlerts('${gameId}')">
+        <button class="alert-btn" id="btn-${gameId}" ${isSubscribed ? 'disabled' : ''} onclick="subscribeToAlerts('${gameId}')">
           ${isSubscribed ? 'ALERTS ENABLED ✓' : 'ENABLE ALERTS'}
         </button>
       `;
