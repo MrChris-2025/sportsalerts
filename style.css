@@ -180,7 +180,7 @@ body {
 .team-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .team-logo {
@@ -191,7 +191,14 @@ body {
 
 .team-name {
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1rem;
+}
+
+.team-record {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #94a3b8;
+  margin-left: 4px;
 }
 
 .team-score {
@@ -210,7 +217,7 @@ body {
   text-align: center;
 }
 
-.countdown {
+.start-time {
   color: #38bdf8;
   font-weight: 600;
 }
