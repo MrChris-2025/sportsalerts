@@ -1,23 +1,23 @@
-Parse.initialize(
-  "kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v",
-  "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q"
-);
-Parse.serverURL = 'https://parseapi.back4app.com/';
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1539045647645282438/7F_mexbfLW2Kr5sF-kdkSAS2MD6WqmXyqj9G-fRc5a1jsdXfoM5kYNfJWG1sfUhpeT09";
 
-const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E";
 let currentSport = "baseball";
 let currentLeague = "mlb";
 let fetchInterval = null;
+let previousGameState = {};
 
 document.addEventListener("DOMContentLoaded", () => {
   const datePicker = document.getElementById("gameDatePicker");
-  datePicker.value = new Date().toISOString().split('T')[0];
+  if (datePicker) {
+    datePicker.value = new Date().toISOString().split('T')[0];
+  }
   updateClock();
   setInterval(updateClock, 1000);
   startPolling();
 });
 
 function updateClock() {
+  const clockEl = document.getElementById("clock");
+  if (!clockEl) return;
   const now = new Date();
   const etTimeString = now.toLocaleTimeString('en-US', {
     timeZone: 'America/New_York',
@@ -25,7 +25,7 @@ function updateClock() {
     minute: '2-digit',
     hour12: true
   });
-  document.getElementById("clock").innerText = `${etTimeString} ET`;
+  clockEl.innerText = `${etTimeString} ET`;
 }
 
 function getSubscribedGames() {
@@ -40,6 +40,41 @@ function saveSubscribedGame(gameId) {
   }
 }
 
+function removeSubscribedGame(gameId) {
+  const subs = getSubscribedGames().filter(id => id !== gameId);
+  localStorage.setItem('subscribedGames', JSON.stringify(subs));
+}
+
+async function sendDiscordAlert(message) {
+  try {
+    await fetch(DISCORD_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content: message,
+        username: "Scoreboard Bot"
+      })
+    });
+  } catch (err) {
+    console.error("Failed to send Discord alert:", err);
+  }
+}
+
+async function toggleAlerts(gameId, gameTitle) {
+  const isSubscribed = getSubscribedGames().includes(gameId);
+  const title = gameTitle || `Game #${gameId}`;
+
+  if (isSubscribed) {
+    removeSubscribedGame(gameId);
+    await sendDiscordAlert(`🔕 Disabled alerts for **${title}**`);
+  } else {
+    saveSubscribedGame(gameId);
+    await sendDiscordAlert(`🔔 Enabled alerts for **${title}**! You will receive live score updates in this channel.`);
+  }
+
+  updateScoreboardCards();
+}
+
 function selectLeague(button) {
   document.querySelectorAll(".league-btn").forEach(btn => btn.classList.remove("active"));
   button.classList.add("active");
@@ -52,56 +87,6 @@ function onDateOrLeagueChange() {
   updateScoreboardCards();
 }
 
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
-async function subscribeToAlerts(gameId) {
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      alert('Notification permission denied.');
-      return;
-    }
-
-    if (!('serviceWorker' in navigator)) return;
-    const registration = await navigator.serviceWorker.register('./sw.js');
-    let subscription = await registration.pushManager.getSubscription();
-
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
-    }
-
-    await Parse.Cloud.run("subscribeToGame", {
-      gameId,
-      sport: currentSport,
-      league: currentLeague,
-      subscription: subscription.toJSON()
-    });
-
-    saveSubscribedGame(gameId);
-
-    const btn = document.getElementById(`btn-${gameId}`);
-    if (btn) {
-      btn.innerText = "ALERTS ENABLED ✓";
-      btn.disabled = true;
-    }
-  } catch (err) {
-    console.error("Subscription Error:", err);
-    alert("Failed to subscribe: " + (err.message || "Unauthorized access."));
-  }
-}
-
 function getTeamRecord(competitor) {
   if (competitor && competitor.records && competitor.records.length > 0) {
     const totalRecord = competitor.records.find(r => r.type === 'total' || r.name === 'overall') || competitor.records[0];
@@ -111,7 +96,10 @@ function getTeamRecord(competitor) {
 }
 
 async function updateScoreboardCards() {
-  const selectedDate = document.getElementById("gameDatePicker").value.replace(/-/g, "");
+  const datePicker = document.getElementById("gameDatePicker");
+  if (!datePicker) return;
+
+  const selectedDate = datePicker.value.replace(/-/g, "");
   const container = document.getElementById('scoreboard');
   const subscribedGames = getSubscribedGames();
 
@@ -154,8 +142,25 @@ async function updateScoreboardCards() {
       const awayRecord = getTeamRecord(away);
       const homeRecord = getTeamRecord(home);
 
+      const awayScore = away.score || '0';
+      const homeScore = home.score || '0';
+      const awayName = away.team.abbreviation || away.team.displayName;
+      const homeName = home.team.abbreviation || home.team.displayName;
+      const gameTitle = `${awayName} vs ${homeName}`;
+
       let liveDetail = comp.status ? comp.status.type.detail : statusType.detail;
       let extraInfo = buildExtraDetails(currentSport, comp, liveDetail, state);
+
+      // Trigger automatic score update alerts on Discord for subscribed games
+      if (subscribedGames.includes(gameId)) {
+        const currentScoreKey = `${awayScore}-${homeScore}-${state}-${liveDetail}`;
+        const previousScoreKey = previousGameState[gameId];
+
+        if (previousScoreKey && previousScoreKey !== currentScoreKey) {
+          sendDiscordAlert(`🚨 **SCORE UPDATE**: ${awayName} ${awayScore} - ${homeScore} ${homeName} (${liveDetail})`);
+        }
+        previousGameState[gameId] = currentScoreKey;
+      }
 
       const card = document.createElement('div');
       card.className = 'card glass';
@@ -177,25 +182,25 @@ async function updateScoreboardCards() {
         <div class="team-row" style="background: linear-gradient(90deg, ${awayColor}33, transparent)">
           <div class="team-info">
             <img class="team-logo" src="${away.team.logo || ''}" alt="">
-            <span class="team-name">${away.team.abbreviation || away.team.displayName}</span>
+            <span class="team-name">${awayName}</span>
             <span class="team-record">${awayRecord}</span>
           </div>
-          <span class="team-score">${away.score || '0'}</span>
+          <span class="team-score">${awayScore}</span>
         </div>
 
         <div class="team-row" style="background: linear-gradient(90deg, ${homeColor}33, transparent)">
           <div class="team-info">
             <img class="team-logo" src="${home.team.logo || ''}" alt="">
-            <span class="team-name">${home.team.abbreviation || home.team.displayName}</span>
+            <span class="team-name">${homeName}</span>
             <span class="team-record">${homeRecord}</span>
           </div>
-          <span class="team-score">${home.score || '0'}</span>
+          <span class="team-score">${homeScore}</span>
         </div>
 
         ${extraInfo ? `<div class="details-box">${extraInfo}</div>` : ''}
         ${startDisplay}
 
-        <button class="alert-btn" id="btn-${gameId}" ${isSubscribed ? 'disabled' : ''} onclick="subscribeToAlerts('${gameId}')">
+        <button class="alert-btn ${isSubscribed ? 'active' : ''}" id="btn-${gameId}" onclick="toggleAlerts('${gameId}', '${gameTitle.replace(/'/g, "\\'")}')">
           ${isSubscribed ? 'ALERTS ENABLED ✓' : 'ENABLE ALERTS'}
         </button>
       `;
