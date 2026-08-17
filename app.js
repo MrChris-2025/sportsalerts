@@ -2,9 +2,13 @@ Parse.initialize("kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v", "qQB0p5G4Mf0MqMiM6Z
 Parse.serverURL = 'https://parseapi.back4app.com/';
 
 const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E";
-const SPORT = "basketball";
-const LEAGUE = "nba";
 let fetchInterval = null;
+
+function getSelectedLeague() {
+  const selector = document.getElementById('leagueSelector');
+  const [sport, league] = selector.value.split('/');
+  return { sport, league };
+}
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -24,7 +28,7 @@ async function registerServiceWorker() {
   throw new Error('Push messaging is not supported by your browser.');
 }
 
-async function subscribeToAlerts(gameId) {
+async function subscribeToAlerts(gameId, sport, league) {
   try {
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
@@ -44,8 +48,8 @@ async function subscribeToAlerts(gameId) {
 
     await Parse.Cloud.run("subscribeToGame", {
       gameId,
-      sport: SPORT,
-      league: LEAGUE,
+      sport,
+      league,
       subscription: subscription.toJSON()
     });
 
@@ -61,15 +65,19 @@ async function subscribeToAlerts(gameId) {
 }
 
 async function updateScoreboardCards() {
+  const { sport, league } = getSelectedLeague();
+  
   try {
-    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${SPORT}/${LEAGUE}/scoreboard`);
+    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/scoreboard`);
     const data = await response.json();
     const container = document.getElementById('scoreboard');
 
     if (!data.events || data.events.length === 0) {
-      container.innerHTML = "<p>No games currently available.</p>";
+      container.innerHTML = `<p class="empty-state">No live or upcoming games scheduled today for ${league.toUpperCase()}.</p>`;
       return;
     }
+
+    container.innerHTML = '';
 
     data.events.forEach(event => {
       const gameId = event.id;
@@ -78,26 +86,31 @@ async function updateScoreboardCards() {
       const homeTeam = competition.competitors.find(c => c.homeAway === 'home');
       const awayTeam = competition.competitors.find(c => c.homeAway === 'away');
 
-      let card = document.getElementById(`card-${gameId}`);
-      if (!card) {
-        card = document.createElement('div');
-        card.className = 'card';
-        card.id = `card-${gameId}`;
-        card.innerHTML = `
-          <div class="teams">${awayTeam.team.displayName} vs ${homeTeam.team.displayName}</div>
-          <div class="score" id="score-${gameId}">${awayTeam.score || '0'} - ${homeTeam.score || '0'}</div>
+      const homeName = homeTeam.team.shortDisplayName || homeTeam.team.displayName;
+      const awayName = awayTeam.team.shortDisplayName || awayTeam.team.displayName;
+      const homeScore = homeTeam.score || '0';
+      const awayScore = awayTeam.score || '0';
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = `card-${gameId}`;
+      card.innerHTML = `
+        <div>
+          <div class="teams">${awayName} vs ${homeName}</div>
+          <div class="score" id="score-${gameId}">${awayScore} - ${homeScore}</div>
           <div class="status" id="status-${gameId}">${status}</div>
-          <button id="btn-${gameId}" onclick="subscribeToAlerts('${gameId}')">Enable Score Alerts</button>
-        `;
-        container.appendChild(card);
-      } else {
-        document.getElementById(`score-${gameId}`).innerText = `${awayTeam.score || '0'} - ${homeTeam.score || '0'}`;
-        document.getElementById(`status-${gameId}`).innerText = status;
-      }
+        </div>
+        <button id="btn-${gameId}" onclick="subscribeToAlerts('${gameId}', '${sport}', '${league}')">Enable Score Alerts</button>
+      `;
+      container.appendChild(card);
     });
   } catch (error) {
     console.error("Direct score fetching error:", error);
   }
+}
+
+function changeLeague() {
+  updateScoreboardCards();
 }
 
 function startPolling() {
