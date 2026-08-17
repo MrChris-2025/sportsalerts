@@ -1,8 +1,9 @@
 {
-  "name": "back4app-espn-backend",
+  "name": "back4app-sports-alerts",
   "version": "1.0.0",
+  "description": "Multi-sport live ongoing score alert system using Back4App and QStash",
+  "main": "cloud/index.js",
   "dependencies": {
-    "web-push": "^3.6.6",
-    "node-fetch": "^2.6.7"
+    "web-push": "^3.6.0"
   }
 }
