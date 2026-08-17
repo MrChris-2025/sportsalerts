@@ -1,7 +1,7 @@
 // Initialize Parse with Client Key included to resolve authorization errors
 Parse.initialize(
   "kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v",
-  "zTWL3qyM60J3HlwDWLiPx7YSBMPe0DVHm4bCmD26" // Add your Back4App Client Key here if required in App Settings
+  "6mPKe3bdTGIBE237fVV7lRei6N9e5oXR7PArQp4Q" // Add your Back4App Client Key here if required in App Settings
 );
 Parse.serverURL = 'https://parseapi.back4app.com/';
 
