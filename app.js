@@ -1,11 +1,11 @@
-Parse.initialize("kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v", "qQB0p5G4Mf0MqMiM6Z5zBEnBypzDPsQRGCrpoNVx");
+// Fix unauthorized error by initializing Parse correctly without REST key conflicts
+Parse.initialize("kgfaEs2YlbM1CBOPiLEGyTNU6TUwsbFayxLUWz6v");
 Parse.serverURL = 'https://parseapi.back4app.com/';
 
 const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E";
 let currentSport = "basketball";
 let currentLeague = "nba";
 let fetchInterval = null;
-let countdownIntervals = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   const datePicker = document.getElementById("gameDatePicker");
@@ -17,11 +17,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function updateClock() {
   const now = new Date();
-  let hours = now.getHours();
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12 || 12;
-  document.getElementById("clock").innerText = `${hours}:${minutes} ${ampm}`;
+  const etTimeString = now.toLocaleTimeString('en-US', {
+    timeZone: 'America/New_York',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+  document.getElementById("clock").innerText = `${etTimeString} ET`;
 }
 
 function selectLeague(button) {
@@ -34,11 +36,6 @@ function selectLeague(button) {
 
 function onDateOrLeagueChange() {
   updateScoreboardCards();
-}
-
-function clearCountdowns() {
-  countdownIntervals.forEach(clearInterval);
-  countdownIntervals = [];
 }
 
 function urlBase64ToUint8Array(base64String) {
@@ -85,12 +82,19 @@ async function subscribeToAlerts(gameId) {
     }
   } catch (err) {
     console.error("Subscription Error:", err);
-    alert("Failed to subscribe: " + err.message);
+    alert("Failed to subscribe: " + (err.message || "Unauthorized access. Check Back4App Client Key settings."));
   }
 }
 
+function getTeamRecord(competitor) {
+  if (competitor && competitor.records && competitor.records.length > 0) {
+    const totalRecord = competitor.records.find(r => r.type === 'total' || r.name === 'overall') || competitor.records[0];
+    return totalRecord.summary ? `(${totalRecord.summary})` : '';
+  }
+  return '';
+}
+
 async function updateScoreboardCards() {
-  clearCountdowns();
   const selectedDate = document.getElementById("gameDatePicker").value.replace(/-/g, "");
   const container = document.getElementById('scoreboard');
 
@@ -112,14 +116,27 @@ async function updateScoreboardCards() {
       const state = statusType.state;
       const gameDate = new Date(event.date);
 
-      const formattedTime = gameDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-      const formattedDate = gameDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      // Format game date and time specifically in US Eastern Time (12-hour format, no seconds)
+      const etTime = gameDate.toLocaleTimeString('en-US', {
+        timeZone: 'America/New_York',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      const etDate = gameDate.toLocaleDateString('en-US', {
+        timeZone: 'America/New_York',
+        month: 'short',
+        day: 'numeric'
+      });
 
       const home = comp.competitors.find(c => c.homeAway === 'home');
       const away = comp.competitors.find(c => c.homeAway === 'away');
 
       const homeColor = home.team.color ? `#${home.team.color}` : 'rgba(255,255,255,0.05)';
       const awayColor = away.team.color ? `#${away.team.color}` : 'rgba(255,255,255,0.05)';
+
+      const awayRecord = getTeamRecord(away);
+      const homeRecord = getTeamRecord(home);
 
       let liveDetail = comp.status ? comp.status.type.detail : statusType.detail;
       let extraInfo = buildExtraDetails(currentSport, comp, liveDetail, state);
@@ -128,15 +145,14 @@ async function updateScoreboardCards() {
       card.className = 'card glass';
       card.id = `card-${gameId}`;
 
-      let countdownHTML = '';
+      let startDisplay = '';
       if (state === 'pre') {
-        countdownHTML = `<div class="details-box">Starts in: <span class="countdown" id="cd-${gameId}">--:--:--</span></div>`;
-        setupCountdown(gameId, gameDate);
+        startDisplay = `<div class="details-box">Starts at <span class="start-time">${etTime} ET</span></div>`;
       }
 
       card.innerHTML = `
         <div class="card-header">
-          <span>${formattedDate} • ${formattedTime}</span>
+          <span>${etDate} • ${etTime} ET</span>
           <span class="${state === 'in' ? 'live-badge' : ''}">${state === 'in' ? '● LIVE' : statusType.shortDetail}</span>
         </div>
 
@@ -144,6 +160,7 @@ async function updateScoreboardCards() {
           <div class="team-info">
             <img class="team-logo" src="${away.team.logo || ''}" alt="">
             <span class="team-name">${away.team.abbreviation || away.team.displayName}</span>
+            <span class="team-record">${awayRecord}</span>
           </div>
           <span class="team-score">${away.score || '0'}</span>
         </div>
@@ -152,12 +169,13 @@ async function updateScoreboardCards() {
           <div class="team-info">
             <img class="team-logo" src="${home.team.logo || ''}" alt="">
             <span class="team-name">${home.team.abbreviation || home.team.displayName}</span>
+            <span class="team-record">${homeRecord}</span>
           </div>
           <span class="team-score">${home.score || '0'}</span>
         </div>
 
         ${extraInfo ? `<div class="details-box">${extraInfo}</div>` : ''}
-        ${countdownHTML}
+        ${startDisplay}
 
         <button class="alert-btn" id="btn-${gameId}" onclick="subscribeToAlerts('${gameId}')">ENABLE ALERTS</button>
       `;
@@ -204,30 +222,6 @@ function buildExtraDetails(sport, comp, detail, state) {
   return detail;
 }
 
-function setupCountdown(gameId, targetDate) {
-  const timer = setInterval(() => {
-    const now = new Date().getTime();
-    const diff = targetDate.getTime() - now;
-
-    const el = document.getElementById(`cd-${gameId}`);
-    if (!el) return;
-
-    if (diff <= 0) {
-      el.innerText = "Starting...";
-      clearInterval(timer);
-      return;
-    }
-
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    el.innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  }, 1000);
-
-  countdownIntervals.push(timer);
-}
-
 function startPolling() {
   if (fetchInterval) clearInterval(fetchInterval);
   updateScoreboardCards();
@@ -239,6 +233,5 @@ document.addEventListener("visibilitychange", () => {
     startPolling();
   } else {
     if (fetchInterval) clearInterval(fetchInterval);
-    clearCountdowns();
   }
 });
