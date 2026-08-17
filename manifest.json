@@ -1,16 +1,15 @@
 {
-  "short_name": "Sports Live",
-  "name": "ESPN Live Multi-Sport Center",
+  "short_name": "SportsAlerts",
+  "name": "Live Sports Score Alerts",
   "icons": [
     {
-      "src": "https://a.espncdn.com/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "sports-icon.png",
+      "type": "image/png",
+      "sizes": "192x192"
     }
   ],
-  "start_url": "./index.html",
-  "background_color": "#080c14",
-  "theme_color": "#0b101d",
-  "display": "standalone",
-  "orientation": "portrait"
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#0284c7",
+  "display": "standalone"
 }
