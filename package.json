@@ -1,9 +1,12 @@
 {
-  "name": "back4app-sports-alerts",
+  "name": "espn-alert-hub",
   "version": "1.0.0",
-  "description": "Multi-sport live ongoing score alert system using Back4App and QStash",
-  "main": "cloud/index.js",
+  "description": "Dynamic ESPN score monitoring PWA",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
-    "web-push": "^3.6.0"
+    "axios": "^1.6.0"
   }
 }
