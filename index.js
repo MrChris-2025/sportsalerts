@@ -49,12 +49,19 @@ async function pollEspnGameLogic(gameId) {
     if (!competition) return;
 
     const isCompleted = competition?.status?.type?.completed || false;
-    const homeTeam = competition?.competitors?.find(c => c.homeAway === 'home');
-    const awayTeam = competition?.competitors?.find(c => c.homeAway === 'away');
+    const competitors = competition?.competitors || [];
     
-    if (!homeTeam || !awayTeam) return;
+    if (competitors.length < 2) return;
 
-    const currentScore = `${awayTeam.team.abbreviation} ${awayTeam.score} - ${homeTeam.team.abbreviation} ${homeTeam.score}`;
+    const homeTeam = competitors.find(c => c.homeAway === 'home') || competitors[0];
+    const awayTeam = competitors.find(c => c.homeAway === 'away') || competitors[1];
+
+    const awayName = awayTeam.team?.abbreviation || awayTeam.team?.shortDisplayName || 'AWAY';
+    const homeName = homeTeam.team?.abbreviation || homeTeam.team?.shortDisplayName || 'HOME';
+    const awayScore = awayTeam.score ?? 0;
+    const homeScore = homeTeam.score ?? 0;
+
+    const currentScore = `${awayName} ${awayScore} - ${homeName} ${homeScore}`;
     const lastScore = monitorObj.get("lastScore");
 
     if (lastScore && currentScore !== lastScore) {
@@ -79,7 +86,7 @@ async function pollEspnGameLogic(gameId) {
 
     await monitorObj.save(null, { useMasterKey: true });
   } catch (error) {
-    console.error(`Error polling ESPN game ${gameId}:`, error.message);
+    console.error(`Error polling ESPN event ${gameId} (${sportPath}):`, error.message);
   }
 }
 
@@ -95,18 +102,32 @@ Parse.Cloud.define("startGameMonitor", async (request) => {
   if (!monitor) {
     monitor = new Monitor();
     monitor.set("gameId", String(gameId));
-    monitor.set("sportPath", sportPath || "baseball/mlb");
-    monitor.set("status", "in_progress");
-    monitor.set("lastScore", "");
-    await monitor.save(null, { useMasterKey: true });
   }
 
+  monitor.set("sportPath", sportPath || "baseball/mlb");
+  monitor.set("status", "in_progress");
+  if (!monitor.get("lastScore")) monitor.set("lastScore", "");
+  await monitor.save(null, { useMasterKey: true });
+
   await pollEspnGameLogic(gameId);
 
-  return { message: `Monitoring initialized for game ${gameId}` };
+  return { message: `Monitoring initialized for ${sportPath} game ${gameId}` };
 });
 
-Parse.Cloud.define("pollEspnGame", async (request) => {
-  const { gameId } = request.params;
-  await pollEspnGameLogic(gameId);
+Parse.Cloud.job("checkActiveGames", async (request) => {
+  const Monitor = Parse.Object.extend("GameMonitor");
+  const query = new Parse.Query(Monitor);
+  query.equalTo("status", "in_progress");
+
+  const activeGames = await query.find({ useMasterKey: true });
+
+  if (activeGames.length === 0) {
+    return "No active games to monitor.";
+  }
+
+  for (const game of activeGames) {
+    await pollEspnGameLogic(game.get("gameId"));
+  }
+
+  return `Polled ${activeGames.length} active game(s).`;
 });
