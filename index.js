@@ -1,6 +1,5 @@
 const axios = require('axios');
 
-// Registers Web Push installations server-side using Master Key
 Parse.Cloud.define("registerWebPushInstallation", async (request) => {
   const { installationId, subscription, gameId } = request.params;
 
@@ -66,7 +65,8 @@ async function pollEspnGameLogic(gameId) {
         data: {
           title: "Score Update 🏆",
           alert: currentScore,
-          badge: "Increment"
+          body: currentScore,
+          tag: `game_${gameId}`
         }
       }, { useMasterKey: true });
     } else if (!lastScore) {
