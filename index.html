@@ -223,15 +223,16 @@
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
 
-        // FIX: Use local installation object directly without running query.find()
-        const currentInstallation = await Parse.Installation.current();
-        currentInstallation.set("deviceType", "web");
-        currentInstallation.set("pushType", "web");
-        currentInstallation.set("deviceToken", subscription.endpoint);
-        currentInstallation.set("sub", JSON.stringify(subscription));
-        currentInstallation.addUnique("channels", `game_${gameId}`);
-        await currentInstallation.save();
+        const installationId = await Parse._getInstallationId();
 
+        // Register Web Push installation securely via Cloud Function using Master Key
+        await Parse.Cloud.run("registerWebPushInstallation", {
+          installationId: installationId,
+          subscription: JSON.stringify(subscription),
+          gameId: String(gameId)
+        });
+
+        // Trigger dynamic monitoring worker
         await Parse.Cloud.run("startGameMonitor", { gameId: String(gameId), sportPath: currentSportPath });
 
         btn.innerText = "Alerts Enabled";
