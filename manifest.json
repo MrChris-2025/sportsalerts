@@ -1,15 +1,8 @@
 {
-  "short_name": "ESPN Alerts",
-  "name": "ESPN Live Score Alerts",
-  "icons": [
-    {
-      "src": "sports-icon.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    }
-  ],
+  "short_name": "AlertHub",
+  "name": "ESPN Alert Hub",
   "start_url": "/",
-  "background_color": "#0f172a",
-  "theme_color": "#cc0000",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
   "display": "standalone"
 }
