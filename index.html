@@ -122,10 +122,13 @@
   </div>
 
   <script>
-    Parse.initialize("c8D2QRlTCLFPPfQlHrsQvtEP7AQQMZ9GBrazKLRB", "M6ztQZxk7rAiUDkQOJ92cpJsQYrdP24e3Q7eyPsG");
-    Parse.serverURL = "https://parseapi.back4app.com/";
-
+    // Config: Replace these placeholder values with your actual keys
+    const APP_ID = "c8D2QRlTCLFPPfQlHrsQvtEP7AQQMZ9GBrazKLRB";
+    const JS_KEY = "M6ztQZxk7rAiUDkQOJ92cpJsQYrdP24e3Q7eyPsG";
     const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E";
+
+    Parse.initialize(APP_ID, JS_KEY);
+    Parse.serverURL = "https://parseapi.back4app.com/";
 
     let currentSportPath = 'baseball/mlb';
 
@@ -192,6 +195,22 @@
 
     async function enableAlerts(gameId, btn) {
       btn.innerText = "Connecting...";
+
+      // Validation 1: Check for unreplaced placeholders
+      if (APP_ID.includes("YOUR_") || VAPID_PUBLIC_KEY.includes("YOUR_")) {
+        alert("Configuration Error: Please update APP_ID, JS_KEY, and VAPID_PUBLIC_KEY in index.html with your actual keys.");
+        btn.innerText = "Set API Keys";
+        return;
+      }
+
+      // Validation 2: Check standalone iPad PWA status
+      const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+      if (!isStandalone) {
+        alert("iPad Requirement: Web Push requires this app to be launched from your Home Screen.\n\nTap Share -> 'Add to Home Screen' and open the app from there.");
+        btn.innerText = "Add to Home Screen";
+        return;
+      }
+
       try {
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
@@ -200,6 +219,10 @@
         }
 
         const swReg = await navigator.serviceWorker.ready;
+        if (!swReg) {
+          throw new Error("Service Worker is not ready.");
+        }
+
         const subscription = await swReg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
@@ -223,13 +246,14 @@
         installObj.addUnique("channels", `game_${gameId}`);
         await installObj.save();
 
-        await Parse.Cloud.run("startGameMonitor", { gameId, sportPath: currentSportPath });
+        await Parse.Cloud.run("startGameMonitor", { gameId: String(gameId), sportPath: currentSportPath });
 
         btn.innerText = "Alerts Enabled";
         btn.classList.add("active");
       } catch (e) {
         console.error("Push activation error:", e);
         btn.innerText = "Error Enabling";
+        alert(`Error: ${e.message || e}`);
       }
     }
 
