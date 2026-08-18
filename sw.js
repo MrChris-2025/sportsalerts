@@ -1,11 +1,10 @@
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
   
-  const title = data.title || 'Score Update';
+  const title = data.title || 'ESPN Alert Hub';
   const options = {
-    body: data.alert || 'A score change occurred!',
-    icon: '/icon.png', // Add a 192x192 icon file to your root directory
-    badge: '/badge.png',
+    body: data.alert || 'New score update received.',
+    badge: data.badge || '',
     data: data
   };
 
