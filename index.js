@@ -1,5 +1,37 @@
 const axios = require('axios');
 
+// Registers Web Push installations server-side using Master Key
+Parse.Cloud.define("registerWebPushInstallation", async (request) => {
+  const { installationId, subscription, gameId } = request.params;
+
+  if (!installationId || !subscription) {
+    throw new Parse.Error(400, "Installation ID and subscription are required.");
+  }
+
+  const subObj = typeof subscription === 'string' ? JSON.parse(subscription) : subscription;
+
+  const Installation = Parse.Object.extend("_Installation");
+  const query = new Parse.Query(Installation);
+  query.equalTo("installationId", installationId);
+  
+  let installObj = await query.first({ useMasterKey: true });
+
+  if (!installObj) {
+    installObj = new Installation();
+    installObj.set("installationId", installationId);
+    installObj.set("deviceType", "web");
+  }
+
+  installObj.set("pushType", "web");
+  installObj.set("deviceToken", subObj.endpoint);
+  installObj.set("sub", JSON.stringify(subObj));
+  installObj.addUnique("channels", `game_${gameId}`);
+
+  await installObj.save(null, { useMasterKey: true });
+
+  return { success: true };
+});
+
 async function pollEspnGameLogic(gameId) {
   const Monitor = Parse.Object.extend("GameMonitor");
   const query = new Parse.Query(Monitor);
