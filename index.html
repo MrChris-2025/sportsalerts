@@ -122,7 +122,6 @@
   </div>
 
   <script>
-    // Config: Replace these placeholder values with your actual keys
     const APP_ID = "c8D2QRlTCLFPPfQlHrsQvtEP7AQQMZ9GBrazKLRB";
     const JS_KEY = "M6ztQZxk7rAiUDkQOJ92cpJsQYrdP24e3Q7eyPsG";
     const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E";
@@ -196,17 +195,15 @@
     async function enableAlerts(gameId, btn) {
       btn.innerText = "Connecting...";
 
-      // Validation 1: Check for unreplaced placeholders
       if (APP_ID.includes("YOUR_") || VAPID_PUBLIC_KEY.includes("YOUR_")) {
-        alert("Configuration Error: Please update APP_ID, JS_KEY, and VAPID_PUBLIC_KEY in index.html with your actual keys.");
+        alert("Configuration Error: Update APP_ID, JS_KEY, and VAPID_PUBLIC_KEY in index.html.");
         btn.innerText = "Set API Keys";
         return;
       }
 
-      // Validation 2: Check standalone iPad PWA status
       const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
       if (!isStandalone) {
-        alert("iPad Requirement: Web Push requires this app to be launched from your Home Screen.\n\nTap Share -> 'Add to Home Screen' and open the app from there.");
+        alert("iPad Requirement: Web Push requires launching from your Home Screen.\n\nTap Share -> 'Add to Home Screen' and open the app from there.");
         btn.innerText = "Add to Home Screen";
         return;
       }
@@ -219,32 +216,21 @@
         }
 
         const swReg = await navigator.serviceWorker.ready;
-        if (!swReg) {
-          throw new Error("Service Worker is not ready.");
-        }
+        if (!swReg) throw new Error("Service Worker is not ready.");
 
         const subscription = await swReg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
 
-        const installationId = await Parse._getInstallationId();
-        const Installation = Parse.Object.extend("_Installation");
-        const query = new Parse.Query(Installation);
-        query.equalTo("installationId", installationId);
-        
-        let installObj = await query.first();
-        if (!installObj) {
-          installObj = new Installation();
-          installObj.set("installationId", installationId);
-          installObj.set("deviceType", "web");
-        }
-        
-        installObj.set("pushType", "web");
-        installObj.set("deviceToken", subscription.endpoint);
-        installObj.set("sub", JSON.stringify(subscription));
-        installObj.addUnique("channels", `game_${gameId}`);
-        await installObj.save();
+        // FIX: Use local installation object directly without running query.find()
+        const currentInstallation = await Parse.Installation.current();
+        currentInstallation.set("deviceType", "web");
+        currentInstallation.set("pushType", "web");
+        currentInstallation.set("deviceToken", subscription.endpoint);
+        currentInstallation.set("sub", JSON.stringify(subscription));
+        currentInstallation.addUnique("channels", `game_${gameId}`);
+        await currentInstallation.save();
 
         await Parse.Cloud.run("startGameMonitor", { gameId: String(gameId), sportPath: currentSportPath });
 
