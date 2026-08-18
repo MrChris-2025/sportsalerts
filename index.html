@@ -3,48 +3,255 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ESPN ScoreCenter</title>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <title>ESPN Alert Hub</title>
   <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0f141d;
+      --panel-dark: #171e2b;
+      --card-bg: #1e2638;
+      --accent-red: #e51b24;
+      --text-main: #ffffff;
+      --text-sub: #8d9bb0;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 180px;
+      background-color: var(--panel-dark);
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .brand {
+      font-weight: 800;
+      font-size: 16px;
+      padding: 0 20px 20px;
+      letter-spacing: 1px;
+    }
+    .brand span { color: var(--accent-red); }
+    .league-btn {
+      padding: 14px 20px;
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .league-btn.active, .league-btn:hover {
+      color: var(--text-main);
+      background-color: rgba(229, 27, 36, 0.15);
+      border-left: 4px solid var(--accent-red);
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    /* Game Card Component */
+    .game-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .game-time {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-bottom: 12px;
+    }
+    .team-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .team-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .team-logo { width: 28px; height: 28px; }
+    .team-name { font-weight: 700; font-size: 16px; }
+    .team-record { font-size: 12px; color: var(--text-sub); margin-left: 6px; }
+    .score { font-weight: 800; font-size: 18px; }
+
+    /* Action Buttons */
+    .enable-btn {
+      background-color: var(--accent-red);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 12px;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .enable-btn.active {
+      background-color: #28a745;
+    }
+  </style>
 </head>
 <body>
-  <header class="top-nav glass">
-    <div class="brand">
-      <span class="espn-red">ESPN</span>
-      <span class="brand-sub">ALERT HUB</span>
-    </div>
-    <div class="nav-center">
-      <input type="date" id="gameDatePicker" class="glass-input" onchange="onDateOrLeagueChange()">
-    </div>
-    <div class="clock-display" id="clock">12:00 PM ET</div>
-  </header>
 
-  <div class="app-layout">
-    <aside class="sidebar glass">
-      <div class="sidebar-title">LEAGUES</div>
-      <nav class="league-menu">
-        <button class="league-btn" data-sport="basketball" data-league="nba" onclick="selectLeague(this)">NBA</button>
-        <button class="league-btn" data-sport="basketball" data-league="mens-college-basketball" onclick="selectLeague(this)">NCAAB</button>
-        <button class="league-btn" data-sport="football" data-league="nfl" onclick="selectLeague(this)">NFL</button>
-        <button class="league-btn" data-sport="football" data-league="college-football" onclick="selectLeague(this)">NCAAF</button>
-        <button class="league-btn active" data-sport="baseball" data-league="mlb" onclick="selectLeague(this)">MLB</button>
-        <button class="league-btn" data-sport="hockey" data-league="nhl" onclick="selectLeague(this)">NHL</button>
-        <button class="league-btn" data-sport="soccer" data-league="eng.1" onclick="selectLeague(this)">EPL</button>
-        <button class="league-btn" data-sport="soccer" data-league="usa.1" onclick="selectLeague(this)">MLS</button>
-        <button class="league-btn" data-sport="soccer" data-league="uefa.champions" onclick="selectLeague(this)">UCL</button>
-      </nav>
-    </aside>
-
-    <main class="main-content">
-      <div id="scoreboard" class="grid"></div>
-    </main>
+  <div class="sidebar">
+    <div class="brand"><span>ESPN</span> ALERT HUB</div>
+    <button class="league-btn active" onclick="switchLeague('mlb', 'baseball')">MLB</button>
+    <button class="league-btn" onclick="switchLeague('nba', 'basketball')">NBA</button>
+    <button class="league-btn" onclick="switchLeague('nfl', 'football')">NFL</button>
+    <button class="league-btn" onclick="switchLeague('nhl', 'hockey')">NHL</button>
   </div>
-<button onclick="setDiscordWebhook()">Set Discord Webhook</button>
 
-  <script src="app.js"></script>
+  <div class="main-content">
+    <div id="gameGrid" class="grid">
+      <!-- Cards render dynamically here -->
+    </div>
+  </div>
+
+  <script>
+    // Initialize Back4app
+    Parse.initialize("YOUR_BACK4APP_APP_ID", "YOUR_BACK4APP_JS_KEY");
+    Parse.serverURL = "https://parseapi.back4app.com/";
+
+    let currentLeague = 'mlb';
+    let currentSport = 'baseball';
+
+    // Map of ESPN endpoints by sport/league
+    const endpoints = {
+      mlb: 'baseball/mlb',
+      nba: 'basketball/nba',
+      nfl: 'football/nfl',
+      nhl: 'hockey/nhl'
+    };
+
+    async function loadScoreboard() {
+      const grid = document.getElementById('gameGrid');
+      grid.innerHTML = '<p style="color:var(--text-sub)">Loading active games...</p>';
+
+      try {
+        const path = endpoints[currentLeague];
+        const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${path}/scoreboard`);
+        const data = await res.json();
+        
+        grid.innerHTML = ''; // Clear loading
+
+        if (!data.events || data.events.length === 0) {
+          grid.innerHTML = '<p style="color:var(--text-sub)">No games scheduled today.</p>';
+          return;
+        }
+
+        data.events.forEach(event => {
+          const competition = event.competitions[0];
+          const home = competition.competitors.find(c => c.homeAway === 'home');
+          const away = competition.competitors.find(c => c.homeAway === 'away');
+
+          const card = document.createElement('div');
+          card.className = 'game-card';
+          card.innerHTML = `
+            <div>
+              <div class="game-time">${event.status.type.shortDetail || event.date}</div>
+              <div class="team-row">
+                <div class="team-info">
+                  <img class="team-logo" src="${away.team.logo || ''}" alt="">
+                  <span class="team-name">${away.team.abbreviation}</span>
+                  <span class="team-record">(${away.records?.[0]?.summary || '0-0'})</span>
+                </div>
+                <div class="score">${away.score || 0}</div>
+              </div>
+              <div class="team-row">
+                <div class="team-info">
+                  <img class="team-logo" src="${home.team.logo || ''}" alt="">
+                  <span class="team-name">${home.team.abbreviation}</span>
+                  <span class="team-record">(${home.records?.[0]?.summary || '0-0'})</span>
+                </div>
+                <div class="score">${home.score || 0}</div>
+              </div>
+            </div>
+            <button class="enable-btn" onclick="enableAlerts('${event.id}', this)">Enable Alerts</button>
+          `;
+          grid.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = '<p style="color:var(--accent-red)">Failed to load scoreboard.</p>';
+      }
+    }
+
+    async function enableAlerts(gameId, buttonEl) {
+      buttonEl.innerText = "Connecting...";
+      try {
+        // Request Web Push permissions if needed
+        if ("Notification" in window && Notification.permission !== "granted") {
+          await Notification.requestPermission();
+        }
+
+        // Register channel on Back4app
+        const installationId = await Parse._getInstallationId();
+        const Installation = Parse.Object.extend("_Installation");
+        const query = new Parse.Query(Installation);
+        query.equalTo("installationId", installationId);
+        
+        let installObj = await query.first();
+        if (!installObj) {
+          installObj = new Installation();
+          installObj.set("installationId", installationId);
+          installObj.set("deviceType", "web");
+        }
+        
+        installObj.addUnique("channels", `game_${gameId}`);
+        await installObj.save();
+
+        // Trigger dynamic short-lived monitor
+        await Parse.Cloud.run("startGameMonitor", { gameId: gameId });
+
+        buttonEl.innerText = "Alerts Enabled";
+        buttonEl.classList.add("active");
+      } catch (e) {
+        console.error(e);
+        buttonEl.innerText = "Error Enabling";
+      }
+    }
+
+    function switchLeague(league, sport) {
+      currentLeague = league;
+      currentSport = sport;
+      
+      document.querySelectorAll('.league-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      loadScoreboard();
+    }
+
+    // Initial load
+    loadScoreboard();
+  </script>
 </body>
 </html>
