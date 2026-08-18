@@ -29,28 +29,30 @@
     }
 
     .sidebar {
-      width: 180px;
+      width: 200px;
       background-color: var(--panel-dark);
       padding: 20px 0;
       display: flex;
       flex-direction: column;
       border-right: 1px solid rgba(255, 255, 255, 0.05);
+      overflow-y: auto;
     }
     .brand {
       font-weight: 800;
       font-size: 15px;
-      padding: 0 20px 20px;
+      padding: 0 20px 16px;
       letter-spacing: 0.5px;
     }
     .brand span { color: var(--accent-red); }
     .league-btn {
-      padding: 12px 20px;
+      padding: 10px 20px;
       background: none;
       border: none;
       color: var(--text-sub);
       font-weight: 700;
       text-align: left;
       cursor: pointer;
+      font-size: 13px;
     }
     .league-btn.active, .league-btn:hover {
       color: var(--text-main);
@@ -86,7 +88,7 @@
       margin-bottom: 8px;
     }
     .team-info { display: flex; align-items: center; gap: 8px; }
-    .team-logo { width: 24px; height: 24px; }
+    .team-logo { width: 24px; height: 24px; object-fit: contain; }
     .team-name { font-weight: 700; font-size: 15px; }
     .team-record { font-size: 12px; color: var(--text-sub); }
     .score { font-weight: 800; font-size: 16px; }
@@ -110,11 +112,18 @@
 
   <div class="sidebar">
     <div class="brand"><span>ESPN</span> ALERT HUB</div>
-    <button class="league-btn active" onclick="switchLeague('mlb', 'baseball/mlb', this)">MLB</button>
-    <button class="league-btn" onclick="switchLeague('nba', 'basketball/nba', this)">NBA</button>
-    <button class="league-btn" onclick="switchLeague('nfl', 'football/nfl', this)">NFL</button>
-    <button class="league-btn" onclick="switchLeague('nhl', 'hockey/nhl', this)">NHL</button>
-    <button class="league-btn" onclick="switchLeague('epl', 'soccer/eng.1', this)">EPL</button>
+    <button class="league-btn active" onclick="switchLeague('baseball/mlb', this)">MLB</button>
+    <button class="league-btn" onclick="switchLeague('basketball/nba', this)">NBA</button>
+    <button class="league-btn" onclick="switchLeague('basketball/wnba', this)">WNBA</button>
+    <button class="league-btn" onclick="switchLeague('basketball/mens-college-basketball', this)">NCAAM</button>
+    <button class="league-btn" onclick="switchLeague('football/nfl', this)">NFL</button>
+    <button class="league-btn" onclick="switchLeague('football/college-football', this)">NCAAF</button>
+    <button class="league-btn" onclick="switchLeague('hockey/nhl', this)">NHL</button>
+    <button class="league-btn" onclick="switchLeague('soccer/eng.1', this)">EPL</button>
+    <button class="league-btn" onclick="switchLeague('soccer/usa.1', this)">MLS</button>
+    <button class="league-btn" onclick="switchLeague('soccer/uefa.champions', this)">UCL</button>
+    <button class="league-btn" onclick="switchLeague('mma/ufc', this)">UFC</button>
+    <button class="league-btn" onclick="switchLeague('racing/f1', this)">F1</button>
   </div>
 
   <div class="main-content">
@@ -144,7 +153,7 @@
 
     async function loadScoreboard() {
       const grid = document.getElementById('gameGrid');
-      grid.innerHTML = '<p style="color:var(--text-sub)">Loading active games...</p>';
+      grid.innerHTML = '<p style="color:var(--text-sub)">Loading active events...</p>';
 
       try {
         const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${currentSportPath}/scoreboard`);
@@ -152,35 +161,41 @@
         grid.innerHTML = '';
 
         if (!data.events || data.events.length === 0) {
-          grid.innerHTML = '<p style="color:var(--text-sub)">No games scheduled today.</p>';
+          grid.innerHTML = '<p style="color:var(--text-sub)">No scheduled events found today for this sport.</p>';
           return;
         }
 
         data.events.forEach(event => {
-          const comp = event.competitions[0];
-          const home = comp.competitors.find(c => c.homeAway === 'home');
-          const away = comp.competitors.find(c => c.homeAway === 'away');
+          const comp = event.competitions?.[0];
+          if (!comp || !comp.competitors) return;
+
+          const competitors = comp.competitors;
+          const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
+          const away = competitors.find(c => c.homeAway === 'away') || competitors[1] || competitors[0];
+
+          const awayName = away.team?.abbreviation || away.team?.shortDisplayName || away.athlete?.displayName || 'AWAY';
+          const homeName = home.team?.abbreviation || home.team?.shortDisplayName || home.athlete?.displayName || 'HOME';
 
           const card = document.createElement('div');
           card.className = 'game-card';
           card.innerHTML = `
             <div>
-              <div class="game-time">${event.status.type.shortDetail || event.date}</div>
+              <div class="game-time">${event.status?.type?.shortDetail || event.date}</div>
               <div class="team-row">
                 <div class="team-info">
-                  <img class="team-logo" src="${away.team.logo || ''}" alt="">
-                  <span class="team-name">${away.team.abbreviation}</span>
+                  <img class="team-logo" src="${away.team?.logo || away.athlete?.headshot || ''}" alt="">
+                  <span class="team-name">${awayName}</span>
                   <span class="team-record">(${away.records?.[0]?.summary || '0-0'})</span>
                 </div>
-                <div class="score">${away.score || 0}</div>
+                <div class="score">${away.score ?? 0}</div>
               </div>
               <div class="team-row">
                 <div class="team-info">
-                  <img class="team-logo" src="${home.team.logo || ''}" alt="">
-                  <span class="team-name">${home.team.abbreviation}</span>
+                  <img class="team-logo" src="${home.team?.logo || home.athlete?.headshot || ''}" alt="">
+                  <span class="team-name">${homeName}</span>
                   <span class="team-record">(${home.records?.[0]?.summary || '0-0'})</span>
                 </div>
-                <div class="score">${home.score || 0}</div>
+                <div class="score">${home.score ?? 0}</div>
               </div>
             </div>
             <button class="enable-btn" onclick="enableAlerts('${event.id}', this)">Enable Alerts</button>
@@ -225,15 +240,16 @@
 
         const installationId = await Parse._getInstallationId();
 
-        // Register Web Push installation securely via Cloud Function using Master Key
         await Parse.Cloud.run("registerWebPushInstallation", {
           installationId: installationId,
           subscription: JSON.stringify(subscription),
           gameId: String(gameId)
         });
 
-        // Trigger dynamic monitoring worker
-        await Parse.Cloud.run("startGameMonitor", { gameId: String(gameId), sportPath: currentSportPath });
+        await Parse.Cloud.run("startGameMonitor", { 
+          gameId: String(gameId), 
+          sportPath: currentSportPath 
+        });
 
         btn.innerText = "Alerts Enabled";
         btn.classList.add("active");
@@ -244,7 +260,7 @@
       }
     }
 
-    function switchLeague(league, path, btn) {
+    function switchLeague(path, btn) {
       currentSportPath = path;
       document.querySelectorAll('.league-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
