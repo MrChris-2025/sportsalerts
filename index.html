@@ -3,16 +3,94 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ESPN Score Alerts</title>
+  <title>ESPN Live Games & Alerts</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+      background-color: #f4f4f9;
+      color: #1a1a1a;
+    }
+    h2 { text-align: center; margin-bottom: 0.5rem; }
+    p.subtitle { text-align: center; color: #666; font-size: 14px; margin-bottom: 1.5rem; }
+    .game-card {
+      background: white;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .game-info { font-weight: 600; font-size: 15px; }
+    .game-status { font-size: 12px; color: #888; font-weight: normal; margin-top: 4px; }
+    input[type="checkbox"] { width: 20px; height: 20px; accent-color: #007aff; }
+    button {
+      width: 100%;
+      background-color: #007aff;
+      color: white;
+      border: none;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:active { opacity: 0.85; }
+  </style>
 </head>
-<body style="font-family: system-ui; text-align: center; padding: 3rem 1rem;">
-  <h2>Live Sports Push Alerts</h2>
-  <button id="enable-btn" style="padding: 16px 32px; font-size: 18px; border-radius: 8px; background: #007aff; color: white; border: none;">Enable Score Notifications</button>
+<body>
+
+  <h2>Scheduled ESPN Games</h2>
+  <p class="subtitle">Select matches to receive live push alerts on your iPad</p>
+
+  <div id="games-container">Loading ESPN schedule...</div>
+
+  <button id="subscribe-btn">Save Preferences & Enable Push</button>
 
   <script>
     const VAPID_PUBLIC_KEY = 'BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E';
     const PARSE_APP_ID = 'd1eje7SvxRjIFsdB6c3TuQLlF8v6zExAMBzChgXa';
     const PARSE_JS_KEY = 'eQqLLilvkNhy04m0OF5J4ry17vw0FKeeEHfPT2mq';
+
+    // Load active schedule directly from ESPN on page load
+    async function loadSchedule() {
+      const container = document.getElementById('games-container');
+      try {
+        const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard');
+        const data = await res.json();
+        
+        if (!data.events || data.events.length === 0) {
+          container.innerHTML = '<p style="text-align:center;">No games scheduled today.</p>';
+          return;
+        }
+
+        container.innerHTML = '';
+        data.events.forEach(event => {
+          const comp = event.competitions[0];
+          const home = comp.competitors.find(c => c.homeAway === 'home').team.displayName;
+          const away = comp.competitors.find(c => c.homeAway === 'away').team.displayName;
+          const status = event.status.type.detail;
+
+          const card = document.createElement('div');
+          card.className = 'game-card';
+          card.innerHTML = `
+            <div>
+              <div class="game-info">${away} @ ${home}</div>
+              <div class="game-status">${status}</div>
+            </div>
+            <input type="checkbox" class="game-checkbox" value="${event.id}">
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        container.innerHTML = '<p style="text-align:center; color:red;">Failed to load ESPN schedule.</p>';
+      }
+    }
 
     function urlBase64ToUint8Array(base64String) {
       const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -25,36 +103,51 @@
       return outputArray;
     }
 
-    document.getElementById('enable-btn').addEventListener('click', async () => {
+    document.getElementById('subscribe-btn').addEventListener('click', async () => {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        alert('Push notifications require installing this page to your Home Screen first!');
+        alert('Please launch this app from your iPad Home Screen to enable push alerts.');
         return;
       }
+
+      const selectedGames = Array.from(document.querySelectorAll('.game-checkbox:checked')).map(cb => cb.value);
 
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
-        alert('Notification permission was denied in iPad settings.');
+        alert('Notification permission was blocked.');
         return;
       }
 
-      const reg = await navigator.serviceWorker.register('./sw.js');
-      const subscription = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
+      try {
+        const reg = await navigator.serviceWorker.register('./sw.js');
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
 
-      await fetch('https://parseapi.back4app.com/functions/saveSubscription', {
-        method: 'POST',
-        headers: {
-          'X-Parse-Application-Id': PARSE_APP_ID,
-          'X-Parse-JavaScript-Key': PARSE_JS_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ subscription: subscription.toJSON() })
-      });
+        const res = await fetch('https://parseapi.back4app.com/functions/saveSubscription', {
+          method: 'POST',
+          headers: {
+            'X-Parse-Application-Id': PARSE_APP_ID,
+            'X-Parse-JavaScript-Key': PARSE_JS_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            subscription: subscription.toJSON(),
+            gameIds: selectedGames 
+          })
+        });
 
-      alert('SUCCESS! Your iPad is registered to receive score alerts.');
+        if (res.ok) {
+          alert('Success! Subscribed to score alerts for selected games.');
+        } else {
+          alert('Failed to save preferences to Back4App.');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
     });
+
+    loadSchedule();
   </script>
 </body>
 </html>
