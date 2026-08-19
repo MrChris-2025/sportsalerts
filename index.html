@@ -367,7 +367,7 @@
       const btn = cardEl.querySelector('.alert-toggle-btn');
       const isSubbed = selectedGameIds.has(String(gameId));
       btn.className = `alert-toggle-btn ${isSubbed ? 'active' : ''}`;
-      btn.innerText = isSubbed ? '🔔 Alert On' : '🔕 Alert Off';
+      btn.innerText = isSubbed ? 'Alert On' : 'Alert Off';
 
       if (masterEnabled) {
         syncSubscriptionWithServer();
