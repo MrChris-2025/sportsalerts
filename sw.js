@@ -1,15 +1,13 @@
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Live Score Update';
-  
+
+  const title = data.title || 'ESPN Score Update';
   const options = {
-    body: data.body || 'Game update available.',
-    icon: '/icon-192.png',
-    tag: data.gameId ? `game-${data.gameId}` : 'general-alert',
-    renotify: data.renotify !== undefined ? data.renotify : false,
-    data: {
-      url: data.url || '/'
-    }
+    body: data.body || 'New game action recorded!',
+    icon: '/icon.png',
+    badge: '/badge.png',
+    vibrate: [200, 100, 200],
+    data: { url: data.data?.url || '/' }
   };
 
   event.waitUntil(
@@ -20,6 +18,6 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
-    clients.openWindow(event.notification.data.url)
+    clients.openWindow(event.notification.data.url || '/')
   );
 });
