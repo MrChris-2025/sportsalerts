@@ -1,20 +1,22 @@
 {
-  "name": "Live Sports Score Tracker",
-  "short_name": "SportsPush",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "short_name": "ESPN Alerts",
+  "name": "ESPN Sports Score Alerts",
   "icons": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "https://a.espncdn.com/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
     },
     {
-      "src": "icon-512.png",
+      "src": "https://a.espncdn.com/i/espn/espn_logos/espn_red.png",
+      "type": "image/png",
       "sizes": "512x512",
-      "type": "image/png"
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "start_url": "./index.html",
+  "background_color": "#f4f4f9",
+  "theme_color": "#007aff",
+  "display": "standalone",
+  "orientation": "portrait"
 }
