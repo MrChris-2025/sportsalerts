@@ -117,8 +117,13 @@
       mma: 'https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard'
     };
 
-    // Global set preserves selected game IDs across tab changes
-    const selectedGameIds = new Set();
+    // Load saved game IDs from LocalStorage on launch
+    const savedGames = JSON.parse(localStorage.getItem('selectedGameIds') || '[]');
+    const selectedGameIds = new Set(savedGames);
+
+    function saveStateToLocalStorage() {
+      localStorage.setItem('selectedGameIds', JSON.stringify(Array.from(selectedGameIds)));
+    }
 
     function switchCategory(category, element) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -132,6 +137,7 @@
       } else {
         selectedGameIds.delete(String(gameId));
       }
+      saveStateToLocalStorage();
     }
 
     async function loadSchedule(category) {
@@ -211,7 +217,7 @@
 
         const gameArray = Array.from(selectedGameIds);
 
-        const res = await fetch('https://parseapi.back4app.com/functions/saveSubscription', {
+        const res = await fetch('https://parseapi.back4app.com/parse/functions/saveSubscription', {
           method: 'POST',
           headers: {
             'X-Parse-Application-Id': PARSE_APP_ID,
@@ -224,10 +230,9 @@
           })
         });
 
-        const resData = await res.json();
-
         if (res.ok) {
-          alert(`Success! Saved ${gameArray.length} game preferences to Back4App.`);
+          saveStateToLocalStorage();
+          alert(`Success! Saved ${gameArray.length} game preferences.`);
         } else {
           alert('Failed to save choices to Back4App.');
         }
