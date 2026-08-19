@@ -3,56 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Sports Tracker</title>
-  <link rel="manifest" href="./manifest.json">
-  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
-  <style>
-    body { background-color: #0f172a; color: #fff; font-family: system-ui, sans-serif; padding: 16px; margin: 0; }
-    .card { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; margin-bottom: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-    .header { display: flex; justify-content: space-between; align-items: center; }
-    
-    .controls { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-    select, input[type="date"] { background: #1e293b; color: white; border: 1px solid #334155; padding: 10px 14px; border-radius: 8px; font-size: 14px; outline: none; }
-    
-    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px; }
-    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-    input:checked + .slider { background-color: #3b82f6; }
-    input:checked + .slider:before { transform: translateX(20px); }
-
-    .game-meta { font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
-    .teams-row { display: flex; flex-direction: column; gap: 6px; font-size: 16px; }
-    .team { display: flex; justify-content: space-between; }
-  </style>
+  <title>ESPN Score Alerts</title>
 </head>
-<body>
-  <div class="card header">
-    <div>
-      <h2 style="margin:0; font-size: 18px;">Main Push Alerts</h2>
-      <span style="font-size: 12px; color: #94a3b8;">Enable background notifications</span>
-    </div>
-    <label class="switch">
-      <input type="checkbox" id="main-push-toggle">
-      <span class="slider"></span>
-    </label>
-  </div>
+<body style="font-family: sans-serif; text-align: center; padding: 2rem;">
+  <h2>Live Sports Push Alerts</h2>
+  <button id="enable-btn" style="padding: 12px 24px; font-size: 16px;">Enable Score Notifications</button>
 
-  <div class="controls">
-    <select id="league-select">
-      <option value="basketball/nba">NBA Basketball</option>
-      <option value="football/nfl">NFL Football</option>
-      <option value="baseball/mlb">MLB Baseball</option>
-      <option value="hockey/nhl">NHL Hockey</option>
-      <option value="soccer/eng.1">English Premier League</option>
-      <option value="football/mens-college-football">NCAA College Football</option>
-      <option value="basketball/mens-college-basketball">NCAA College Basketball</option>
-    </select>
-    <input type="date" id="date-picker">
-  </div>
+  <script>
+    const VAPID_PUBLIC_KEY = 'BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E';
+    const PARSE_APP_ID = 'd1eje7SvxRjIFsdB6c3TuQLlF8v6zExAMBzChgXa';
+    const PARSE_JS_KEY = 'eQqLLilvkNhy04m0OF5J4ry17vw0FKeeEHfPT2mq';
 
-  <div id="games-container">Loading schedule...</div>
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
 
-  <script type="module" src="./index.js"></script>
+    document.getElementById('enable-btn').addEventListener('click', async () => {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        alert('Push notifications are not supported on this device/browser.');
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        alert('Notification permission denied.');
+        return;
+      }
+
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+
+      // Send subscription object to Back4App
+      await fetch('https://parseapi.back4app.com/functions/saveSubscription', {
+        method: 'POST',
+        headers: {
+          'X-Parse-Application-Id': PARSE_APP_ID,
+          'X-Parse-JavaScript-Key': PARSE_JS_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscription: subscription.toJSON() })
+      });
+
+      alert('Successfully subscribed to live ESPN updates!');
+    });
+  </script>
 </body>
 </html>
