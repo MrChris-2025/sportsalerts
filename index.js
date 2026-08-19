@@ -1,4 +1,3 @@
-// Initialize Back4App SDK
 Parse.initialize("d1eje7SvxRjIFsdB6c3TuQLlF8v6zExAMBzChgXa", "eQqLLilvkNhy04m0OF5J4ry17vw0FKeeEHfPT2mq");
 Parse.serverURL = "https://parseapi.back4app.com/";
 
@@ -6,7 +5,6 @@ const VAPID_PUBLIC_KEY = "BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-
 
 let currentSubscription = null;
 
-// Base64 helper for VAPID conversion
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -18,13 +16,10 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-// App Initialization
 document.addEventListener('DOMContentLoaded', async () => {
   await setupServiceWorker();
   setupUIEventListeners();
   loadLiveScores();
-  
-  // High-frequency live polling for open UI (Every 30 seconds)
   setInterval(loadLiveScores, 30000);
 });
 
@@ -65,7 +60,7 @@ async function subscribeUserToPush() {
     await saveSubscriptionToBack4App(sub);
     updateMainToggleUI(true);
   } catch (err) {
-    console.error('Failed to subscribe to push notifications:', err);
+    console.error('Failed to subscribe:', err);
     updateMainToggleUI(false);
   }
 }
@@ -109,7 +104,6 @@ function updateMainToggleUI(isEnabled) {
   if (mainToggle) mainToggle.checked = isEnabled;
 }
 
-// Fetch Live Scores directly from ESPN
 async function loadLiveScores() {
   try {
     const res = await fetch("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard");
@@ -124,7 +118,6 @@ async function renderGames(events) {
   const container = document.getElementById('games-container');
   if (!container) return;
   
-  // Get active user subscriptions for game toggles
   const activeGameSubs = await getActiveGameSubscriptions();
 
   container.innerHTML = events.map(event => {
@@ -134,17 +127,17 @@ async function renderGames(events) {
     const isSubscribed = activeGameSubs.includes(event.id);
 
     return `
-      <div class="game-card" data-game-id="${event.id}">
-        <div class="game-header">
+      <div class="card" data-game-id="${event.id}">
+        <div class="header">
           <span>${event.status.type.detail}</span>
           <label class="switch">
             <input type="checkbox" class="game-toggle" data-game-id="${event.id}" ${isSubscribed ? 'checked' : ''}>
             <span class="slider"></span>
           </label>
         </div>
-        <div class="teams">
-          <div class="team">${away.team.shortDisplayName}: <strong>${away.score}</strong></div>
-          <div class="team">${home.team.shortDisplayName}: <strong>${home.score}</strong></div>
+        <div>
+          <div>${away.team.shortDisplayName}: <strong>${away.score}</strong></div>
+          <div>${home.team.shortDisplayName}: <strong>${home.score}</strong></div>
         </div>
       </div>
     `;
