@@ -17,9 +17,16 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Set default date to today in YYYY-MM-DD
+  const datePicker = document.getElementById('date-picker');
+  const today = new Date().toISOString().split('T')[0];
+  datePicker.value = today;
+
   await setupServiceWorker();
   setupUIEventListeners();
   loadLiveScores();
+  
+  // Poll active schedule every 30 seconds
   setInterval(loadLiveScores, 30000);
 });
 
@@ -46,6 +53,9 @@ function setupUIEventListeners() {
       }
     });
   }
+
+  document.getElementById('league-select').addEventListener('change', loadLiveScores);
+  document.getElementById('date-picker').addEventListener('change', loadLiveScores);
 }
 
 async function subscribeUserToPush() {
@@ -105,18 +115,28 @@ function updateMainToggleUI(isEnabled) {
 }
 
 async function loadLiveScores() {
+  const leaguePath = document.getElementById('league-select').value;
+  const rawDate = document.getElementById('date-picker').value.replace(/-/g, ''); // Convert YYYY-MM-DD to YYYYMMDD
+  const container = document.getElementById('games-container');
+  
   try {
-    const res = await fetch("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard");
+    const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${leaguePath}/scoreboard?dates=${rawDate}`);
     const data = await res.json();
     renderGames(data.events || []);
   } catch (err) {
     console.error('Error fetching ESPN scores:', err);
+    container.innerHTML = `<div class="card">Failed to load schedule for selected date.</div>`;
   }
 }
 
 async function renderGames(events) {
   const container = document.getElementById('games-container');
   if (!container) return;
+
+  if (events.length === 0) {
+    container.innerHTML = `<div class="card">No games scheduled for this date.</div>`;
+    return;
+  }
   
   const activeGameSubs = await getActiveGameSubscriptions();
 
@@ -125,19 +145,26 @@ async function renderGames(events) {
     const home = competition.competitors.find(c => c.homeAway === 'home');
     const away = competition.competitors.find(c => c.homeAway === 'away');
     const isSubscribed = activeGameSubs.includes(event.id);
+    const statusText = event.status.type.detail || 'Scheduled';
 
     return `
       <div class="card" data-game-id="${event.id}">
         <div class="header">
-          <span>${event.status.type.detail}</span>
+          <span class="game-meta">${statusText}</span>
           <label class="switch">
             <input type="checkbox" class="game-toggle" data-game-id="${event.id}" ${isSubscribed ? 'checked' : ''}>
             <span class="slider"></span>
           </label>
         </div>
-        <div>
-          <div>${away.team.shortDisplayName}: <strong>${away.score}</strong></div>
-          <div>${home.team.shortDisplayName}: <strong>${home.score}</strong></div>
+        <div class="teams-row">
+          <div class="team">
+            <span>${away.team.displayName}</span>
+            <strong>${away.score !== undefined ? away.score : '-'}</strong>
+          </div>
+          <div class="team">
+            <span>${home.team.displayName}</span>
+            <strong>${home.score !== undefined ? home.score : '-'}</strong>
+          </div>
         </div>
       </div>
     `;
@@ -151,9 +178,10 @@ async function renderGames(events) {
 async function handleGameToggleChange(e) {
   const gameId = e.target.dataset.gameId;
   const isChecked = e.target.checked;
-  
+  const [sport, league] = document.getElementById('league-select').value.split('/');
+
   if (!currentSubscription) {
-    alert("Please enable Main PWA Push Notifications first.");
+    alert("Please enable Main Push Alerts first.");
     e.target.checked = false;
     return;
   }
@@ -162,8 +190,8 @@ async function handleGameToggleChange(e) {
     endpoint: currentSubscription.endpoint,
     gameId: gameId,
     enabled: isChecked,
-    sport: "basketball",
-    league: "nba"
+    sport: sport,
+    league: league
   });
 }
 
