@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ESPN Multi-Sport Live Alerts</title>
+  <title>ESPN Multi-Sport Alerts</title>
 
-  <!-- PWA Headers -->
   <link rel="manifest" href="./manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,7 +26,6 @@
     h2 { text-align: center; margin: 0 0 0.2rem 0; font-size: 24px; font-weight: 700; }
     p.subtitle { text-align: center; color: #6c6c70; font-size: 14px; margin: 0 0 1.5rem 0; }
     
-    /* Category Filter Tabs */
     .tabs {
       display: flex;
       gap: 8px;
@@ -92,7 +90,6 @@
   <h2>Live Sports & Games</h2>
   <p class="subtitle">Select matches across leagues to get iPad push alerts</p>
 
-  <!-- Category Nav Tabs -->
   <div class="tabs">
     <button class="tab active" onclick="switchCategory('mlb', this)">MLB</button>
     <button class="tab" onclick="switchCategory('nba', this)">NBA</button>
@@ -102,7 +99,7 @@
     <button class="tab" onclick="switchCategory('mma', this)">MMA</button>
   </div>
 
-  <div id="games-container">Loading ESPN schedule...</div>
+  <div id="games-container">Loading schedule...</div>
 
   <button class="submit-btn" id="subscribe-btn">Save Preferences & Enable Push</button>
 
@@ -120,13 +117,21 @@
       mma: 'https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard'
     };
 
-    let currentCategory = 'mlb';
+    // Global set preserves selected game IDs across tab changes
+    const selectedGameIds = new Set();
 
     function switchCategory(category, element) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       element.classList.add('active');
-      currentCategory = category;
       loadSchedule(category);
+    }
+
+    function toggleGameSelection(gameId, isChecked) {
+      if (isChecked) {
+        selectedGameIds.add(String(gameId));
+      } else {
+        selectedGameIds.delete(String(gameId));
+      }
     }
 
     async function loadSchedule(category) {
@@ -138,7 +143,7 @@
         const data = await res.json();
         
         if (!data.events || data.events.length === 0) {
-          container.innerHTML = '<p style="text-align:center; color:#8e8e93;">No matches scheduled today.</p>';
+          container.innerHTML = '<p style="text-align:center; color:#8e8e93;">No games scheduled today.</p>';
           return;
         }
 
@@ -146,6 +151,7 @@
         data.events.forEach(event => {
           const comp = event.competitions[0];
           const competitors = comp.competitors || [];
+          const gameId = String(event.id);
           
           let titleText = event.name;
           if (competitors.length >= 2) {
@@ -155,6 +161,7 @@
           }
 
           const status = event.status.type.detail;
+          const isChecked = selectedGameIds.has(gameId) ? 'checked' : '';
 
           const card = document.createElement('div');
           card.className = 'game-card';
@@ -163,7 +170,7 @@
               <div class="game-info">${titleText}</div>
               <div class="game-status">${status}</div>
             </div>
-            <input type="checkbox" class="game-checkbox" value="${event.id}">
+            <input type="checkbox" class="game-checkbox" value="${gameId}" ${isChecked} onchange="toggleGameSelection('${gameId}', this.checked)">
           `;
           container.appendChild(card);
         });
@@ -189,8 +196,6 @@
         return;
       }
 
-      const selectedGames = Array.from(document.querySelectorAll('.game-checkbox:checked')).map(cb => cb.value);
-
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
         alert('Notification permission was denied.');
@@ -204,6 +209,8 @@
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
 
+        const gameArray = Array.from(selectedGameIds);
+
         const res = await fetch('https://parseapi.back4app.com/functions/saveSubscription', {
           method: 'POST',
           headers: {
@@ -213,12 +220,14 @@
           },
           body: JSON.stringify({ 
             subscription: subscription.toJSON(),
-            gameIds: selectedGames 
+            gameIds: gameArray 
           })
         });
 
+        const resData = await res.json();
+
         if (res.ok) {
-          alert('Success! Device registered for selected score alerts.');
+          alert(`Success! Saved ${gameArray.length} game preferences to Back4App.`);
         } else {
           alert('Failed to save choices to Back4App.');
         }
