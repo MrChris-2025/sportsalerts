@@ -2,499 +2,4358 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
   <title>Sports Alerts</title>
+
   <link rel="manifest" href="/manifest.json">
+
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black-translucent"
+  >
 
   <style>
+    /* =========================================================
+       SPORTS ALERTS
+       Complete redesigned dashboard
+       ========================================================= */
+
     :root {
-      --glass-bg: rgba(255, 255, 255, 0.12);
-      --glass-border: rgba(255, 255, 255, 0.22);
-      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-      --accent-neon: #00f0ff;
-      --accent-pink: #ff007f;
-      --accent-green: #00ff88;
+      --bg-main: #060912;
+      --bg-secondary: #0b111e;
+      --bg-tertiary: #111827;
+
+      --glass-bg: rgba(255, 255, 255, 0.055);
+      --glass-bg-strong: rgba(255, 255, 255, 0.09);
+      --glass-border: rgba(255, 255, 255, 0.115);
+
+      --accent-neon: #00eaff;
+      --accent-pink: #ff1688;
+      --accent-green: #00f59b;
+      --accent-purple: #9b6cff;
+      --accent-orange: #ff9f43;
+      --accent-yellow: #ffe66d;
+
       --text-main: #ffffff;
-      --text-muted: rgba(255, 255, 255, 0.65);
+      --text-secondary: rgba(255, 255, 255, 0.76);
+      --text-muted: rgba(255, 255, 255, 0.46);
+
+      --sidebar-width: 220px;
+      --topbar-height: 74px;
+
+      --radius-lg: 22px;
+      --radius-md: 16px;
+
+      --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.42);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg-main);
+    }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
-      background: linear-gradient(135deg, #090d16 0%, #111827 50%, #1f082b 100%);
-      background-attachment: fixed;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
       color: var(--text-main);
-      padding: 5rem 1rem 3rem 1rem;
-      max-width: 560px;
-      margin: 0 auto;
+
+      background:
+        radial-gradient(
+          circle at 10% 5%,
+          rgba(0, 234, 255, 0.075),
+          transparent 28%
+        ),
+        radial-gradient(
+          circle at 90% 10%,
+          rgba(155, 108, 255, 0.09),
+          transparent 30%
+        ),
+        radial-gradient(
+          circle at 80% 90%,
+          rgba(255, 22, 136, 0.075),
+          transparent 28%
+        ),
+        linear-gradient(
+          145deg,
+          #050810 0%,
+          #0a101c 48%,
+          #0d0a18 100%
+        );
+
+      background-attachment: fixed;
+
+      overflow-x: hidden;
     }
 
-    /* Fixed Navigation Bar with Master Switch */
-    nav.navbar {
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* =========================================================
+       APP SHELL
+       ========================================================= */
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    /* =========================================================
+       LEFT SIDEBAR
+       ========================================================= */
+
+    .sidebar {
       position: fixed;
+
       top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 560px;
-      padding: 0.8rem 1.2rem;
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--glass-border);
-      z-index: 1000;
+      left: 0;
+      bottom: 0;
+
+      width: var(--sidebar-width);
+
+      padding: 24px 14px;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(8, 13, 25, 0.97),
+          rgba(7, 10, 19, 0.93)
+        );
+
+      border-right: 1px solid var(--glass-border);
+
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+
+      z-index: 1100;
+
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+
+      overflow-y: auto;
+    }
+
+    .sidebar-brand {
+      padding: 6px 12px 28px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+
+      display: flex;
       align-items: center;
+      justify-content: center;
+
+      margin-bottom: 13px;
+
+      border-radius: 13px;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--accent-neon),
+          var(--accent-purple)
+        );
+
+      color: #050810;
+
+      font-size: 19px;
+      font-weight: 950;
+
+      box-shadow:
+        0 0 25px rgba(0, 234, 255, 0.20);
     }
 
-    .nav-title {
-      font-size: 18px;
+    .brand-title {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: -0.4px;
+    }
+
+    .brand-subtitle {
+      margin-top: 4px;
+
+      color: var(--text-muted);
+
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+    }
+
+    .sidebar-section-label {
+      padding: 0 12px;
+      margin: 8px 0 9px;
+
+      color: var(--text-muted);
+
+      font-size: 10px;
       font-weight: 800;
-      background: linear-gradient(90deg, #ffffff, var(--accent-neon));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
     }
 
-    /* Master Switch Styling */
+    .sports-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .sport-button {
+      width: 100%;
+
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      padding: 11px 12px;
+
+      border: 1px solid transparent;
+      border-radius: 13px;
+
+      background: transparent;
+
+      color: var(--text-muted);
+
+      cursor: pointer;
+
+      text-align: left;
+
+      transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .sport-button:hover {
+      background: rgba(255, 255, 255, 0.055);
+      color: var(--text-main);
+    }
+
+    .sport-button.active {
+      background:
+        linear-gradient(
+          90deg,
+          rgba(0, 234, 255, 0.13),
+          rgba(0, 234, 255, 0.035)
+        );
+
+      border-color: rgba(0, 234, 255, 0.20);
+
+      color: var(--text-main);
+
+      box-shadow:
+        inset 3px 0 0 var(--accent-neon);
+    }
+
+    .sport-icon {
+      width: 31px;
+      height: 31px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      flex: 0 0 31px;
+
+      border-radius: 9px;
+
+      background: rgba(255, 255, 255, 0.055);
+
+      font-size: 15px;
+    }
+
+    .sport-button.active .sport-icon {
+      background: rgba(0, 234, 255, 0.12);
+    }
+
+    .sport-name {
+      flex: 1;
+
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .sport-count {
+      min-width: 22px;
+      height: 21px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 0 6px;
+
+      border-radius: 20px;
+
+      background: rgba(255, 255, 255, 0.06);
+
+      color: var(--text-muted);
+
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 20px;
+    }
+
+    .sidebar-info {
+      padding: 14px;
+
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .sidebar-info-title {
+      color: var(--text-secondary);
+
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .sidebar-info-text {
+      margin-top: 5px;
+
+      color: var(--text-muted);
+
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    /* =========================================================
+       MAIN AREA
+       ========================================================= */
+
+    .main-area {
+      min-height: 100vh;
+
+      margin-left: var(--sidebar-width);
+    }
+
+    /* =========================================================
+       TOP BAR
+       ========================================================= */
+
+    .topbar {
+      position: sticky;
+
+      top: 0;
+
+      height: var(--topbar-height);
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 30px;
+
+      background:
+        rgba(7, 11, 20, 0.78);
+
+      border-bottom: 1px solid var(--glass-border);
+
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+
+      z-index: 1000;
+    }
+
+    .topbar-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .page-kicker {
+      color: var(--accent-neon);
+
+      font-size: 9px;
+      font-weight: 900;
+
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 900;
+
+      letter-spacing: -0.6px;
+    }
+
+    .date-time {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .date-display {
+      color: var(--text-secondary);
+
+      font-size: 12px;
+      font-weight: 700;
+
+      white-space: nowrap;
+    }
+
+    .time-display {
+      padding-left: 16px;
+
+      border-left: 1px solid var(--glass-border);
+
+      color: var(--text-main);
+
+      font-size: 14px;
+      font-weight: 850;
+
+      white-space: nowrap;
+    }
+
+    /* =========================================================
+       MASTER PUSH SWITCH
+       ========================================================= */
+
     .master-switch-container {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
+
+      margin-left: 18px;
     }
 
     .master-label {
-      font-size: 12px;
-      font-weight: 700;
       color: var(--text-muted);
+
+      font-size: 9px;
+      font-weight: 850;
+
+      letter-spacing: 0.8px;
+
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     .switch {
       position: relative;
+
       display: inline-block;
-      width: 48px;
-      height: 26px;
+
+      width: 46px;
+      height: 25px;
     }
 
-    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
 
     .slider {
       position: absolute;
+
+      inset: 0;
+
       cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: rgba(255, 255, 255, 0.2);
-      transition: .3s ease;
-      border-radius: 34px;
+
+      background-color: rgba(255, 255, 255, 0.13);
+
       border: 1px solid var(--glass-border);
+      border-radius: 34px;
+
+      transition: 0.3s ease;
     }
 
     .slider:before {
       position: absolute;
+
       content: "";
-      height: 18px;
-      width: 18px;
+
+      width: 17px;
+      height: 17px;
+
       left: 3px;
       bottom: 3px;
-      background-color: white;
-      transition: .3s ease;
+
+      background-color: #ffffff;
+
       border-radius: 50%;
+
+      transition: 0.3s ease;
+
+      box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.35);
     }
 
     input:checked + .slider {
       background-color: var(--accent-green);
-      box-shadow: 0 0 10px var(--accent-green);
+
+      border-color: var(--accent-green);
+
+      box-shadow:
+        0 0 15px rgba(0, 245, 155, 0.28);
     }
 
     input:checked + .slider:before {
-      transform: translateX(22px);
-      background-color: #090d16;
+      transform: translateX(21px);
+
+      background-color: #07120f;
     }
 
-    /* Tabs */
-    .tabs {
+    /* =========================================================
+       CONTENT
+       ========================================================= */
+
+    .content {
+      width: 100%;
+
+      max-width: 1500px;
+
+      margin: 0 auto;
+
+      padding: 28px 30px 60px;
+    }
+
+    .content-header {
       display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 6px;
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      border-radius: 16px;
-      margin-top: 0.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: var(--glass-shadow);
-      -webkit-overflow-scrolling: touch;
+      align-items: flex-end;
+      justify-content: space-between;
+
+      margin-bottom: 22px;
     }
 
-    .tabs::-webkit-scrollbar { display: none; }
+    .content-heading {
+      font-size: 27px;
+      font-weight: 950;
 
-    .tab {
-      background: transparent;
-      border: none;
+      letter-spacing: -1px;
+    }
+
+    .content-description {
+      margin-top: 5px;
+
       color: var(--text-muted);
-      padding: 8px 16px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.3s ease;
+
+      font-size: 12px;
+      font-weight: 550;
     }
 
-    .tab.active {
-      background: rgba(255, 255, 255, 0.2);
-      color: var(--text-main);
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+
+      padding: 8px 11px;
+
+      border: 1px solid rgba(0, 245, 155, 0.15);
+      border-radius: 10px;
+
+      background: rgba(0, 245, 155, 0.055);
+
+      color: var(--accent-green);
+
+      font-size: 10px;
+      font-weight: 850;
+
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+
+      border-radius: 50%;
+
+      background: var(--accent-green);
+
+      box-shadow:
+        0 0 9px var(--accent-green);
+
+      animation:
+        pulse 1.7s infinite;
+    }
+
+    @keyframes pulse {
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.35;
+      }
+    }
+
+    .refresh-button {
+      width: 35px;
+      height: 35px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
       border: 1px solid var(--glass-border);
+      border-radius: 10px;
+
+      background: var(--glass-bg);
+
+      color: var(--text-secondary);
+
+      cursor: pointer;
+
+      transition:
+        background 0.2s ease,
+        transform 0.2s ease;
     }
 
-    /* Redesigned Game Cards */
+    .refresh-button:hover {
+      background: var(--glass-bg-strong);
+    }
+
+    .refresh-button.loading {
+      animation:
+        rotateRefresh 0.8s linear infinite;
+    }
+
+    @keyframes rotateRefresh {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* =========================================================
+       GAME GRID
+       ========================================================= */
+
+    #games-container {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap: 18px;
+    }
+
+    /* =========================================================
+       GAME CARD
+       ========================================================= */
+
     .game-card {
-      background: var(--glass-bg);
+      position: relative;
+
+      min-width: 0;
+
+      padding: 18px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.075),
+          rgba(255, 255, 255, 0.025)
+        );
+
+      border: 1px solid var(--glass-border);
+
+      border-radius: var(--radius-lg);
+
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 1rem;
-      box-shadow: var(--glass-shadow);
-      transition: border-color 0.2s ease;
+
+      box-shadow: var(--shadow-lg);
+
+      overflow: hidden;
+
+      transition:
+        transform 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease;
+    }
+
+    .game-card::before {
+      position: absolute;
+
+      content: "";
+
+      top: 0;
+      left: 0;
+
+      width: 100%;
+      height: 1px;
+
+      background:
+        linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+    }
+
+    .game-card:hover {
+      transform: translateY(-3px);
+
+      border-color:
+        rgba(255, 255, 255, 0.18);
+
+      box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.48);
     }
 
     .game-card.alert-enabled {
-      border-color: var(--accent-neon);
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+      border-color:
+        rgba(0, 234, 255, 0.42);
+
+      box-shadow:
+        0 0 0 1px rgba(0, 234, 255, 0.05),
+        0 0 30px rgba(0, 234, 255, 0.08),
+        var(--shadow-lg);
     }
+
+    .game-card.live-game {
+      border-color:
+        rgba(255, 22, 136, 0.27);
+    }
+
+    /* =========================================================
+       CARD HEADER
+       ========================================================= */
 
     .card-top {
       display: flex;
+      align-items: flex-start;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+      gap: 10px;
+
+      margin-bottom: 13px;
+      padding-bottom: 12px;
+
+      border-bottom:
+        1px solid rgba(255, 255, 255, 0.065);
+    }
+
+    .card-meta {
+      min-width: 0;
+
+      display: flex;
+      flex-direction: column;
+
+      gap: 5px;
     }
 
     .status-tag {
-      font-size: 11px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.1);
+      width: fit-content;
+
+      display: inline-flex;
+      align-items: center;
+
+      min-height: 23px;
+
+      padding: 4px 8px;
+
+      border-radius: 7px;
+
+      background:
+        rgba(255, 255, 255, 0.065);
+
       color: var(--text-muted);
+
+      font-size: 9px;
+      font-weight: 850;
+
+      letter-spacing: 0.55px;
+
       text-transform: uppercase;
     }
 
     .status-tag.live {
-      background: rgba(255, 0, 127, 0.25);
+      background:
+        rgba(255, 22, 136, 0.12);
+
+      border:
+        1px solid rgba(255, 22, 136, 0.45);
+
       color: var(--accent-pink);
-      border: 1px solid var(--accent-pink);
+
+      box-shadow:
+        0 0 14px rgba(255, 22, 136, 0.08);
+    }
+
+    .game-date-time {
+      color: var(--text-muted);
+
+      font-size: 10px;
+      font-weight: 650;
+    }
+
+    .game-countdown {
+      color: var(--accent-neon);
+
+      font-size: 10px;
+      font-weight: 850;
+    }
+
+    .game-countdown.started {
+      color: var(--accent-green);
     }
 
     .alert-toggle-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid var(--glass-border);
-      color: var(--text-muted);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 5px;
-      transition: all 0.2s ease;
+      justify-content: center;
+
+      min-height: 28px;
+
+      padding: 5px 11px;
+
+      border:
+        1px solid var(--glass-border);
+
+      border-radius: 20px;
+
+      background:
+        rgba(255, 255, 255, 0.055);
+
+      color: var(--text-muted);
+
+      font-size: 9px;
+      font-weight: 850;
+
+      cursor: pointer;
+
+      white-space: nowrap;
     }
 
     .alert-toggle-btn.active {
-      background: rgba(0, 240, 255, 0.2);
+      background:
+        rgba(0, 234, 255, 0.10);
+
+      border-color:
+        rgba(0, 234, 255, 0.50);
+
       color: var(--accent-neon);
-      border-color: var(--accent-neon);
+
+      box-shadow:
+        0 0 13px rgba(0, 234, 255, 0.08);
     }
 
-    /* Scoreboard Layout */
+    /* =========================================================
+       LIVE DATA STRIP
+       ========================================================= */
+
+    .live-data {
+      display: grid;
+
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+      gap: 6px;
+
+      margin-bottom: 12px;
+    }
+
+    .live-stat {
+      min-width: 0;
+
+      padding: 8px 7px;
+
+      border:
+        1px solid rgba(255, 255, 255, 0.065);
+
+      border-radius: 10px;
+
+      background:
+        rgba(0, 0, 0, 0.16);
+
+      text-align: center;
+    }
+
+    .live-stat.highlight {
+      border-color:
+        rgba(0, 234, 255, 0.18);
+
+      background:
+        rgba(0, 234, 255, 0.055);
+    }
+
+    .live-stat.possession {
+      border-color:
+        rgba(0, 245, 155, 0.28);
+
+      background:
+        rgba(0, 245, 155, 0.06);
+    }
+
+    .stat-label {
+      display: block;
+
+      color: var(--text-muted);
+
+      font-size: 7px;
+      font-weight: 850;
+
+      letter-spacing: 0.65px;
+
+      text-transform: uppercase;
+
+      white-space: nowrap;
+    }
+
+    .stat-value {
+      display: block;
+
+      margin-top: 3px;
+
+      color: var(--text-secondary);
+
+      font-size: 11px;
+      font-weight: 850;
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .stat-value.large {
+      color: var(--text-main);
+
+      font-size: 14px;
+    }
+
+    /* =========================================================
+       BASES
+       ========================================================= */
+
+    .base-diamond {
+      position: relative;
+
+      width: 31px;
+      height: 24px;
+
+      margin: 0 auto 1px;
+    }
+
+    .base {
+      position: absolute;
+
+      width: 8px;
+      height: 8px;
+
+      transform: rotate(45deg);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.25);
+
+      background:
+        rgba(255, 255, 255, 0.08);
+    }
+
+    .base.on {
+      background:
+        var(--accent-green);
+
+      border-color:
+        var(--accent-green);
+
+      box-shadow:
+        0 0 8px rgba(0, 245, 155, 0.55);
+    }
+
+    .base-second {
+      top: 0;
+      left: 11px;
+    }
+
+    .base-third {
+      top: 9px;
+      left: 21px;
+    }
+
+    .base-first {
+      top: 9px;
+      left: 1px;
+    }
+
+    /* =========================================================
+       SCOREBOARD
+       ========================================================= */
+
     .scoreboard {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+
+      gap: 7px;
     }
 
     .team-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
+
+      min-height: 55px;
+
+      padding: 6px 8px;
+
+      border-radius: 13px;
+
+      transition:
+        background 0.2s ease;
+    }
+
+    .team-row:hover {
+      background:
+        rgba(255, 255, 255, 0.035);
     }
 
     .team-info {
+      min-width: 0;
+
       display: flex;
       align-items: center;
-      gap: 12px;
+
+      gap: 11px;
     }
 
     .team-logo {
-      width: 32px;
-      height: 32px;
+      width: 39px;
+      height: 39px;
+
+      flex: 0 0 39px;
+
       object-fit: contain;
+
+      filter:
+        drop-shadow(
+          0 3px 7px rgba(0, 0, 0, 0.30)
+        );
+    }
+
+    .team-text {
+      min-width: 0;
+
+      display: flex;
+      flex-direction: column;
     }
 
     .team-name {
-      font-size: 15px;
-      font-weight: 700;
+      display: block;
+
+      overflow: hidden;
+
+      color: var(--text-main);
+
+      font-size: 13px;
+      font-weight: 800;
+
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .team-record {
-      font-size: 11px;
+      display: block;
+
+      margin-top: 3px;
+
       color: var(--text-muted);
-      margin-left: 6px;
+
+      font-size: 9px;
+      font-weight: 650;
     }
 
     .score-display {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: -0.5px;
+      min-width: 42px;
+
+      margin-left: 10px;
+
       color: var(--text-main);
-      min-width: 30px;
+
+      font-size: 25px;
+      font-weight: 950;
+
+      line-height: 1;
+
+      letter-spacing: -1px;
+
       text-align: right;
+    }
+
+    /* =========================================================
+       GAME STATE
+       ========================================================= */
+
+    .state-message {
+      grid-column: 1 / -1;
+
+      min-height: 260px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      gap: 12px;
+
+      padding: 30px;
+
+      border:
+        1px solid var(--glass-border);
+
+      border-radius: var(--radius-lg);
+
+      background:
+        var(--glass-bg);
+
+      color: var(--text-muted);
+
+      text-align: center;
+    }
+
+    .state-icon {
+      width: 48px;
+      height: 48px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 15px;
+
+      background:
+        rgba(255, 255, 255, 0.06);
+
+      font-size: 21px;
+    }
+
+    .state-title {
+      color: var(--text-secondary);
+
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .state-description {
+      max-width: 350px;
+
+      color: var(--text-muted);
+
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .loading-spinner {
+      width: 27px;
+      height: 27px;
+
+      border:
+        2px solid rgba(255, 255, 255, 0.10);
+
+      border-top-color:
+        var(--accent-neon);
+
+      border-radius: 50%;
+
+      animation:
+        spin 0.75s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @media (max-width: 1050px) {
+
+      :root {
+        --sidebar-width: 190px;
+      }
+
+      .content {
+        padding-left: 22px;
+        padding-right: 22px;
+      }
+
+      .topbar {
+        padding-left: 22px;
+        padding-right: 22px;
+      }
+
+      #games-container {
+        gap: 14px;
+      }
+
+      .game-card {
+        padding: 15px;
+      }
+
+    }
+
+    @media (max-width: 800px) {
+
+      .sidebar {
+        width: 170px;
+      }
+
+      .main-area {
+        margin-left: 170px;
+      }
+
+      .date-display {
+        display: none;
+      }
+
+      .time-display {
+        border-left: none;
+        padding-left: 0;
+      }
+
+      .content-heading {
+        font-size: 23px;
+      }
+
+      .live-data {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+
+    }
+
+    /* =========================================================
+       PHONE
+       ========================================================= */
+
+    @media (max-width: 650px) {
+
+      :root {
+        --topbar-height: 64px;
+      }
+
+      .sidebar {
+        position: fixed;
+
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        width: 100%;
+        height: 68px;
+
+        padding: 7px 8px;
+
+        border-right: none;
+        border-top:
+          1px solid var(--glass-border);
+
+        overflow: hidden;
+      }
+
+      .sidebar-brand,
+      .sidebar-section-label,
+      .sidebar-bottom {
+        display: none;
+      }
+
+      .sports-nav {
+        width: 100%;
+
+        display: grid;
+
+        grid-template-columns:
+          repeat(6, 1fr);
+
+        gap: 4px;
+      }
+
+      .sport-button {
+        min-width: 0;
+
+        height: 54px;
+
+        padding: 4px;
+
+        display: flex;
+        flex-direction: column;
+
+        justify-content: center;
+
+        gap: 2px;
+
+        border-radius: 10px;
+
+        text-align: center;
+      }
+
+      .sport-button.active {
+        box-shadow:
+          inset 0 2px 0 var(--accent-neon);
+      }
+
+      .sport-icon {
+        width: auto;
+        height: auto;
+
+        background: transparent;
+
+        font-size: 15px;
+      }
+
+      .sport-button.active .sport-icon {
+        background: transparent;
+      }
+
+      .sport-name {
+        font-size: 8px;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+      }
+
+      .sport-count {
+        display: none;
+      }
+
+      .main-area {
+        margin-left: 0;
+
+        padding-bottom: 68px;
+      }
+
+      .topbar {
+        padding: 0 15px;
+      }
+
+      .page-kicker {
+        font-size: 8px;
+      }
+
+      .page-title {
+        font-size: 17px;
+      }
+
+      .date-time {
+        gap: 9px;
+      }
+
+      .time-display {
+        font-size: 12px;
+      }
+
+      .master-switch-container {
+        margin-left: 7px;
+      }
+
+      .master-label {
+        display: none;
+      }
+
+      .content {
+        padding: 20px 14px 35px;
+      }
+
+      .content-header {
+        align-items: center;
+
+        margin-bottom: 16px;
+      }
+
+      .content-heading {
+        font-size: 21px;
+      }
+
+      .content-description {
+        font-size: 10px;
+      }
+
+      .live-indicator {
+        display: none;
+      }
+
+      #games-container {
+        grid-template-columns: 1fr;
+
+        gap: 12px;
+      }
+
+      .state-message {
+        grid-column: auto;
+      }
+
+    }
+
+    @media (max-width: 380px) {
+
+      .sport-name {
+        font-size: 7px;
+      }
+
+      .sports-nav {
+        gap: 1px;
+      }
+
+      .topbar {
+        padding: 0 11px;
+      }
+
+      .content {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+      }
+
     }
   </style>
 </head>
+
 <body>
 
-  <!-- Navigation Bar with Master Push Switch -->
-  <nav class="navbar">
-    <div class="nav-title">Sports Alerts</div>
-    <div class="master-switch-container">
-      <span class="master-label" id="master-status-text">OFF</span>
-      <label class="switch">
-        <input type="checkbox" id="master-push-toggle" onchange="toggleMasterPush(this.checked)">
-        <span class="slider"></span>
-      </label>
-    </div>
-  </nav>
+  <div class="app-shell">
 
-  <!-- Category Tabs -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('mlb', this)">MLB</button>
-    <button class="tab" onclick="switchTab('nba', this)">NBA</button>
-    <button class="tab" onclick="switchTab('nfl', this)">NFL</button>
-    <button class="tab" onclick="switchTab('nhl', this)">NHL</button>
-    <button class="tab" onclick="switchTab('soccer', this)">Soccer</button>
-    <button class="tab" onclick="switchTab('mma', this)">MMA</button>
+    <!-- =======================================================
+         SIDEBAR
+         ======================================================= -->
+
+    <aside class="sidebar">
+
+      <div class="sidebar-brand">
+
+        <div class="brand-mark">
+          SA
+        </div>
+
+        <div class="brand-title">
+          Sports Alerts
+        </div>
+
+        <div class="brand-subtitle">
+          Live scores & notifications
+        </div>
+
+      </div>
+
+      <div class="sidebar-section-label">
+        Sports
+      </div>
+
+      <nav class="sports-nav">
+
+        <button
+          class="sport-button active"
+          data-sport="mlb"
+          onclick="switchTab('mlb', this)"
+        >
+          <span class="sport-icon">⚾</span>
+          <span class="sport-name">MLB</span>
+          <span class="sport-count" id="count-mlb">—</span>
+        </button>
+
+        <button
+          class="sport-button"
+          data-sport="nba"
+          onclick="switchTab('nba', this)"
+        >
+          <span class="sport-icon">🏀</span>
+          <span class="sport-name">NBA</span>
+          <span class="sport-count" id="count-nba">—</span>
+        </button>
+
+        <button
+          class="sport-button"
+          data-sport="nfl"
+          onclick="switchTab('nfl', this)"
+        >
+          <span class="sport-icon">🏈</span>
+          <span class="sport-name">NFL</span>
+          <span class="sport-count" id="count-nfl">—</span>
+        </button>
+
+        <button
+          class="sport-button"
+          data-sport="nhl"
+          onclick="switchTab('nhl', this)"
+        >
+          <span class="sport-icon">🏒</span>
+          <span class="sport-name">NHL</span>
+          <span class="sport-count" id="count-nhl">—</span>
+        </button>
+
+        <button
+          class="sport-button"
+          data-sport="soccer"
+          onclick="switchTab('soccer', this)"
+        >
+          <span class="sport-icon">⚽</span>
+          <span class="sport-name">Soccer</span>
+          <span class="sport-count" id="count-soccer">—</span>
+        </button>
+
+        <button
+          class="sport-button"
+          data-sport="mma"
+          onclick="switchTab('mma', this)"
+        >
+          <span class="sport-icon">🥊</span>
+          <span class="sport-name">MMA</span>
+          <span class="sport-count" id="count-mma">—</span>
+        </button>
+
+      </nav>
+
+      <div class="sidebar-bottom">
+
+        <div class="sidebar-info">
+
+          <div class="sidebar-info-title">
+            Push Alerts
+          </div>
+
+          <div class="sidebar-info-text">
+            Turn on the master switch to receive
+            alerts for selected games.
+          </div>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+
+    <!-- =======================================================
+         MAIN
+         ======================================================= -->
+
+    <main class="main-area">
+
+      <!-- TOP NAVIGATION -->
+
+      <header class="topbar">
+
+        <div class="topbar-left">
+
+          <div class="page-kicker">
+            Live Sports
+          </div>
+
+          <div class="page-title">
+            Sports Alerts
+          </div>
+
+        </div>
+
+        <div class="date-time">
+
+          <div
+            class="date-display"
+            id="current-date"
+          >
+            Loading date...
+          </div>
+
+          <div
+            class="time-display"
+            id="current-time"
+          >
+            --:-- --
+          </div>
+
+        </div>
+
+        <!-- MASTER PUSH SWITCH -->
+
+        <div class="master-switch-container">
+
+          <span
+            class="master-label"
+            id="master-status-text"
+          >
+            OFF
+          </span>
+
+          <label class="switch">
+
+            <input
+              type="checkbox"
+              id="master-push-toggle"
+              onchange="toggleMasterPush(this.checked)"
+            >
+
+            <span class="slider"></span>
+
+          </label>
+
+        </div>
+
+      </header>
+
+
+      <!-- CONTENT -->
+
+      <section class="content">
+
+        <div class="content-header">
+
+          <div>
+
+            <h1
+              class="content-heading"
+              id="current-sport-title"
+            >
+              MLB
+            </h1>
+
+            <p
+              class="content-description"
+              id="current-sport-description"
+            >
+              Today's Major League Baseball games
+            </p>
+
+          </div>
+
+          <div class="header-actions">
+
+            <div class="live-indicator">
+
+              <span class="live-dot"></span>
+
+              Live
+
+            </div>
+
+            <button
+              class="refresh-button"
+              id="refresh-button"
+              onclick="refreshCurrentSport()"
+              aria-label="Refresh scores"
+              title="Refresh scores"
+            >
+              ↻
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div id="games-container">
+
+          <div class="state-message">
+
+            <div class="loading-spinner"></div>
+
+            <div class="state-title">
+              Loading scores
+            </div>
+
+            <div class="state-description">
+              Fetching the latest games and scores...
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
   </div>
 
-  <div id="games-container">Loading scores...</div>
 
   <script>
-    const VAPID_KEY = 'BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E';
-    const APP_ID = 'd1eje7SvxRjIFsdB6c3TuQLlF8v6zExAMBzChgXa';
-    const JS_KEY = 'eQqLLilvkNhy04m0OF5J4ry17vw0FKeeEHfPT2mq';
+
+    /* =========================================================
+       PUSH CONFIGURATION
+       ========================================================= */
+
+    const VAPID_KEY =
+      'BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E';
+
+    const APP_ID =
+      'd1eje7SvxRjIFsdB6c3TuQLlF8v6zExAMBzChgXa';
+
+    const JS_KEY =
+      'eQqLLilvkNhy04m0OF5J4ry17vw0FKeeEHfPT2mq';
+
+
+    /* =========================================================
+       ESPN URLS
+       ========================================================= */
 
     const URLS = {
-      mlb: 'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard',
-      nba: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
-      nfl: 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
-      nhl: 'https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard',
-      soccer: 'https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard',
-      mma: 'https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard'
+
+      mlb:
+        'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard',
+
+      nba:
+        'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
+
+      nfl:
+        'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
+
+      nhl:
+        'https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard',
+
+      soccer:
+        'https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard',
+
+      mma:
+        'https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard'
+
     };
 
-    const savedGames = JSON.parse(localStorage.getItem('selectedGameIds') || '[]');
-    const selectedGameIds = new Set(savedGames);
-    let masterEnabled = localStorage.getItem('masterPushEnabled') === 'true';
 
-    // Initialize Master Switch State on UI Load
-    document.addEventListener('DOMContentLoaded', () => {
-      const masterToggle = document.getElementById('master-push-toggle');
-      masterToggle.checked = masterEnabled;
-      updateMasterLabel(masterEnabled);
-    });
+    /* =========================================================
+       STATE
+       ========================================================= */
 
-    function updateMasterLabel(enabled) {
-      document.getElementById('master-status-text').innerText = enabled ? 'ON' : 'OFF';
-      document.getElementById('master-status-text').style.color = enabled ? 'var(--accent-green)' : 'var(--text-muted)';
+    const savedGames =
+      JSON.parse(
+        localStorage.getItem(
+          'selectedGameIds'
+        ) || '[]'
+      );
+
+    const selectedGameIds =
+      new Set(savedGames);
+
+    let masterEnabled =
+      localStorage.getItem(
+        'masterPushEnabled'
+      ) === 'true';
+
+    let currentSport = 'mlb';
+
+    let refreshTimer = null;
+
+    let countdownTimer = null;
+
+    /*
+      Stores the scheduled timestamp for each
+      game currently rendered.
+    */
+    const gameStartTimes = new Map();
+
+
+    /* =========================================================
+       SPORT METADATA
+       ========================================================= */
+
+    const SPORT_INFO = {
+
+      mlb: {
+        title: 'MLB',
+        description:
+          "Today's Major League Baseball games"
+      },
+
+      nba: {
+        title: 'NBA',
+        description:
+          "Today's National Basketball Association games"
+      },
+
+      nfl: {
+        title: 'NFL',
+        description:
+          "Today's National Football League games"
+      },
+
+      nhl: {
+        title: 'NHL',
+        description:
+          "Today's National Hockey League games"
+      },
+
+      soccer: {
+        title: 'Soccer',
+        description:
+          "Today's soccer matches"
+      },
+
+      mma: {
+        title: 'MMA',
+        description:
+          "Today's UFC events"
+      }
+
+    };
+
+
+    /* =========================================================
+       DATE + TIME
+       ========================================================= */
+
+    function updateDateTime() {
+
+      const now = new Date();
+
+      const dateFormatter =
+        new Intl.DateTimeFormat(
+          undefined,
+          {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          }
+        );
+
+      const timeFormatter =
+        new Intl.DateTimeFormat(
+          undefined,
+          {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          }
+        );
+
+      document.getElementById(
+        'current-date'
+      ).textContent =
+        dateFormatter.format(now);
+
+      document.getElementById(
+        'current-time'
+      ).textContent =
+        timeFormatter.format(now);
+
     }
 
-    async function toggleMasterPush(enable) {
+
+    updateDateTime();
+
+    setInterval(
+      updateDateTime,
+      60000
+    );
+
+
+    /* =========================================================
+       MASTER SWITCH
+       ========================================================= */
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      () => {
+
+        const masterToggle =
+          document.getElementById(
+            'master-push-toggle'
+          );
+
+        masterToggle.checked =
+          masterEnabled;
+
+        updateMasterLabel(
+          masterEnabled
+        );
+
+      }
+    );
+
+
+    function updateMasterLabel(
+      enabled
+    ) {
+
+      const label =
+        document.getElementById(
+          'master-status-text'
+        );
+
+      label.innerText =
+        enabled ? 'ON' : 'OFF';
+
+      label.style.color =
+        enabled
+          ? 'var(--accent-green)'
+          : 'var(--text-muted)';
+
+    }
+
+
+    async function toggleMasterPush(
+      enable
+    ) {
+
       masterEnabled = enable;
-      localStorage.setItem('masterPushEnabled', enable);
+
+      localStorage.setItem(
+        'masterPushEnabled',
+        enable
+      );
+
       updateMasterLabel(enable);
 
       if (enable) {
-        if (!('serviceWorker' in navigator)) {
-          alert('Launch this app from your iPad Home Screen to enable Web Push.');
+
+        if (
+          !('serviceWorker' in navigator)
+        ) {
+
+          alert(
+            'Launch this app from your iPad Home Screen to enable Web Push.'
+          );
+
           revertMasterSwitch(false);
+
           return;
+
         }
 
-        const perm = await Notification.requestPermission();
+        const perm =
+          await Notification.requestPermission();
+
         if (perm !== 'granted') {
-          alert('Notification permission denied.');
+
+          alert(
+            'Notification permission denied.'
+          );
+
           revertMasterSwitch(false);
+
           return;
+
         }
 
         await syncSubscriptionWithServer();
+
       } else {
+
         await syncSubscriptionWithServer();
+
       }
+
     }
 
-    function revertMasterSwitch(state) {
+
+    function revertMasterSwitch(
+      state
+    ) {
+
       masterEnabled = state;
-      localStorage.setItem('masterPushEnabled', state);
-      document.getElementById('master-push-toggle').checked = state;
+
+      localStorage.setItem(
+        'masterPushEnabled',
+        state
+      );
+
+      document.getElementById(
+        'master-push-toggle'
+      ).checked = state;
+
       updateMasterLabel(state);
+
     }
 
-    function toggleGameAlert(gameId, cardEl) {
-      if (selectedGameIds.has(String(gameId))) {
-        selectedGameIds.delete(String(gameId));
-        cardEl.classList.remove('alert-enabled');
+
+    /* =========================================================
+       GAME ALERT TOGGLE
+       ========================================================= */
+
+    function toggleGameAlert(
+      gameId,
+      cardEl
+    ) {
+
+      if (
+        selectedGameIds.has(
+          String(gameId)
+        )
+      ) {
+
+        selectedGameIds.delete(
+          String(gameId)
+        );
+
+        cardEl.classList.remove(
+          'alert-enabled'
+        );
+
       } else {
-        selectedGameIds.add(String(gameId));
-        cardEl.classList.add('alert-enabled');
+
+        selectedGameIds.add(
+          String(gameId)
+        );
+
+        cardEl.classList.add(
+          'alert-enabled'
+        );
+
       }
-      
-      localStorage.setItem('selectedGameIds', JSON.stringify(Array.from(selectedGameIds)));
-      
-      // Update active card button UI
-      const btn = cardEl.querySelector('.alert-toggle-btn');
-      const isSubbed = selectedGameIds.has(String(gameId));
-      btn.className = `alert-toggle-btn ${isSubbed ? 'active' : ''}`;
-      btn.innerText = isSubbed ? 'Alert On' : 'Alert Off';
+
+      localStorage.setItem(
+        'selectedGameIds',
+        JSON.stringify(
+          Array.from(
+            selectedGameIds
+          )
+        )
+      );
+
+      const btn =
+        cardEl.querySelector(
+          '.alert-toggle-btn'
+        );
+
+      const isSubbed =
+        selectedGameIds.has(
+          String(gameId)
+        );
+
+      btn.className =
+        `alert-toggle-btn ${
+          isSubbed ? 'active' : ''
+        }`;
+
+      btn.innerText =
+        isSubbed
+          ? 'Alert On'
+          : 'Alert Off';
 
       if (masterEnabled) {
         syncSubscriptionWithServer();
       }
+
     }
+
+
+    /* =========================================================
+       PUSH SUBSCRIPTION
+       ========================================================= */
 
     async function syncSubscriptionWithServer() {
+
       try {
-        const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+
+        const reg =
+          await navigator.serviceWorker.register(
+            '/sw.js',
+            {
+              scope: '/'
+            }
+          );
+
         await navigator.serviceWorker.ready;
 
-        const sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_KEY)
-        });
+        const sub =
+          await reg.pushManager.subscribe({
 
-        await fetch('https://parseapi.back4app.com/parse/functions/saveSubscription', {
-          method: 'POST',
-          headers: {
-            'X-Parse-Application-Id': APP_ID,
-            'X-Parse-JavaScript-Key': JS_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            subscription: masterEnabled ? sub.toJSON() : null,
-            gameIds: masterEnabled ? Array.from(selectedGameIds) : []
-          })
-        });
+            userVisibleOnly: true,
+
+            applicationServerKey:
+              urlBase64ToUint8Array(
+                VAPID_KEY
+              )
+
+          });
+
+        await fetch(
+          'https://parseapi.back4app.com/parse/functions/saveSubscription',
+          {
+
+            method: 'POST',
+
+            headers: {
+
+              'X-Parse-Application-Id':
+                APP_ID,
+
+              'X-Parse-JavaScript-Key':
+                JS_KEY,
+
+              'Content-Type':
+                'application/json'
+
+            },
+
+            body: JSON.stringify({
+
+              subscription:
+                masterEnabled
+                  ? sub.toJSON()
+                  : null,
+
+              gameIds:
+                masterEnabled
+                  ? Array.from(
+                      selectedGameIds
+                    )
+                  : []
+
+            })
+
+          }
+        );
+
       } catch (e) {
-        console.error('Subscription Sync Error:', e);
+
+        console.error(
+          'Subscription Sync Error:',
+          e
+        );
+
       }
+
     }
 
-    function switchTab(cat, btn) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
+
+    /* =========================================================
+       SPORT SWITCHING
+       ========================================================= */
+
+    function switchTab(
+      cat,
+      btn
+    ) {
+
+      currentSport = cat;
+
+      document
+        .querySelectorAll(
+          '.sport-button'
+        )
+        .forEach(
+          button => {
+            button.classList.remove(
+              'active'
+            );
+          }
+        );
+
+      btn.classList.add(
+        'active'
+      );
+
+      const info =
+        SPORT_INFO[cat];
+
+      document.getElementById(
+        'current-sport-title'
+      ).textContent =
+        info.title;
+
+      document.getElementById(
+        'current-sport-description'
+      ).textContent =
+        info.description;
+
       loadSchedule(cat);
+
     }
 
-    async function loadSchedule(cat) {
-      const container = document.getElementById('games-container');
-      container.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 2rem;">Loading live scores...</p>';
-      
-      try {
-        const res = await fetch(URLS[cat]);
-        const data = await res.json();
-        
-        if (!data.events || data.events.length === 0) {
-          container.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 2rem;">No games scheduled today.</p>';
-          return;
+
+    function refreshCurrentSport() {
+
+      loadSchedule(
+        currentSport,
+        true
+      );
+
+    }
+
+
+    /* =========================================================
+       COUNTDOWN SYSTEM
+       ========================================================= */
+
+    function formatCountdown(
+      milliseconds
+    ) {
+
+      const totalSeconds =
+        Math.max(
+          0,
+          Math.floor(
+            milliseconds / 1000
+          )
+        );
+
+      const days =
+        Math.floor(
+          totalSeconds / 86400
+        );
+
+      const hours =
+        Math.floor(
+          (totalSeconds % 86400) / 3600
+        );
+
+      const minutes =
+        Math.floor(
+          (totalSeconds % 3600) / 60
+        );
+
+      const seconds =
+        totalSeconds % 60;
+
+
+      if (days > 0) {
+
+        return `${days}d ${hours}h ${minutes}m`;
+
+      }
+
+      if (hours > 0) {
+
+        return `${hours}h ${minutes}m`;
+
+      }
+
+      if (minutes > 0) {
+
+        return `${minutes}m ${seconds}s`;
+
+      }
+
+      return `${seconds}s`;
+
+    }
+
+
+    function updateCountdowns() {
+
+      const now =
+        Date.now();
+
+      document
+        .querySelectorAll(
+          '[data-countdown-id]'
+        )
+        .forEach(
+          element => {
+
+            const gameId =
+              element.dataset.countdownId;
+
+            const start =
+              gameStartTimes.get(
+                gameId
+              );
+
+            if (!start) {
+              return;
+            }
+
+            const difference =
+              start - now;
+
+
+            if (difference > 0) {
+
+              element.textContent =
+                `Starts in ${formatCountdown(
+                  difference
+                )}`;
+
+              element.classList.remove(
+                'started'
+              );
+
+            } else {
+
+              element.textContent =
+                'Game started';
+
+              element.classList.add(
+                'started'
+              );
+
+            }
+
+          }
+        );
+
+    }
+
+
+    function startCountdownTimer() {
+
+      if (countdownTimer) {
+        clearInterval(
+          countdownTimer
+        );
+      }
+
+      updateCountdowns();
+
+      countdownTimer =
+        setInterval(
+          updateCountdowns,
+          1000
+        );
+
+    }
+
+
+    /* =========================================================
+       DATE/TIME FORMATTERS
+       ========================================================= */
+
+    function formatGameDate(
+      date
+    ) {
+
+      if (!date) {
+        return 'Date unavailable';
+      }
+
+      const d =
+        new Date(date);
+
+      if (
+        Number.isNaN(
+          d.getTime()
+        )
+      ) {
+        return 'Date unavailable';
+      }
+
+      return new Intl.DateTimeFormat(
+        undefined,
+        {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric'
+        }
+      ).format(d);
+
+    }
+
+
+    function formatGameTime(
+      date
+    ) {
+
+      if (!date) {
+        return 'Time unavailable';
+      }
+
+      const d =
+        new Date(date);
+
+      if (
+        Number.isNaN(
+          d.getTime()
+        )
+      ) {
+        return 'Time unavailable';
+      }
+
+      return new Intl.DateTimeFormat(
+        undefined,
+        {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        }
+      ).format(d);
+
+    }
+
+
+    function getGameStartTime(
+      event
+    ) {
+
+      /*
+        ESPN commonly exposes event.date as an ISO
+        timestamp. Some events may expose a competition
+        date instead, so use that as a fallback.
+      */
+
+      return (
+        event.date ||
+        event.competitions?.[0]?.date ||
+        null
+      );
+
+    }
+
+
+    /* =========================================================
+       GENERIC STATUS HELPERS
+       ========================================================= */
+
+    function getStatusType(
+      event
+    ) {
+
+      return (
+        event.status?.type ||
+        event.competitions?.[0]?.status?.type ||
+        {}
+      );
+
+    }
+
+
+    function getStatusDetail(
+      event
+    ) {
+
+      const status =
+        getStatusType(event);
+
+      return (
+        status.detail ||
+        status.shortDetail ||
+        status.description ||
+        'Scheduled'
+      );
+
+    }
+
+
+    function isLiveEvent(
+      event
+    ) {
+
+      const status =
+        getStatusType(event);
+
+      return (
+        status.state === 'in' ||
+        status.type === 'in'
+      );
+
+    }
+
+
+    function isCompletedEvent(
+      event
+    ) {
+
+      const status =
+        getStatusType(event);
+
+      return (
+        status.completed === true ||
+        status.state === 'post'
+      );
+
+    }
+
+
+    /* =========================================================
+       ESPN SITUATION
+       ========================================================= */
+
+    function getSituation(
+      competition
+    ) {
+
+      return (
+        competition?.situation ||
+        competition?.status?.situation ||
+        {}
+      );
+
+    }
+
+
+    /* =========================================================
+       SPORT-SPECIFIC LIVE DATA
+       ========================================================= */
+
+    function buildLiveStats(
+      sport,
+      event,
+      competition,
+      competitors
+    ) {
+
+      const situation =
+        getSituation(
+          competition
+        );
+
+      const status =
+        getStatusType(event);
+
+      const stats = [];
+
+
+      /* =======================================================
+         BASEBALL
+         ======================================================= */
+
+      if (sport === 'mlb') {
+
+        /*
+          inning / half inning
+        */
+
+        const inning =
+          situation.inning ??
+          situation.currentInning ??
+          situation.inningNumber ??
+          null;
+
+        const half =
+          situation.inningHalf ??
+          situation.halfInning ??
+          situation.inningState ??
+          null;
+
+        if (
+          inning !== null
+        ) {
+
+          let inningText =
+            `Inning ${inning}`;
+
+          if (half) {
+
+            const normalized =
+              String(
+                half
+              ).toLowerCase();
+
+            if (
+              normalized.includes(
+                'top'
+              )
+            ) {
+              inningText =
+                `Top ${inning}`;
+            } else if (
+              normalized.includes(
+                'bottom'
+              )
+            ) {
+              inningText =
+                `Bot ${inning}`;
+            }
+
+          }
+
+          stats.push({
+            label: 'Inning',
+            value: inningText,
+            highlight: true
+          });
+
+        } else {
+
+          const detail =
+            getStatusDetail(event);
+
+          if (isLiveEvent(event)) {
+
+            stats.push({
+              label: 'Game',
+              value: detail,
+              highlight: true
+            });
+
+          }
+
         }
 
-        container.innerHTML = '';
-        data.events.forEach(e => {
-          const comp = e.competitions[0];
-          const comps = comp.competitors || [];
-          const id = String(e.id);
-          const isLive = e.status.type.state === 'in';
-          
-          let home = comps.find(c => c.homeAway === 'home') || comps[0];
-          let away = comps.find(c => c.homeAway === 'away') || comps[1];
 
-          const homeName = home?.team?.shortDisplayName || home?.athlete?.displayName || 'HOME';
-          const homeLogo = home?.team?.logo || 'https://a.espncdn.com/i/espn/espn_logos/espn_red.png';
-          const homeRecord = home?.records?.[0]?.summary || '';
-          const homeScore = home?.score ?? '0';
+        const balls =
+          situation.balls ??
+          situation.ballCount ??
+          null;
 
-          const awayName = away?.team?.shortDisplayName || away?.athlete?.displayName || 'AWAY';
-          const awayLogo = away?.team?.logo || 'https://a.espncdn.com/i/espn/espn_logos/espn_red.png';
-          const awayRecord = away?.records?.[0]?.summary || '';
-          const awayScore = away?.score ?? '0';
+        const strikes =
+          situation.strikes ??
+          situation.strikeCount ??
+          null;
 
-          const isSubscribed = selectedGameIds.has(id);
-          const card = document.createElement('div');
-          card.className = `game-card ${isSubscribed ? 'alert-enabled' : ''}`;
-          
-          card.innerHTML = `
-            <div class="card-top">
-              <span class="status-tag ${isLive ? 'live' : ''}">${e.status.type.detail}</span>
-              <button class="alert-toggle-btn ${isSubscribed ? 'active' : ''}" onclick="toggleGameAlert('${id}', this.closest('.game-card'))">
-                ${isSubscribed ? '🔔 Alert On' : '🔕 Alert Off'}
-              </button>
-            </div>
-            
-            <div class="scoreboard">
-              <div class="team-row">
-                <div class="team-info">
-                  <img class="team-logo" src="${awayLogo}" alt="${awayName}" onerror="this.src='https://a.espncdn.com/i/espn/espn_logos/espn_red.png'">
-                  <div>
-                    <span class="team-name">${awayName}</span>
-                    <span class="team-record">${awayRecord}</span>
-                  </div>
-                </div>
-                <div class="score-display">${awayScore}</div>
+        const outs =
+          situation.outs ??
+          situation.outCount ??
+          null;
+
+
+        if (balls !== null) {
+
+          stats.push({
+            label: 'Balls',
+            value: String(balls)
+          });
+
+        }
+
+
+        if (strikes !== null) {
+
+          stats.push({
+            label: 'Strikes',
+            value: String(strikes)
+          });
+
+        }
+
+
+        if (outs !== null) {
+
+          stats.push({
+            label: 'Outs',
+            value: String(outs)
+          });
+
+        }
+
+
+        /*
+          Runners on base.
+
+          ESPN has used several shapes for situation
+          data over time, so inspect the common variants.
+        */
+
+        const onFirst =
+          Boolean(
+            situation.onFirst ??
+            situation.firstBaseOccupied ??
+            situation.runnersOnFirst
+          );
+
+        const onSecond =
+          Boolean(
+            situation.onSecond ??
+            situation.secondBaseOccupied ??
+            situation.runnersOnSecond
+          );
+
+        const onThird =
+          Boolean(
+            situation.onThird ??
+            situation.thirdBaseOccupied ??
+            situation.runnersOnThird
+          );
+
+
+        if (
+          situation.basesOccupied ||
+          situation.runners ||
+          situation.onFirst !== undefined ||
+          situation.onSecond !== undefined ||
+          situation.onThird !== undefined
+        ) {
+
+          stats.push({
+            label: 'Bases',
+            value: `
+              <div class="base-diamond">
+                <span class="base base-second ${
+                  onSecond ? 'on' : ''
+                }"></span>
+
+                <span class="base base-third ${
+                  onThird ? 'on' : ''
+                }"></span>
+
+                <span class="base base-first ${
+                  onFirst ? 'on' : ''
+                }"></span>
+              </div>
+            `,
+            html: true
+          });
+
+        }
+
+        /*
+          If ESPN does not expose balls/strikes/outs,
+          show whatever count it does expose.
+        */
+
+        if (
+          stats.length === 1 &&
+          situation.count
+        ) {
+
+          stats.push({
+            label: 'Count',
+            value:
+              String(
+                situation.count
+              )
+          });
+
+        }
+
+      }
+
+
+      /* =======================================================
+         FOOTBALL
+         ======================================================= */
+
+      else if (sport === 'nfl') {
+
+        const period =
+          situation.period ??
+          situation.quarter ??
+          situation.currentPeriod ??
+          null;
+
+        const clock =
+          situation.clock ??
+          situation.gameClock ??
+          situation.displayClock ??
+          null;
+
+        const down =
+          situation.down ??
+          null;
+
+        const distance =
+          situation.distance ??
+          situation.yardsToGo ??
+          null;
+
+        const yardLine =
+          situation.yardLine ??
+          situation.yardline ??
+          situation.possessionText ??
+          null;
+
+
+        if (period !== null) {
+
+          stats.push({
+            label: 'Quarter',
+            value: `Q${period}`,
+            highlight: true
+          });
+
+        }
+
+
+        if (clock !== null) {
+
+          stats.push({
+            label: 'Time',
+            value: formatClock(
+              clock
+            ),
+            highlight: true
+          });
+
+        }
+
+
+        if (down !== null) {
+
+          stats.push({
+            label: 'Down',
+            value:
+              formatDown(
+                down
+              )
+          });
+
+        }
+
+
+        if (distance !== null) {
+
+          stats.push({
+            label: 'Distance',
+            value:
+              formatDistance(
+                distance
+              )
+          });
+
+        }
+
+
+        if (yardLine !== null) {
+
+          stats.push({
+            label: 'Ball',
+            value:
+              formatYardLine(
+                yardLine
+              )
+          });
+
+        }
+
+
+        /*
+          Possession may be available through situation
+          possession, possessionText, or a competitor ID.
+        */
+
+        const possession =
+          situation.possession ??
+          situation.possessionText ??
+          situation.possessionTeam ??
+          null;
+
+
+        if (possession) {
+
+          stats.push({
+            label: 'Possession',
+            value:
+              getPossessionName(
+                possession,
+                competitors
+              ),
+            possession: true
+          });
+
+        }
+
+      }
+
+
+      /* =======================================================
+         BASKETBALL
+         ======================================================= */
+
+      else if (sport === 'nba') {
+
+        const period =
+          situation.period ??
+          situation.quarter ??
+          situation.currentPeriod ??
+          null;
+
+        const clock =
+          situation.clock ??
+          situation.gameClock ??
+          situation.displayClock ??
+          null;
+
+
+        if (period !== null) {
+
+          stats.push({
+            label: 'Quarter',
+            value:
+              formatBasketballPeriod(
+                period
+              ),
+            highlight: true
+          });
+
+        }
+
+
+        if (clock !== null) {
+
+          stats.push({
+            label: 'Time Left',
+            value:
+              formatClock(
+                clock
+              ),
+            highlight: true
+          });
+
+        }
+
+
+        /*
+          If ESPN exposes possession, include it.
+        */
+
+        const possession =
+          situation.possession ??
+          situation.possessionTeam ??
+          null;
+
+
+        if (possession) {
+
+          stats.push({
+            label: 'Possession',
+            value:
+              getPossessionName(
+                possession,
+                competitors
+              ),
+            possession: true
+          });
+
+        }
+
+      }
+
+
+      /* =======================================================
+         HOCKEY
+         ======================================================= */
+
+      else if (sport === 'nhl') {
+
+        const period =
+          situation.period ??
+          situation.currentPeriod ??
+          null;
+
+        const clock =
+          situation.clock ??
+          situation.gameClock ??
+          situation.displayClock ??
+          null;
+
+
+        if (period !== null) {
+
+          stats.push({
+            label: 'Period',
+            value:
+              formatHockeyPeriod(
+                period
+              ),
+            highlight: true
+          });
+
+        }
+
+
+        if (clock !== null) {
+
+          stats.push({
+            label: 'Time Left',
+            value:
+              formatClock(
+                clock
+              ),
+            highlight: true
+          });
+
+        }
+
+
+        const possession =
+          situation.possession ??
+          situation.possessionTeam ??
+          null;
+
+
+        if (possession) {
+
+          stats.push({
+            label: 'Possession',
+            value:
+              getPossessionName(
+                possession,
+                competitors
+              )
+          });
+
+        }
+
+      }
+
+
+      /* =======================================================
+         SOCCER
+         ======================================================= */
+
+      else if (sport === 'soccer') {
+
+        const period =
+          situation.period ??
+          situation.currentPeriod ??
+          null;
+
+        const clock =
+          situation.clock ??
+          situation.gameClock ??
+          situation.displayClock ??
+          null;
+
+
+        if (period !== null) {
+
+          stats.push({
+            label: 'Half',
+            value:
+              formatSoccerPeriod(
+                period
+              ),
+            highlight: true
+          });
+
+        }
+
+
+        if (clock !== null) {
+
+          stats.push({
+            label: 'Match Time',
+            value:
+              formatSoccerClock(
+                clock
+              ),
+            highlight: true
+          });
+
+        }
+
+
+        const detail =
+          getStatusDetail(
+            event
+          );
+
+
+        if (
+          !stats.length &&
+          isLiveEvent(event)
+        ) {
+
+          stats.push({
+            label: 'Status',
+            value: detail,
+            highlight: true
+          });
+
+        }
+
+      }
+
+
+      /* =======================================================
+         MMA
+         ======================================================= */
+
+      else if (sport === 'mma') {
+
+        const period =
+          situation.period ??
+          situation.round ??
+          situation.currentRound ??
+          null;
+
+        const clock =
+          situation.clock ??
+          situation.fightClock ??
+          situation.displayClock ??
+          null;
+
+
+        if (period !== null) {
+
+          stats.push({
+            label: 'Round',
+            value:
+              `Round ${period}`,
+            highlight: true
+          });
+
+        }
+
+
+        if (clock !== null) {
+
+          stats.push({
+            label: 'Time',
+            value:
+              formatClock(
+                clock
+              ),
+            highlight: true
+          });
+
+        }
+
+
+        if (
+          !stats.length &&
+          isLiveEvent(event)
+        ) {
+
+          stats.push({
+            label: 'Status',
+            value:
+              getStatusDetail(
+                event
+              ),
+            highlight: true
+          });
+
+        }
+
+      }
+
+
+      /*
+        Only show a live data strip when the game
+        is actually underway, or when useful situation
+        data exists.
+      */
+
+      if (
+        !isLiveEvent(event) &&
+        stats.length === 0
+      ) {
+
+        return '';
+
+      }
+
+
+      /*
+        Limit to four items so the card remains compact.
+      */
+
+      const visibleStats =
+        stats.slice(0, 4);
+
+
+      if (!visibleStats.length) {
+        return '';
+      }
+
+
+      return `
+        <div class="live-data">
+          ${visibleStats
+            .map(
+              stat =>
+                renderLiveStat(
+                  stat
+                )
+            )
+            .join('')
+          }
+        </div>
+      `;
+
+    }
+
+
+    /* =========================================================
+       RENDER LIVE STAT
+       ========================================================= */
+
+    function renderLiveStat(
+      stat
+    ) {
+
+      const classes = [
+        'live-stat'
+      ];
+
+      if (stat.highlight) {
+        classes.push(
+          'highlight'
+        );
+      }
+
+      if (stat.possession) {
+        classes.push(
+          'possession'
+        );
+      }
+
+
+      const value =
+        stat.html
+          ? stat.value
+          : escapeHtml(
+              String(
+                stat.value
+              )
+            );
+
+
+      return `
+        <div class="${classes.join(' ')}">
+
+          <span class="stat-label">
+            ${escapeHtml(
+              stat.label
+            )}
+          </span>
+
+          <span
+            class="stat-value ${
+              stat.html
+                ? 'large'
+                : ''
+            }"
+          >
+            ${value}
+          </span>
+
+        </div>
+      `;
+
+    }
+
+
+    /* =========================================================
+       CLOCK FORMATTING
+       ========================================================= */
+
+    function formatClock(
+      clock
+    ) {
+
+      if (
+        clock === null ||
+        clock === undefined
+      ) {
+        return '—';
+      }
+
+      const value =
+        String(clock)
+          .trim();
+
+
+      /*
+        ESPN often gives football/basketball/hockey
+        clocks as "MM:SS".
+      */
+
+      if (
+        /^\d{1,2}:\d{2}$/.test(
+          value
+        )
+      ) {
+
+        return value;
+
+      }
+
+
+      /*
+        Sometimes clock is numeric seconds.
+      */
+
+      const numeric =
+        Number(value);
+
+      if (
+        Number.isFinite(
+          numeric
+        ) &&
+        numeric >= 0
+      ) {
+
+        const minutes =
+          Math.floor(
+            numeric / 60
+          );
+
+        const seconds =
+          Math.floor(
+            numeric % 60
+          );
+
+        return (
+          `${minutes}:` +
+          String(seconds)
+            .padStart(2, '0')
+        );
+
+      }
+
+
+      return value;
+
+    }
+
+
+    function formatDown(
+      down
+    ) {
+
+      const number =
+        Number(down);
+
+      if (
+        !Number.isFinite(number)
+      ) {
+
+        return String(
+          down
+        );
+
+      }
+
+
+      const names = {
+        1: '1st',
+        2: '2nd',
+        3: '3rd',
+        4: '4th'
+      };
+
+
+      return (
+        names[number] ||
+        `${number}th`
+      );
+
+    }
+
+
+    function formatDistance(
+      distance
+    ) {
+
+      if (
+        typeof distance === 'string' &&
+        distance.length
+      ) {
+
+        return distance
+          .toUpperCase()
+          .includes('YARD')
+          ? distance
+          : `${distance} yd`;
+
+      }
+
+
+      const number =
+        Number(distance);
+
+      if (
+        Number.isFinite(number)
+      ) {
+
+        return `${number} yd`;
+
+      }
+
+
+      return String(
+        distance
+      );
+
+    }
+
+
+    function formatYardLine(
+      value
+    ) {
+
+      if (
+        typeof value === 'string'
+      ) {
+
+        return value;
+
+      }
+
+
+      const number =
+        Number(value);
+
+      if (
+        Number.isFinite(number)
+      ) {
+
+        return `${number}`;
+
+      }
+
+
+      return String(
+        value
+      );
+
+    }
+
+
+    function formatBasketballPeriod(
+      period
+    ) {
+
+      const number =
+        Number(period);
+
+      if (
+        !Number.isFinite(number)
+      ) {
+
+        return String(
+          period
+        );
+
+      }
+
+
+      if (number <= 4) {
+        return `Q${number}`;
+      }
+
+
+      return `OT${number - 4}`;
+
+    }
+
+
+    function formatHockeyPeriod(
+      period
+    ) {
+
+      const number =
+        Number(period);
+
+      if (
+        !Number.isFinite(number)
+      ) {
+
+        return String(
+          period
+        );
+
+      }
+
+
+      if (number <= 3) {
+        return `P${number}`;
+      }
+
+
+      return `OT`;
+
+    }
+
+
+    function formatSoccerPeriod(
+      period
+    ) {
+
+      const number =
+        Number(period);
+
+      if (
+        number === 1
+      ) {
+        return '1st Half';
+      }
+
+      if (
+        number === 2
+      ) {
+        return '2nd Half';
+      }
+
+      if (
+        number === 3
+      ) {
+        return 'Extra Time';
+      }
+
+      return String(
+        period
+      );
+
+    }
+
+
+    function formatSoccerClock(
+      clock
+    ) {
+
+      const formatted =
+        formatClock(
+          clock
+        );
+
+      return formatted;
+
+    }
+
+
+    /* =========================================================
+       POSSESSION
+       ========================================================= */
+
+    function getPossessionName(
+      possession,
+      competitors
+    ) {
+
+      /*
+        If ESPN gives an actual name, use it.
+      */
+
+      if (
+        typeof possession === 'string' &&
+        !/^\d+$/.test(
+          possession
+        )
+      ) {
+
+        return possession;
+
+      }
+
+
+      /*
+        If possession is an ID, try to match
+        it against the competitors.
+      */
+
+      const id =
+        String(
+          possession
+        );
+
+
+      const match =
+        competitors.find(
+          competitor =>
+            String(
+              competitor.id
+            ) === id ||
+            String(
+              competitor.team?.id
+            ) === id
+        );
+
+
+      if (match) {
+
+        return (
+          match.team?.abbreviation ||
+          match.team?.shortDisplayName ||
+          match.athlete?.shortName ||
+          'Yes'
+        );
+
+      }
+
+
+      return 'Yes';
+
+    }
+
+
+    /* =========================================================
+       SPORT COUNT
+       ========================================================= */
+
+    function updateSportCount(
+      cat,
+      count
+    ) {
+
+      const element =
+        document.getElementById(
+          `count-${cat}`
+        );
+
+      if (!element) {
+        return;
+      }
+
+      element.textContent =
+        count;
+
+    }
+
+
+    /* =========================================================
+       LOAD SCHEDULE
+       ========================================================= */
+
+    async function loadSchedule(
+      cat,
+      manualRefresh = false
+    ) {
+
+      currentSport = cat;
+
+
+      const container =
+        document.getElementById(
+          'games-container'
+        );
+
+
+      const refreshButton =
+        document.getElementById(
+          'refresh-button'
+        );
+
+
+      if (manualRefresh) {
+
+        refreshButton.classList.add(
+          'loading'
+        );
+
+      }
+
+
+      container.innerHTML = `
+
+        <div class="state-message">
+
+          <div class="loading-spinner"></div>
+
+          <div class="state-title">
+            Loading ${SPORT_INFO[cat].title}
+          </div>
+
+          <div class="state-description">
+            Fetching the latest games and scores...
+          </div>
+
+        </div>
+
+      `;
+
+
+      try {
+
+        const res =
+          await fetch(
+            URLS[cat]
+          );
+
+
+        if (!res.ok) {
+
+          throw new Error(
+            `HTTP ${res.status}`
+          );
+
+        }
+
+
+        const data =
+          await res.json();
+
+
+        const events =
+          data.events || [];
+
+
+        updateSportCount(
+          cat,
+          events.length
+        );
+
+
+        if (!events.length) {
+
+          container.innerHTML = `
+
+            <div class="state-message">
+
+              <div class="state-icon">
+                📅
               </div>
 
-              <div class="team-row">
-                <div class="team-info">
-                  <img class="team-logo" src="${homeLogo}" alt="${homeName}" onerror="this.src='https://a.espncdn.com/i/espn/espn_logos/espn_red.png'">
-                  <div>
-                    <span class="team-name">${homeName}</span>
-                    <span class="team-record">${homeRecord}</span>
-                  </div>
-                </div>
-                <div class="score-display">${homeScore}</div>
+              <div class="state-title">
+                No games scheduled
               </div>
+
+              <div class="state-description">
+                There are no
+                ${SPORT_INFO[cat].title}
+                games scheduled for today.
+              </div>
+
             </div>
+
           `;
-          container.appendChild(card);
-        });
+
+          return;
+
+        }
+
+
+        /*
+          Clear old countdown timestamps.
+        */
+
+        gameStartTimes.clear();
+
+
+        container.innerHTML = '';
+
+
+        events.forEach(
+          event => {
+
+            const competition =
+              event.competitions?.[0];
+
+
+            if (!competition) {
+              return;
+            }
+
+
+            const competitors =
+              competition.competitors ||
+              [];
+
+
+            const id =
+              String(
+                event.id
+              );
+
+
+            const live =
+              isLiveEvent(
+                event
+              );
+
+
+            const completed =
+              isCompletedEvent(
+                event
+              );
+
+
+            let home =
+              competitors.find(
+                c =>
+                  c.homeAway === 'home'
+              ) ||
+              competitors[0];
+
+
+            let away =
+              competitors.find(
+                c =>
+                  c.homeAway === 'away'
+              ) ||
+              competitors[1];
+
+
+            const homeName =
+              home?.team?.shortDisplayName ||
+              home?.athlete?.displayName ||
+              'HOME';
+
+
+            const awayName =
+              away?.team?.shortDisplayName ||
+              away?.athlete?.displayName ||
+              'AWAY';
+
+
+            const homeLogo =
+              home?.team?.logo ||
+              'https://a.espncdn.com/i/espn/espn_logos/espn_red.png';
+
+
+            const awayLogo =
+              away?.team?.logo ||
+              'https://a.espncdn.com/i/espn/espn_logos/espn_red.png';
+
+
+            const homeRecord =
+              home?.records?.[0]?.summary ||
+              '';
+
+
+            const awayRecord =
+              away?.records?.[0]?.summary ||
+              '';
+
+
+            const homeScore =
+              home?.score ??
+              '0';
+
+
+            const awayScore =
+              away?.score ??
+              '0';
+
+
+            const isSubscribed =
+              selectedGameIds.has(
+                id
+              );
+
+
+            /*
+              Determine start date/time.
+            */
+
+            const startTime =
+              getGameStartTime(
+                event
+              );
+
+
+            if (startTime) {
+
+              const parsed =
+                new Date(
+                  startTime
+                ).getTime();
+
+              if (
+                !Number.isNaN(
+                  parsed
+                )
+              ) {
+
+                gameStartTimes.set(
+                  id,
+                  parsed
+                );
+
+              }
+
+            }
+
+
+            const card =
+              document.createElement(
+                'div'
+              );
+
+
+            card.className =
+              [
+                'game-card',
+                isSubscribed
+                  ? 'alert-enabled'
+                  : '',
+                live
+                  ? 'live-game'
+                  : ''
+              ]
+                .filter(Boolean)
+                .join(' ');
+
+
+            const statusDetail =
+              getStatusDetail(
+                event
+              );
+
+
+            /*
+              Start date/time display.
+            */
+
+            const startDateText =
+              startTime
+                ? formatGameDate(
+                    startTime
+                  )
+                : 'Date unavailable';
+
+
+            const startTimeText =
+              startTime
+                ? formatGameTime(
+                    startTime
+                  )
+                : 'Time unavailable';
+
+
+            /*
+              Live stats.
+            */
+
+            const liveStats =
+              buildLiveStats(
+                cat,
+                event,
+                competition,
+                competitors
+              );
+
+
+            /*
+              Countdown is only useful before
+              a game starts.
+            */
+
+            let countdownHTML =
+              '';
+
+
+            if (
+              startTime &&
+              !live &&
+              !completed
+            ) {
+
+              countdownHTML = `
+
+                <div
+                  class="game-countdown"
+                  data-countdown-id="${escapeAttribute(id)}"
+                >
+                  Starts in —
+                </div>
+
+              `;
+
+            }
+
+
+            card.innerHTML = `
+
+              <div class="card-top">
+
+                <div class="card-meta">
+
+                  <span
+                    class="status-tag ${
+                      live ? 'live' : ''
+                    }"
+                  >
+                    ${
+                      live
+                        ? '● LIVE'
+                        : escapeHtml(
+                            statusDetail
+                          )
+                    }
+                  </span>
+
+
+                  <div class="game-date-time">
+
+                    ${escapeHtml(
+                      startDateText
+                    )}
+
+                    ·
+
+                    ${escapeHtml(
+                      startTimeText
+                    )}
+
+                  </div>
+
+
+                  ${countdownHTML}
+
+                </div>
+
+
+                <button
+                  class="alert-toggle-btn ${
+                    isSubscribed
+                      ? 'active'
+                      : ''
+                  }"
+                  onclick="
+                    toggleGameAlert(
+                      '${escapeAttribute(id)}',
+                      this.closest('.game-card')
+                    )
+                  "
+                >
+                  ${
+                    isSubscribed
+                      ? '🔔 Alert On'
+                      : '🔕 Alert Off'
+                  }
+                </button>
+
+              </div>
+
+
+              ${liveStats}
+
+
+              <div class="scoreboard">
+
+                <div class="team-row">
+
+                  <div class="team-info">
+
+                    <img
+                      class="team-logo"
+                      src="${escapeAttribute(
+                        awayLogo
+                      )}"
+                      alt="${escapeAttribute(
+                        awayName
+                      )}"
+                      onerror="
+                        this.src='https://a.espncdn.com/i/espn/espn_logos/espn_red.png'
+                      "
+                    >
+
+                    <div class="team-text">
+
+                      <span class="team-name">
+                        ${escapeHtml(
+                          awayName
+                        )}
+                      </span>
+
+                      ${
+                        awayRecord
+                          ? `
+                            <span class="team-record">
+                              ${escapeHtml(
+                                awayRecord
+                              )}
+                            </span>
+                          `
+                          : ''
+                      }
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="score-display">
+                    ${escapeHtml(
+                      String(
+                        awayScore
+                      )
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div class="team-row">
+
+                  <div class="team-info">
+
+                    <img
+                      class="team-logo"
+                      src="${escapeAttribute(
+                        homeLogo
+                      )}"
+                      alt="${escapeAttribute(
+                        homeName
+                      )}"
+                      onerror="
+                        this.src='https://a.espncdn.com/i/espn/espn_logos/espn_red.png'
+                      "
+                    >
+
+                    <div class="team-text">
+
+                      <span class="team-name">
+                        ${escapeHtml(
+                          homeName
+                        )}
+                      </span>
+
+                      ${
+                        homeRecord
+                          ? `
+                            <span class="team-record">
+                              ${escapeHtml(
+                                homeRecord
+                              )}
+                            </span>
+                          `
+                          : ''
+                      }
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="score-display">
+                    ${escapeHtml(
+                      String(
+                        homeScore
+                      )
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+
+            `;
+
+
+            container.appendChild(
+              card
+            );
+
+          }
+        );
+
+
+        /*
+          Start the live countdown.
+        */
+
+        startCountdownTimer();
+
+
       } catch (err) {
-        container.innerHTML = '<p style="text-align:center; color: var(--accent-pink); padding: 2rem;">Failed to fetch scores.</p>';
+
+        console.error(
+          'Score Fetch Error:',
+          err
+        );
+
+
+        container.innerHTML = `
+
+          <div class="state-message">
+
+            <div
+              class="state-icon"
+              style="
+                color: var(--accent-pink);
+              "
+            >
+              !
+            </div>
+
+            <div class="state-title">
+              Failed to fetch scores
+            </div>
+
+            <div class="state-description">
+              We couldn't retrieve the latest
+              ${SPORT_INFO[cat].title}
+              scores. Try refreshing the page.
+            </div>
+
+          </div>
+
+        `;
+
+      } finally {
+
+        refreshButton.classList.remove(
+          'loading'
+        );
+
       }
+
     }
 
-    function urlBase64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-      const rawData = window.atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
-      for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
+
+    /* =========================================================
+       AUTOMATIC LIVE SCORE REFRESH
+       ========================================================= */
+
+    function startAutoRefresh() {
+
+      if (refreshTimer) {
+
+        clearInterval(
+          refreshTimer
+        );
+
       }
+
+
+      /*
+        Refresh every 30 seconds.
+
+        This keeps live information such as:
+        - MLB count
+        - NFL down/clock
+        - NBA clock
+        - NHL clock
+        - Soccer time
+        - MMA round
+        reasonably current.
+      */
+
+      refreshTimer =
+        setInterval(
+          () => {
+
+            loadSchedule(
+              currentSport,
+              false
+            );
+
+          },
+          30000
+        );
+
+    }
+
+
+    startAutoRefresh();
+
+
+    /* =========================================================
+       HTML ESCAPING
+       ========================================================= */
+
+    function escapeHtml(
+      value
+    ) {
+
+      return String(
+        value
+      )
+        .replace(
+          /&/g,
+          '&amp;'
+        )
+        .replace(
+          /</g,
+          '&lt;'
+        )
+        .replace(
+          />/g,
+          '&gt;'
+        )
+        .replace(
+          /"/g,
+          '&quot;'
+        )
+        .replace(
+          /'/g,
+          '&#039;'
+        );
+
+    }
+
+
+    function escapeAttribute(
+      value
+    ) {
+
+      return escapeHtml(
+        value
+      );
+
+    }
+
+
+    /* =========================================================
+       VAPID HELPER
+       ========================================================= */
+
+    function urlBase64ToUint8Array(
+      base64String
+    ) {
+
+      const padding =
+        '='.repeat(
+          (
+            4 -
+            base64String.length % 4
+          ) % 4
+        );
+
+
+      const base64 =
+        (
+          base64String +
+          padding
+        )
+          .replace(
+            /-/g,
+            '+'
+          )
+          .replace(
+            /_/g,
+            '/'
+          );
+
+
+      const rawData =
+        window.atob(
+          base64
+        );
+
+
+      const outputArray =
+        new Uint8Array(
+          rawData.length
+        );
+
+
+      for (
+        let i = 0;
+        i < rawData.length;
+        ++i
+      ) {
+
+        outputArray[i] =
+          rawData.charCodeAt(i);
+
+      }
+
+
       return outputArray;
+
     }
 
-    loadSchedule('mlb');
+
+    /* =========================================================
+       INITIAL LOAD
+       ========================================================= */
+
+    loadSchedule(
+      'mlb'
+    );
+
   </script>
+
 </body>
 </html>
