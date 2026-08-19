@@ -2,32 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ESPN Live Games & Alerts</title>
+
+  <!-- PWA & Apple iOS Metadata -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ESPN Alerts">
+  <link rel="apple-touch-icon" href="https://a.espncdn.com/i/espn/espn_logos/espn_red.png">
+  <meta name="theme-color" content="#007aff">
+
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      max-width: 500px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      max-width: 480px;
       margin: 0 auto;
-      padding: 1.5rem 1rem;
+      padding: 2rem 1rem;
       background-color: #f4f4f9;
-      color: #1a1a1a;
+      color: #1c1c1e;
     }
-    h2 { text-align: center; margin-bottom: 0.5rem; }
-    p.subtitle { text-align: center; color: #666; font-size: 14px; margin-bottom: 1.5rem; }
+    h2 { text-align: center; margin: 0 0 0.5rem 0; font-size: 24px; font-weight: 700; }
+    p.subtitle { text-align: center; color: #6c6c70; font-size: 14px; margin: 0 0 2rem 0; }
     .game-card {
-      background: white;
-      border-radius: 10px;
-      padding: 1rem;
-      margin-bottom: 1rem;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 1.2rem 1rem;
+      margin-bottom: 0.75rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .game-info { font-weight: 600; font-size: 15px; }
-    .game-status { font-size: 12px; color: #888; font-weight: normal; margin-top: 4px; }
-    input[type="checkbox"] { width: 20px; height: 20px; accent-color: #007aff; }
+    .game-info { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+    .game-status { font-size: 13px; color: #8e8e93; }
+    input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+      accent-color: #007aff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
     button {
       width: 100%;
       background-color: #007aff;
@@ -36,11 +53,12 @@
       padding: 16px;
       font-size: 16px;
       font-weight: 600;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
-      margin-top: 1rem;
+      margin-top: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
     }
-    button:active { opacity: 0.85; }
+    button:active { opacity: 0.85; transform: scale(0.99); }
   </style>
 </head>
 <body>
@@ -57,7 +75,6 @@
     const PARSE_APP_ID = 'd1eje7SvxRjIFsdB6c3TuQLlF8v6zExAMBzChgXa';
     const PARSE_JS_KEY = 'eQqLLilvkNhy04m0OF5J4ry17vw0FKeeEHfPT2mq';
 
-    // Load active schedule directly from ESPN on page load
     async function loadSchedule() {
       const container = document.getElementById('games-container');
       try {
@@ -65,7 +82,7 @@
         const data = await res.json();
         
         if (!data.events || data.events.length === 0) {
-          container.innerHTML = '<p style="text-align:center;">No games scheduled today.</p>';
+          container.innerHTML = '<p style="text-align:center; color: #8e8e93;">No games scheduled today.</p>';
           return;
         }
 
@@ -88,7 +105,7 @@
           container.appendChild(card);
         });
       } catch (err) {
-        container.innerHTML = '<p style="text-align:center; color:red;">Failed to load ESPN schedule.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#ff3b30;">Failed to load ESPN schedule.</p>';
       }
     }
 
@@ -113,7 +130,7 @@
 
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
-        alert('Notification permission was blocked.');
+        alert('Notification permission was denied in settings.');
         return;
       }
 
@@ -138,12 +155,12 @@
         });
 
         if (res.ok) {
-          alert('Success! Subscribed to score alerts for selected games.');
+          alert('Success! iPad registered for push notifications.');
         } else {
-          alert('Failed to save preferences to Back4App.');
+          alert('Failed to save subscription to Back4App.');
         }
       } catch (err) {
-        alert('Error: ' + err.message);
+        alert('Error enabling notifications: ' + err.message);
       }
     });
 
