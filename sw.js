@@ -3,8 +3,8 @@ self.addEventListener('push', (event) => {
 
   const title = data.title || 'ESPN Live Alert';
   const options = {
-    body: data.body || 'Game event updated!',
-    icon: 'https://a.espncdn.com/favicon.ico',
+    body: data.body || 'Game status updated!',
+    icon: 'https://a.espncdn.com/i/espn/espn_logos/espn_red.png',
     badge: 'https://a.espncdn.com/favicon.ico',
     vibrate: [200, 100, 200],
     data: { url: data.data?.url || '/' }
