@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ESPN Score Alerts</title>
 </head>
-<body style="font-family: sans-serif; text-align: center; padding: 2rem;">
+<body style="font-family: system-ui; text-align: center; padding: 3rem 1rem;">
   <h2>Live Sports Push Alerts</h2>
-  <button id="enable-btn" style="padding: 12px 24px; font-size: 16px;">Enable Score Notifications</button>
+  <button id="enable-btn" style="padding: 16px 32px; font-size: 18px; border-radius: 8px; background: #007aff; color: white; border: none;">Enable Score Notifications</button>
 
   <script>
     const VAPID_PUBLIC_KEY = 'BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E';
@@ -27,23 +27,22 @@
 
     document.getElementById('enable-btn').addEventListener('click', async () => {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        alert('Push notifications are not supported on this device/browser.');
+        alert('Push notifications require installing this page to your Home Screen first!');
         return;
       }
 
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
-        alert('Notification permission denied.');
+        alert('Notification permission was denied in iPad settings.');
         return;
       }
 
-      const reg = await navigator.serviceWorker.register('/sw.js');
+      const reg = await navigator.serviceWorker.register('./sw.js');
       const subscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
 
-      // Send subscription object to Back4App
       await fetch('https://parseapi.back4app.com/functions/saveSubscription', {
         method: 'POST',
         headers: {
@@ -54,7 +53,7 @@
         body: JSON.stringify({ subscription: subscription.toJSON() })
       });
 
-      alert('Successfully subscribed to live ESPN updates!');
+      alert('SUCCESS! Your iPad is registered to receive score alerts.');
     });
   </script>
 </body>
