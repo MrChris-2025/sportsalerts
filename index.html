@@ -11,89 +11,92 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-:root{--bg:#080f1d;--panel:#0d1728;--line:#22324a;--text:#f5f7fb;--muted:#8190a8;--blue:#4d8dff;--green:#20c77a}
+:root{
+ --bg:#12090d;--side:#160b11;--panel:#190e15;--panel2:#1d1119;
+ --line:#38202b;--line2:#472735;--text:#f5f1f3;--muted:#968995;
+ --accent:#9f3d55;--accent2:#c5536d;--green:#36bd7c
+}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Poppins,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
 button{font:inherit}.app{display:flex;min-height:100vh}
 
 /* SIDEBAR */
-.sidebar{position:fixed;inset:0 auto 0 0;width:270px;background:#0a1424;border-right:1px solid var(--line);z-index:30;display:flex;flex-direction:column}
+.sidebar{position:fixed;inset:0 auto 0 0;width:270px;background:var(--side);border-right:1px solid var(--line);z-index:30;display:flex;flex-direction:column}
 .brand{height:94px;display:flex;align-items:center;gap:14px;padding:0 28px;border-bottom:1px solid var(--line);font-size:22px;font-weight:700}
-.brand-icon{width:40px;height:40px;background:var(--blue);border-radius:11px;display:grid;place-items:center}
+.brand-icon{width:40px;height:40px;background:var(--accent);border-radius:11px;display:grid;place-items:center}
 .brand-icon svg{width:23px;height:23px}
-.side-content{padding:28px 14px}
-.side-label{padding:0 11px;margin:10px 0 12px;color:#63738c;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
-.sport{width:100%;height:50px;border:0;background:transparent;color:#8998ae;display:flex;align-items:center;gap:14px;padding:0 12px;border-radius:10px;cursor:pointer;text-align:left;margin-bottom:4px}
-.sport:hover{background:#111e32;color:#fff}.sport.active{background:#1b3152;color:#fff}
+.side-content{padding:28px 14px}.side-label{padding:0 11px;margin:10px 0 12px;color:#725f69;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.sport{width:100%;height:50px;border:0;background:transparent;color:#9b8d97;display:flex;align-items:center;gap:14px;padding:0 12px;border-radius:10px;cursor:pointer;text-align:left;margin-bottom:4px}
+.sport:hover{background:#24131b;color:#fff}.sport.active{background:#3a1b27;color:#fff}
 .sport svg{width:21px;height:21px;flex:none}.sport-name{flex:1;font-size:15px;font-weight:500}
-.count{min-width:28px;height:28px;border-radius:14px;background:#1b2d48;display:grid;place-items:center;color:#8ea0b9;font-size:11px}
-.sport.active .count{background:#29466e;color:#fff}
-
-/* ALERT SETTINGS */
-.notify-panel{display:none;margin:10px 4px 16px;padding:14px;background:#0d192b;border:1px solid var(--line);border-radius:12px;max-height:285px;overflow-y:auto}
-.notify-panel.open{display:block}
-.notify-title{color:#dbe3ef;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
-.notify-row{display:flex;align-items:center;justify-content:space-between;min-height:34px;color:#8d9bb0;font-size:12px}
-.notify-row label{cursor:pointer}.notify-row input{accent-color:var(--blue);width:15px;height:15px}
-.notify-all{width:100%;border:1px solid var(--line);background:#132239;color:#8fa0b8;border-radius:7px;padding:7px;margin-top:8px;font-size:11px;cursor:pointer}
-.sidebar-footer{margin-top:auto;padding:22px 24px;border-top:1px solid var(--line);color:#61728b;font-size:12px;line-height:1.8}
+.count{min-width:28px;height:28px;border-radius:14px;background:#2a1821;display:grid;place-items:center;color:#9d8994;font-size:11px}
+.sport.active .count{background:#572638;color:#fff}
+.notify-panel{display:none;margin:10px 4px 16px;padding:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;max-height:285px;overflow-y:auto}
+.notify-panel.open{display:block}.notify-title{color:#ded3d8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.notify-row{display:flex;align-items:center;justify-content:space-between;min-height:34px;color:#a18f99;font-size:12px}
+.notify-row label{cursor:pointer}.notify-row input{accent-color:var(--accent2);width:15px;height:15px}
+.notify-all{width:100%;border:1px solid var(--line);background:#25141d;color:#a8949f;border-radius:7px;padding:7px;margin-top:8px;font-size:11px;cursor:pointer}
+.sidebar-footer{margin-top:auto;padding:22px 24px;border-top:1px solid var(--line);color:#725f69;font-size:12px;line-height:1.8}
 
 /* MAIN */
 .main{margin-left:270px;min-width:0;flex:1;display:flex;flex-direction:column;min-height:100vh}
-.topbar{position:sticky;top:0;height:94px;background:rgba(8,15,29,.97);border-bottom:1px solid var(--line);z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 34px}
+.topbar{position:sticky;top:0;height:94px;background:rgba(18,9,13,.98);border-bottom:1px solid var(--line);z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 34px}
 .page-title{font-size:22px;font-weight:700}.page-subtitle{color:var(--muted);font-size:14px;margin-top:2px}
 .top-right{display:flex;align-items:center;gap:24px}.date{text-align:right}.date-day{color:var(--muted);font-size:12px}.time{font-size:17px;font-weight:700}
-.live-key{display:flex;align-items:center;gap:8px;color:#9aa8bc;font-size:12px}.live-dot{width:9px;height:9px;background:var(--green);border-radius:50%}
-.master{display:flex;align-items:center;gap:10px;padding-left:22px;border-left:1px solid var(--line);color:#91a0b5;font-size:12px;font-weight:600}
+.master{display:flex;align-items:center;gap:10px;padding-left:22px;border-left:1px solid var(--line);color:#a08d97;font-size:12px;font-weight:600}
 .switch{position:relative;width:54px;height:30px}.switch input{display:none}
-.slider{position:absolute;inset:0;background:#22324a;border:1px solid #30435d;border-radius:20px;cursor:pointer}
-.slider:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#dce4ef;border-radius:50%;transition:.2s}
-.switch input:checked+.slider{background:#245b47}.switch input:checked+.slider:before{transform:translateX(24px)}
+.slider{position:absolute;inset:0;background:#30202a;border:1px solid #49303b;border-radius:20px;cursor:pointer}
+.slider:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#ddd5d9;border-radius:50%;transition:.2s}
+.switch input:checked+.slider{background:#643044}.switch input:checked+.slider:before{transform:translateX(24px)}
 
 /* CONTENT */
 .content{padding:26px 34px 0;max-width:1500px;width:100%;margin:auto;flex:1}
 .dates{display:grid;grid-template-columns:repeat(7,minmax(90px,1fr));gap:8px;margin-bottom:24px}
-.day{border:1px solid var(--line);background:var(--panel);color:#8190a8;border-radius:10px;padding:10px 6px;cursor:pointer;text-align:center}
-.day:hover{background:#122039;color:#fff}.day.active{background:#1b3152;border-color:#31537e;color:#fff}
+.day{border:1px solid var(--line);background:var(--panel);color:#958590;border-radius:10px;padding:10px 6px;cursor:pointer;text-align:center}
+.day:hover{background:#25131c;color:#fff}.day.active{background:#3b1c28;border-color:#633143;color:#fff}
 .day-name{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-.day-num{display:block;font-size:16px;font-weight:700;margin-top:2px}.day-month{font-size:10px;color:#667790}
-.day.active .day-month{color:#aebed4}
+.day-num{display:block;font-size:16px;font-weight:700;margin-top:2px}.day-month{font-size:10px;color:#75636d}.day.active .day-month{color:#bca8b1}
 
+/* CARDS */
 .games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
-.card.live{border-color:#294b63}
+.card.live{border-color:#5a3040}
 .card-head{height:54px;padding:0 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
-.status{display:flex;align-items:center;gap:8px;color:#8998ad;font-size:12px;font-weight:600}.status i{width:8px;height:8px;border-radius:50%;background:#66758b}
-.status.live{color:#62d89e}.status.live i{background:var(--green)}
-.alert{height:34px;border:1px solid #293b54;background:#111e31;color:#8998ad;border-radius:8px;padding:0 11px;display:flex;align-items:center;gap:7px;cursor:pointer;font-size:11px;font-weight:600}
-.alert.active{color:#fff;border-color:#3d6da8;background:#172b47}.alert svg{width:15px;height:15px}
-.score-area{display:grid;grid-template-columns:minmax(0,1fr) 190px;min-height:164px}
-.teams{min-width:0;padding:20px 18px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:18px}
-.team{display:grid;grid-template-columns:38px minmax(0,1fr) 42px;align-items:center;gap:11px;min-width:0}
-.logo{width:34px;height:34px;object-fit:contain;display:block}
-.team-text{min-width:0}.team-name{display:block;font-size:15px;font-weight:600;line-height:1.3}
-.record{display:block;color:#65758d;font-size:10px;margin-top:2px}.score{width:42px;text-align:right;font-size:25px;line-height:1;font-weight:700}
-.game-info{min-width:0;padding:19px 18px;display:flex;flex-direction:column;justify-content:center;gap:10px;color:#8493a8;font-size:11px}
-.info{display:flex;align-items:flex-start;gap:8px;line-height:1.45}.info svg{width:16px;height:16px;flex:none;color:#71839d}.info strong{color:#d7deea;font-weight:500}
-.game-footer{height:43px;border-top:1px solid var(--line);padding:0 18px;display:flex;align-items:center;color:#65758d;font-size:10px}
-.message{grid-column:1/-1;border:1px solid var(--line);background:var(--panel);border-radius:16px;min-height:180px;display:grid;place-items:center;color:#718097}
+.status{display:flex;align-items:center;gap:8px;color:#998a94;font-size:12px;font-weight:600}.status i{width:8px;height:8px;border-radius:50%;background:#70616a}
+.status.live{color:#65c993}.status.live i{background:var(--green)}
+.alert{height:34px;border:1px solid #49313c;background:#21131b;color:#9d8c97;border-radius:8px;padding:0 11px;display:flex;align-items:center;gap:7px;cursor:pointer;font-size:11px;font-weight:600}
+.alert.active{color:#fff;border-color:#704052;background:#321a25}.alert svg{width:15px;height:15px}
 
-/* PAGE FOOTER */
-.page-footer{margin:34px 0 0;padding:22px 0;border-top:1px solid var(--line);color:#61728b;font-size:11px;display:flex;justify-content:space-between;gap:20px}
-.page-footer strong{color:#8392a8;font-weight:500}
+/* FIXED SCORE LAYOUT */
+.score-area{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(180px,.9fr);min-height:188px}
+.teams{min-width:0;padding:22px 20px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:22px}
+.team{display:grid;grid-template-columns:46px minmax(0,1fr) 46px;align-items:center;column-gap:12px;min-width:0}
+.logo{width:40px;height:40px;object-fit:contain;display:block}
+.team-text{min-width:0}.team-name{display:block;font-size:15px;font-weight:600;line-height:1.35;white-space:normal;overflow:visible}
+.record{display:block;color:#756670;font-size:10px;margin-top:3px}.score{width:46px;text-align:right;font-size:27px;line-height:1;font-weight:700}
+.game-info{min-width:0;padding:22px 18px;display:flex;flex-direction:column;justify-content:center;gap:15px;color:#93848e;font-size:11px}
+.info{display:flex;align-items:flex-start;gap:9px;line-height:1.5}.info svg{width:16px;height:16px;flex:none;color:#826e79}.info strong{color:#ddd3d8;font-weight:500}
+.game-footer{height:43px;border-top:1px solid var(--line);padding:0 18px;display:flex;align-items:center;color:#756670;font-size:10px}
+.message{grid-column:1/-1;border:1px solid var(--line);background:var(--panel);border-radius:16px;min-height:180px;display:grid;place-items:center;color:#7e6d77}
 
-/* TOAST */
+/* FOOTER */
+.page-footer{margin:34px 0 0;padding:22px 0;border-top:1px solid var(--line);color:#715e68;font-size:11px;display:flex;justify-content:space-between;gap:20px}
+.page-footer strong{color:#917d87;font-weight:500}
+
+/* TOASTS */
 .toasts{position:fixed;right:24px;bottom:24px;width:350px;z-index:100;display:grid;gap:10px}
-.toast{background:#101c2d;border:1px solid #30445f;border-radius:12px;box-shadow:0 15px 40px rgba(0,0,0,.35);padding:13px;display:flex;gap:12px}
-.toast-logo{width:38px;height:38px;object-fit:contain;flex:none;background:#0b1422;border-radius:8px;padding:4px}
-.toast-copy{min-width:0}.toast-title{font-size:11px;color:#7f90a7;font-weight:600;margin-bottom:2px}
-.toast-score{font-size:14px;font-weight:700}.toast-detail{font-size:11px;color:#91a0b4;margin-top:2px;line-height:1.45}
+.toast{background:#21131b;border:1px solid #52303d;border-radius:12px;box-shadow:0 15px 40px rgba(0,0,0,.4);padding:13px;display:flex;gap:12px}
+.toast-logo{width:38px;height:38px;object-fit:contain;flex:none;background:#160b11;border-radius:8px;padding:4px}
+.toast-copy{min-width:0}.toast-title{font-size:11px;color:#927d88;font-weight:600;margin-bottom:2px}
+.toast-score{font-size:14px;font-weight:700}.toast-detail{font-size:11px;color:#9b8a94;margin-top:2px;line-height:1.45}
 
-@media(max-width:1050px){.games{grid-template-columns:1fr}.dates{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:1050px){
+ .games{grid-template-columns:1fr}.dates{grid-template-columns:repeat(4,1fr)}
+}
 @media(max-width:800px){
  .sidebar{width:72px}.brand{height:70px;padding:0;justify-content:center}.brand span,.side-label,.sport-name,.count,.sidebar-footer{display:none}
  .side-content{padding:18px 10px}.sport{justify-content:center;padding:0}.main{margin-left:72px}
- .topbar{height:78px;padding:0 18px}.top-right{gap:13px}.live-key{display:none}.content{padding:20px 18px 0}
+ .topbar{height:78px;padding:0 18px}.content{padding:20px 18px 0}
  .dates{grid-template-columns:repeat(4,1fr)}
 }
 @media(max-width:600px){
@@ -110,89 +113,107 @@ button{font:inherit}.app{display:flex;min-height:100vh}
 <div class="app">
 
 <aside class="sidebar">
- <div class="brand">
-  <div class="brand-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9m5 10V5m5 14v-7m5 7V3"/></svg></div>
-  <span>Sports Alerts</span>
+<div class="brand">
+ <div class="brand-icon">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+   <path d="M4 19V9m5 10V5m5 14v-7m5 7V3"/>
+  </svg>
  </div>
+ <span>Sports Alerts</span>
+</div>
 
- <div class="side-content">
-  <div class="side-label">Sports</div>
+<div class="side-content">
+<div class="side-label">Sports</div>
 
-  <button class="sport active" data-cat="mlb">
-   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>
-   <span class="sport-name">MLB</span><span class="count" id="count-mlb">0</span>
-  </button>
+<button class="sport active" data-cat="mlb">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>
+<span class="sport-name">MLB</span><span class="count" id="count-mlb">0</span>
+</button>
 
-  <button class="sport" data-cat="nba">
-   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M5 5c5 3 9 7 14 14M3 12c4-1 12-1 18 0M12 3c1 5 1 13 0 18"/></svg>
-   <span class="sport-name">NBA</span><span class="count" id="count-nba">0</span>
-  </button>
+<button class="sport" data-cat="nba">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M5 5c5 3 9 7 14 14M3 12c4-1 12-1 18 0M12 3c1 5 1 13 0 18"/></svg>
+<span class="sport-name">NBA</span><span class="count" id="count-nba">0</span>
+</button>
 
-  <button class="sport" data-cat="nfl">
-   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4h10l1 16H6L7 4Z"/><path d="M9 7h6M9 12h6M9 17h6"/></svg>
-   <span class="sport-name">NFL</span><span class="count" id="count-nfl">0</span>
-  </button>
+<button class="sport" data-cat="nfl">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4h10l1 16H6L7 4Z"/><path d="M9 7h6M9 12h6M9 17h6"/></svg>
+<span class="sport-name">NFL</span><span class="count" id="count-nfl">0</span>
+</button>
 
-  <button class="sport" data-cat="nhl">
-   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 4 8 16M16 4 8 20M5 7h14M5 17h14"/></svg>
-   <span class="sport-name">NHL</span><span class="count" id="count-nhl">0</span>
-  </button>
+<button class="sport" data-cat="nhl">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 4 8 16M16 4 8 20M5 7h14M5 17h14"/></svg>
+<span class="sport-name">NHL</span><span class="count" id="count-nhl">0</span>
+</button>
 
-  <button class="sport" data-cat="soccer">
-   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 7 4v8l-7 6-7-6V7l7-4Z"/><path d="m12 8 4 3-1 4h-6l-1-4 4-3Z"/></svg>
-   <span class="sport-name">Soccer</span><span class="count" id="count-soccer">0</span>
-  </button>
+<button class="sport" data-cat="soccer">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 7 4v8l-7 6-7-6V7l7-4Z"/><path d="m12 8 4 3-1 4h-6l-1-4 4-3Z"/></svg>
+<span class="sport-name">Soccer</span><span class="count" id="count-soccer">0</span>
+</button>
 
-  <button class="sport" data-cat="mma">
-   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4h5v6H7zM12 8h5v6h-5zM5 14h7v6H5z"/></svg>
-   <span class="sport-name">MMA</span><span class="count" id="count-mma">0</span>
-  </button>
+<button class="sport" data-cat="mma">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4h5v6H7zM12 8h5v6h-5zM5 14h7v6H5z"/></svg>
+<span class="sport-name">MMA</span><span class="count" id="count-mma">0</span>
+</button>
 
-  <div class="side-label" style="margin-top:32px">Alerts</div>
+<div class="side-label" style="margin-top:32px">Alerts</div>
 
-  <button class="sport" id="alerts-menu">
-   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
-   <span class="sport-name">My Alerts</span><span class="count" id="alert-count">0</span>
-  </button>
+<button class="sport" id="alerts-menu">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+<span class="sport-name">My Alerts</span><span class="count" id="alert-count">0</span>
+</button>
 
-  <div class="notify-panel" id="notify-panel">
-   <div class="notify-title">Scoring Notifications</div>
-   <div class="notify-row"><label for="notify-mlb">MLB</label><input id="notify-mlb" type="checkbox" data-notify="mlb"></div>
-   <div class="notify-row"><label for="notify-nba">NBA</label><input id="notify-nba" type="checkbox" data-notify="nba"></div>
-   <div class="notify-row"><label for="notify-nfl">NFL</label><input id="notify-nfl" type="checkbox" data-notify="nfl"></div>
-   <div class="notify-row"><label for="notify-nhl">NHL</label><input id="notify-nhl" type="checkbox" data-notify="nhl"></div>
-   <div class="notify-row"><label for="notify-soccer">Soccer</label><input id="notify-soccer" type="checkbox" data-notify="soccer"></div>
-   <div class="notify-row"><label for="notify-mma">MMA</label><input id="notify-mma" type="checkbox" data-notify="mma"></div>
-   <button class="notify-all" id="notify-all">Select All</button>
-  </div>
- </div>
+<div class="notify-panel" id="notify-panel">
+<div class="notify-title">Scoring Notifications</div>
+<div class="notify-row"><label>MLB</label><input type="checkbox" data-notify="mlb"></div>
+<div class="notify-row"><label>NBA</label><input type="checkbox" data-notify="nba"></div>
+<div class="notify-row"><label>NFL</label><input type="checkbox" data-notify="nfl"></div>
+<div class="notify-row"><label>NHL</label><input type="checkbox" data-notify="nhl"></div>
+<div class="notify-row"><label>Soccer</label><input type="checkbox" data-notify="soccer"></div>
+<div class="notify-row"><label>MMA</label><input type="checkbox" data-notify="mma"></div>
+<button class="notify-all" id="notify-all">Select All</button>
+</div>
+</div>
 
- <div class="sidebar-footer">Scores refresh automatically.<br>Alerts remain synchronized with this device.</div>
+<div class="sidebar-footer">
+Scores refresh automatically.<br>
+Alerts remain synchronized with this device.
+</div>
 </aside>
 
 <main class="main">
- <header class="topbar">
-  <div>
-   <div class="page-title" id="page-title">MLB Scores</div>
-   <div class="page-subtitle" id="subtitle">Today's games</div>
-  </div>
 
-  <div class="top-right">
-   <div class="live-key"><i class="live-dot"></i>Live</div>
-   <div class="date"><div class="date-day" id="date"></div><div class="time" id="time"></div></div>
-   <div class="master"><span id="master-label">ALERTS OFF</span><label class="switch"><input id="master-toggle" type="checkbox"><span class="slider"></span></label></div>
-  </div>
- </header>
+<header class="topbar">
+<div>
+<div class="page-title" id="page-title">MLB Scores</div>
+<div class="page-subtitle" id="subtitle">Today's games</div>
+</div>
 
- <section class="content">
-  <div class="dates" id="dates"></div>
-  <div class="games" id="games"></div>
+<div class="top-right">
+<div class="date">
+<div class="date-day" id="date"></div>
+<div class="time" id="time"></div>
+</div>
 
-  <footer class="page-footer">
-   <span><strong>Sports Alerts</strong> · Scores refresh automatically every 30 seconds.</span>
-   <span>Push alerts remain synchronized with this device.</span>
-  </footer>
- </section>
+<div class="master">
+<span id="master-label">ALERTS OFF</span>
+<label class="switch">
+<input id="master-toggle" type="checkbox">
+<span class="slider"></span>
+</label>
+</div>
+</div>
+</header>
+
+<section class="content">
+<div class="dates" id="dates"></div>
+<div class="games" id="games"></div>
+
+<footer class="page-footer">
+<span><strong>Sports Alerts</strong> · Scores refresh automatically every 30 seconds.</span>
+<span>Push alerts remain synchronized with this device.</span>
+</footer>
+</section>
+
 </main>
 </div>
 
@@ -204,246 +225,325 @@ const APP_ID='d1eje7SvxRjIFsdB6c3TuQLlF8v6zExAMBzChgXa';
 const JS_KEY='eQqLLilvkNhy04m0OF5J4ry17vw0FKeeEHfPT2mq';
 
 const URLS={
- mlb:'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard',
- nba:'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
- nfl:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
- nhl:'https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard',
- soccer:'https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard',
- mma:'https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard'
+mlb:'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard',
+nba:'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
+nfl:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
+nhl:'https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard',
+soccer:'https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard',
+mma:'https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard'
 };
+
 const names={mlb:'MLB',nba:'NBA',nfl:'NFL',nhl:'NHL',soccer:'Soccer',mma:'MMA'};
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 
-let category='mlb',selectedDate=fmtDate(new Date()),games=[],refreshKey='';
+let category='mlb';
+let selectedDate=fmtDate(new Date());
+let games=[],refreshKey='';
 let selected=new Set(JSON.parse(localStorage.getItem('selectedGameIds')||'[]'));
 let previous=JSON.parse(localStorage.getItem('scoreSnapshots')||'{}');
 let master=localStorage.getItem('masterPushEnabled')==='true';
 let notify=new Set(JSON.parse(localStorage.getItem('toastSports')||'["mlb"]'));
 
 function fmtDate(d){
- return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
 }
-function prettyDate(d){
- return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+
+/* FIXES ESPN YYYYMMDD INVALID DATE */
+function dateObject(s){
+if(!/^\d{8}$/.test(s))return new Date(s);
+return new Date(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8));
+}
+function prettyDate(s){
+const d=dateObject(s);
+return isNaN(d)?'':d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function time(d){
+return d?new Date(d).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'';
+}
+function esc(s){
+return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 function icon(t){
- const x={
- clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>',
- pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2"/></svg>',
- bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>',
- off:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-10.9-3.4M6 8c0 7-3 7-3 9h15M10 21h4M3 3l18 18"/></svg>'
- };return x[t]||''
+return {
+clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>',
+pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2"/></svg>',
+bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>',
+off:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-10.9-3.4M6 8c0 7-3 7-3 9h15M10 21h4M3 3l18 18"/></svg>'
+}[t]||''
 }
-function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-function time(d){return d?new Date(d).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):''}
 
 function clock(){
- const d=new Date();
- $('#date').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',year:'numeric'});
- $('#time').textContent=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+const d=new Date();
+$('#date').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',year:'numeric'});
+$('#time').textContent=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
 }
 clock();setInterval(clock,1000);
 
 function buildDates(){
- const today=new Date(),el=$('#dates');
- el.innerHTML=Array.from({length:7},(_,i)=>{
-  const d=new Date(today);d.setDate(today.getDate()+i);
-  const key=fmtDate(d),name=i===0?'Today':d.toLocaleDateString('en-US',{weekday:'short'});
-  return `<button class="day ${key===selectedDate?'active':''}" data-date="${key}">
-   <span class="day-name">${name}</span><span class="day-num">${d.getDate()}</span>
-   <span class="day-month">${d.toLocaleDateString('en-US',{month:'short'})}</span>
-  </button>`;
- }).join('');
- $$('.day').forEach(b=>b.onclick=()=>{
-  selectedDate=b.dataset.date;
-  $$('.day').forEach(x=>x.classList.toggle('active',x===b));
-  load(category,true);
- });
+const today=new Date();
+$('#dates').innerHTML=Array.from({length:7},(_,i)=>{
+const d=new Date(today);d.setDate(today.getDate()+i);
+const key=fmtDate(d);
+const day=i===0?'Today':d.toLocaleDateString('en-US',{weekday:'short'});
+return `<button class="day ${key===selectedDate?'active':''}" data-date="${key}">
+<span class="day-name">${day}</span>
+<span class="day-num">${d.getDate()}</span>
+<span class="day-month">${d.toLocaleDateString('en-US',{month:'short'})}</span>
+</button>`;
+}).join('');
+
+$$('.day').forEach(b=>b.onclick=()=>{
+selectedDate=b.dataset.date;
+$$('.day').forEach(x=>x.classList.toggle('active',x===b));
+load(category,true);
+});
 }
 
 function parseGame(e){
- const c=e.competitions?.[0]||{},teams=c.competitors||[];
- const home=teams.find(x=>x.homeAway==='home')||teams[0]||{},away=teams.find(x=>x.homeAway==='away')||teams[1]||{},st=e.status?.type||{};
- return{
-  id:String(e.id),live:st.state==='in',status:st.detail||st.shortDetail||st.description||'Scheduled',
-  clock:e.status?.displayClock||'',period:e.status?.period||0,home,away,
-  homeName:home.team?.displayName||home.athlete?.displayName||'Home',
-  awayName:away.team?.displayName||away.athlete?.displayName||'Away',
-  homeLogo:home.team?.logo||'',awayLogo:away.team?.logo||'',
-  homeScore:home.score??'0',awayScore:away.score??'0',
-  homeRecord:home.records?.[0]?.summary||'',awayRecord:away.records?.[0]?.summary||'',
-  venue:c.venue?.fullName||'',start:e.date
- };
+const c=e.competitions?.[0]||{},teams=c.competitors||[];
+const home=teams.find(x=>x.homeAway==='home')||teams[0]||{};
+const away=teams.find(x=>x.homeAway==='away')||teams[1]||{};
+const st=e.status?.type||{};
+return{
+id:String(e.id),
+live:st.state==='in',
+status:st.detail||st.shortDetail||st.description||'Scheduled',
+clock:e.status?.displayClock||'',
+period:e.status?.period||0,
+home,away,
+homeName:home.team?.displayName||home.athlete?.displayName||'Home',
+awayName:away.team?.displayName||away.athlete?.displayName||'Away',
+homeLogo:home.team?.logo||'',
+awayLogo:away.team?.logo||'',
+homeScore:home.score??'0',
+awayScore:away.score??'0',
+homeRecord:home.records?.[0]?.summary||'',
+awayRecord:away.records?.[0]?.summary||'',
+venue:c.venue?.fullName||'',
+start:e.date
+};
 }
 
 function render(){
- $('#games').innerHTML=games.length?games.map(g=>{
-  const sub=selected.has(g.id);
-  return `<article class="card ${g.live?'live':''}">
-   <div class="card-head">
-    <div class="status ${g.live?'live':''}"><i></i>${esc(g.live&&g.clock?g.clock+' · '+g.status:g.status)}</div>
-    <button class="alert ${sub?'active':''}" onclick="toggleAlert('${g.id}')">${sub?icon('bell'):icon('off')}${sub?'Alerts On':'Alerts Off'}</button>
-   </div>
-   <div class="score-area">
-    <div class="teams">
-     <div class="team">
-      <img class="logo" src="${esc(g.awayLogo)}" onerror="this.style.visibility='hidden'">
-      <div class="team-text"><span class="team-name">${esc(g.awayName)}</span>${g.awayRecord?`<span class="record">${esc(g.awayRecord)}</span>`:''}</div>
-      <div class="score">${esc(g.awayScore)}</div>
-     </div>
-     <div class="team">
-      <img class="logo" src="${esc(g.homeLogo)}" onerror="this.style.visibility='hidden'">
-      <div class="team-text"><span class="team-name">${esc(g.homeName)}</span>${g.homeRecord?`<span class="record">${esc(g.homeRecord)}</span>`:''}</div>
-      <div class="score">${esc(g.homeScore)}</div>
-     </div>
-    </div>
-    <div class="game-info">
-     <div class="info">${icon('clock')}<span><strong>${time(g.start)}</strong></span></div>
-     ${g.venue?`<div class="info">${icon('pin')}<span>${esc(g.venue)}</span></div>`:''}
-     ${g.live&&g.period?`<div class="info">${icon('clock')}<span><strong>${esc(g.status)}</strong>${g.clock?' · '+esc(g.clock):''}</span></div>`:''}
-    </div>
-   </div>
-   <div class="game-footer"><span>${prettyDate(selectedDate)} · ${time(g.start)}</span></div>
-  </article>`;
- }).join(''):'<div class="message">No games scheduled for this date.</div>';
+$('#games').innerHTML=games.length?games.map(g=>{
+const sub=selected.has(g.id);
+return `<article class="card ${g.live?'live':''}">
+<div class="card-head">
+<div class="status ${g.live?'live':''}"><i></i>${esc(g.live&&g.clock?g.clock+' · '+g.status:g.status)}</div>
+<button class="alert ${sub?'active':''}" onclick="toggleAlert('${g.id}')">
+${sub?icon('bell'):icon('off')}${sub?'Alerts On':'Alerts Off'}
+</button>
+</div>
+
+<div class="score-area">
+<div class="teams">
+
+<div class="team">
+<img class="logo" src="${esc(g.awayLogo)}" onerror="this.style.visibility='hidden'">
+<div class="team-text">
+<span class="team-name">${esc(g.awayName)}</span>
+${g.awayRecord?`<span class="record">${esc(g.awayRecord)}</span>`:''}
+</div>
+<div class="score">${esc(g.awayScore)}</div>
+</div>
+
+<div class="team">
+<img class="logo" src="${esc(g.homeLogo)}" onerror="this.style.visibility='hidden'">
+<div class="team-text">
+<span class="team-name">${esc(g.homeName)}</span>
+${g.homeRecord?`<span class="record">${esc(g.homeRecord)}</span>`:''}
+</div>
+<div class="score">${esc(g.homeScore)}</div>
+</div>
+
+</div>
+
+<div class="game-info">
+<div class="info">${icon('clock')}<span><strong>${time(g.start)}</strong></span></div>
+${g.venue?`<div class="info">${icon('pin')}<span>${esc(g.venue)}</span></div>`:''}
+${g.live&&g.period?`<div class="info">${icon('clock')}<span><strong>${esc(g.status)}</strong>${g.clock?' · '+esc(g.clock):''}</span></div>`:''}
+</div>
+</div>
+
+<div class="game-footer">
+<span>${prettyDate(selectedDate)} · ${time(g.start)}</span>
+</div>
+</article>`;
+}).join(''):'<div class="message">No games scheduled for this date.</div>';
 }
 
 async function load(cat,initial=false){
- category=cat;
- $('#page-title').textContent=`${names[cat]} Scores`;
- $('#subtitle').textContent=selectedDate===fmtDate(new Date())?"Today's games":`Games for ${prettyDate(selectedDate)}`;
- if(initial&&!games.length)$('#games').innerHTML='<div class="message">Loading scores...</div>';
- try{
-  const r=await fetch(`${URLS[cat]}?dates=${selectedDate}`,{cache:'no-store'}),d=await r.json();
-  const next=(d.events||[]).map(parseGame);
-  detectScores(next);
-  games=next;
-  refreshKey=JSON.stringify(next.map(g=>[g.id,g.status,g.clock,g.period,g.awayScore,g.homeScore]));
-  updateCounts();render();
- }catch(e){if(initial&&!games.length)$('#games').innerHTML='<div class="message">Unable to load scores.</div>'}
+category=cat;
+$('#page-title').textContent=`${names[cat]} Scores`;
+$('#subtitle').textContent=selectedDate===fmtDate(new Date())?"Today's games":`Games for ${prettyDate(selectedDate)}`;
+
+if(initial&&!games.length)$('#games').innerHTML='<div class="message">Loading scores...</div>';
+
+try{
+const r=await fetch(`${URLS[cat]}?dates=${selectedDate}`,{cache:'no-store'});
+const d=await r.json();
+const next=(d.events||[]).map(parseGame);
+detectScores(next);
+games=next;
+refreshKey=JSON.stringify(next.map(g=>[g.id,g.status,g.clock,g.period,g.awayScore,g.homeScore]));
+updateCounts();render();
+}catch(e){
+if(initial&&!games.length)$('#games').innerHTML='<div class="message">Unable to load scores.</div>';
+}
 }
 
 function updateCounts(){
- $('#count-'+category).textContent=games.length;
- $('#alert-count').textContent=selected.size;
+$('#count-'+category).textContent=games.length;
+$('#alert-count').textContent=selected.size;
 }
+
 function detectScores(next){
- const snap={...previous};
- next.forEach(g=>{
-  const old=snap[g.id],cur=`${g.awayScore}-${g.homeScore}`;
-  if(old&&old!==cur&&g.live){
-   const a=old.split('-').map(Number),b=[+g.awayScore,+g.homeScore];
-   const scorer=b[0]>a[0]?g.away:b[1]>a[1]?g.home:null;
-   if(scorer&&notify.has(category))showToast(g,scorer);
-  }
-  snap[g.id]=cur;
- });
- previous=snap;localStorage.setItem('scoreSnapshots',JSON.stringify(snap));
+const snap={...previous};
+
+next.forEach(g=>{
+const old=snap[g.id],cur=`${g.awayScore}-${g.homeScore}`;
+if(old&&old!==cur&&g.live){
+const a=old.split('-').map(Number),b=[+g.awayScore,+g.homeScore];
+const scorer=b[0]>a[0]?g.away:b[1]>a[1]?g.home:null;
+if(scorer&&notify.has(category))showToast(g,scorer);
+}
+snap[g.id]=cur;
+});
+
+previous=snap;
+localStorage.setItem('scoreSnapshots',JSON.stringify(snap));
 }
 
 async function showToast(g,team){
- let detail='Score update';
- try{
-  const r=await fetch(`${URLS[category].replace('/scoreboard','/summary')}?event=${g.id}`,{cache:'no-store'});
-  const d=await r.json(),p=d.scoringPlays?.at(-1);
-  if(p)detail=p.text||p.shortText||p.description||detail;
- }catch(e){}
- const t=document.createElement('div');
- t.className='toast';
- t.innerHTML=`<img class="toast-logo" src="${esc(team.team?.logo||'')}" alt="">
-  <div class="toast-copy"><div class="toast-title">${names[category]} Scoring Update</div>
-  <div class="toast-score">${esc(team.team?.displayName||team.athlete?.displayName||'Score')} scored</div>
-  <div class="toast-detail">${esc(detail)}</div></div>`;
- $('#toasts').appendChild(t);setTimeout(()=>t.remove(),7000);
+let detail='Score update';
+
+try{
+const r=await fetch(`${URLS[category].replace('/scoreboard','/summary')}?event=${g.id}`,{cache:'no-store'});
+const d=await r.json();
+const p=d.scoringPlays?.at(-1);
+if(p)detail=p.text||p.shortText||p.description||detail;
+}catch(e){}
+
+const t=document.createElement('div');
+t.className='toast';
+t.innerHTML=`
+<img class="toast-logo" src="${esc(team.team?.logo||'')}" alt="">
+<div class="toast-copy">
+<div class="toast-title">${names[category]} Scoring Update</div>
+<div class="toast-score">${esc(team.team?.displayName||team.athlete?.displayName||'Score')} scored</div>
+<div class="toast-detail">${esc(detail)}</div>
+</div>`;
+
+$('#toasts').appendChild(t);
+setTimeout(()=>t.remove(),7000);
 }
 
 window.toggleAlert=id=>{
- id=String(id);selected.has(id)?selected.delete(id):selected.add(id);
- localStorage.setItem('selectedGameIds',JSON.stringify([...selected]));updateCounts();render();
- if(master)syncSubscription();
+id=String(id);
+selected.has(id)?selected.delete(id):selected.add(id);
+localStorage.setItem('selectedGameIds',JSON.stringify([...selected]));
+updateCounts();render();
+if(master)syncSubscription();
 };
 
 function setCategory(cat){
- category=cat;
- $$('.sport[data-cat]').forEach(x=>x.classList.toggle('active',x.dataset.cat===cat));
- load(cat,true);
+category=cat;
+$$('.sport[data-cat]').forEach(x=>x.classList.toggle('active',x.dataset.cat===cat));
+load(cat,true);
 }
 $$('.sport[data-cat]').forEach(x=>x.onclick=()=>setCategory(x.dataset.cat));
 
-$('#alerts-menu').onclick=()=>{
- $('#notify-panel').classList.toggle('open');
-};
+$('#alerts-menu').onclick=()=>$('#notify-panel').classList.toggle('open');
 
 $$('[data-notify]').forEach(x=>{
- x.checked=notify.has(x.dataset.notify);
- x.onchange=()=>{
-  x.checked?notify.add(x.dataset.notify):notify.delete(x.dataset.notify);
-  localStorage.setItem('toastSports',JSON.stringify([...notify]));
- };
+x.checked=notify.has(x.dataset.notify);
+x.onchange=()=>{
+x.checked?notify.add(x.dataset.notify):notify.delete(x.dataset.notify);
+localStorage.setItem('toastSports',JSON.stringify([...notify]));
+};
 });
 
 $('#notify-all').onclick=()=>{
- const all=Object.keys(names),enable=all.some(x=>!notify.has(x));
- enable?all.forEach(x=>notify.add(x)):notify.clear();
- $$('[data-notify]').forEach(x=>x.checked=notify.has(x));
- localStorage.setItem('toastSports',JSON.stringify([...notify]));
- $('#notify-all').textContent=enable?'Clear All':'Select All';
+const all=Object.keys(names),enable=all.some(x=>!notify.has(x));
+enable?all.forEach(x=>notify.add(x)):notify.clear();
+$$('[data-notify]').forEach(x=>x.checked=notify.has(x));
+localStorage.setItem('toastSports',JSON.stringify([...notify]));
+$('#notify-all').textContent=enable?'Clear All':'Select All';
 };
 
 $('#master-toggle').checked=master;
 $('#master-label').textContent=master?'ALERTS ON':'ALERTS OFF';
 
 $('#master-toggle').onchange=async()=>{
- master=$('#master-toggle').checked;
- localStorage.setItem('masterPushEnabled',master);
- $('#master-label').textContent=master?'ALERTS ON':'ALERTS OFF';
- if(master)await enablePush();else await syncSubscription();
+master=$('#master-toggle').checked;
+localStorage.setItem('masterPushEnabled',master);
+$('#master-label').textContent=master?'ALERTS ON':'ALERTS OFF';
+if(master)await enablePush();else await syncSubscription();
 };
 
 async function enablePush(){
- try{
-  if(!('serviceWorker'in navigator)||!('Notification'in window))throw 0;
-  if(await Notification.requestPermission()!=='granted')throw 0;
-  await syncSubscription();
- }catch(e){
-  master=false;$('#master-toggle').checked=false;
-  $('#master-label').textContent='ALERTS OFF';
-  localStorage.setItem('masterPushEnabled','false');
- }
+try{
+if(!('serviceWorker'in navigator)||!('Notification'in window))throw 0;
+if(await Notification.requestPermission()!=='granted')throw 0;
+await syncSubscription();
+}catch(e){
+master=false;
+$('#master-toggle').checked=false;
+$('#master-label').textContent='ALERTS OFF';
+localStorage.setItem('masterPushEnabled','false');
+}
 }
 
 async function syncSubscription(){
- try{
-  if(!('serviceWorker'in navigator))return;
-  const reg=await navigator.serviceWorker.register('/sw.js',{scope:'/'});
-  let sub=null;
-  if(master)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:base64ToUint8(VAPID_KEY)});
-  await fetch('https://parseapi.back4app.com/parse/functions/saveSubscription',{
-   method:'POST',
-   headers:{
-    'X-Parse-Application-Id':APP_ID,
-    'X-Parse-JavaScript-Key':JS_KEY,
-    'Content-Type':'application/json'
-   },
-   body:JSON.stringify({subscription:master&&sub?sub.toJSON():null,gameIds:master?[...selected]:[]})
-  });
- }catch(e){console.error('Subscription sync:',e)}
+try{
+if(!('serviceWorker'in navigator))return;
+const reg=await navigator.serviceWorker.register('/sw.js',{scope:'/'});
+let sub=null;
+
+if(master){
+sub=await reg.pushManager.subscribe({
+userVisibleOnly:true,
+applicationServerKey:base64ToUint8(VAPID_KEY)
+});
+}
+
+await fetch('https://parseapi.back4app.com/parse/functions/saveSubscription',{
+method:'POST',
+headers:{
+'X-Parse-Application-Id':APP_ID,
+'X-Parse-JavaScript-Key':JS_KEY,
+'Content-Type':'application/json'
+},
+body:JSON.stringify({
+subscription:master&&sub?sub.toJSON():null,
+gameIds:master?[...selected]:[]
+})
+});
+}catch(e){console.error('Subscription sync:',e)}
 }
 
 function base64ToUint8(s){
- const p='='.repeat((4-s.length%4)%4),r=atob((s+p).replace(/-/g,'+').replace(/_/g,'/'));
- return Uint8Array.from([...r],c=>c.charCodeAt(0));
+const p='='.repeat((4-s.length%4)%4);
+const r=atob((s+p).replace(/-/g,'+').replace(/_/g,'/'));
+return Uint8Array.from([...r],c=>c.charCodeAt(0));
 }
 
-/* SILENT REFRESH */
+/* SILENT BACKGROUND REFRESH */
 async function silentRefresh(){
- try{
-  const r=await fetch(`${URLS[category]}?dates=${selectedDate}`,{cache:'no-store'}),d=await r.json();
-  const next=(d.events||[]).map(parseGame);
-  const key=JSON.stringify(next.map(g=>[g.id,g.status,g.clock,g.period,g.awayScore,g.homeScore]));
-  detectScores(next);
-  if(key!==refreshKey){refreshKey=key;games=next;updateCounts();render()}
- }catch(e){}
+try{
+const r=await fetch(`${URLS[category]}?dates=${selectedDate}`,{cache:'no-store'});
+const d=await r.json();
+const next=(d.events||[]).map(parseGame);
+const key=JSON.stringify(next.map(g=>[g.id,g.status,g.clock,g.period,g.awayScore,g.homeScore]));
+detectScores(next);
+
+if(key!==refreshKey){
+refreshKey=key;
+games=next;
+updateCounts();
+render();
+}
+}catch(e){}
 }
 
 buildDates();
