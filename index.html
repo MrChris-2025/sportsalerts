@@ -2,32 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#e7ebf0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#e7ebf2">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="light">
 <link rel="manifest" href="/manifest.json">
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
 <title>Sports Alerts</title>
 
 <style>
 :root{
-  --bg:#e7ebf0;
-  --panel:#e7ebf0;
-  --text:#202733;
-  --muted:#7b8491;
-  --dark:#171d27;
-  --accent:#315bea;
-  --accent2:#18a779;
-  --red:#df4d58;
-  --shadow:12px 12px 26px #c7ccd3,-12px -12px 26px #fff;
-  --inset:inset 5px 5px 11px #c8cdd4,inset -5px -5px 11px #fff;
-  --radius:20px;
-  --sidebar:218px;
-  --top:76px;
+  --bg:#e7ebf2;
+  --panel:#e7ebf2;
+  --text:#202735;
+  --muted:#778091;
+  --accent:#4056d6;
+  --accent-dark:#3044b4;
+  --green:#198754;
+  --red:#c84a57;
+  --line:rgba(91,104,128,.16);
+  --shadow-out:9px 9px 18px #c7ccd5,-9px -9px 18px #fff;
+  --shadow-soft:5px 5px 12px #cbd0d8,-5px -5px 12px #fff;
+  --shadow-in:inset 4px 4px 9px #c8cdd5,inset -4px -4px 9px #fff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -35,946 +34,1138 @@ body{
   min-height:100vh;
   background:var(--bg);
   color:var(--text);
-  font-family:"Poppins",sans-serif;
-  padding-left:var(--sidebar);
-  padding-top:var(--top);
+  font-family:Poppins,sans-serif;
+  font-size:14px;
 }
 button,input{font:inherit}
-button{border:0;cursor:pointer;color:inherit}
-img{display:block}
-.hidden{display:none!important}
-
-/* TOP NAV */
-.topbar{
+button{color:inherit}
+.app-shell{min-height:100vh}
+.sidebar{
   position:fixed;
+  left:0;top:0;bottom:0;
+  width:225px;
+  padding:22px 16px;
+  background:var(--panel);
+  box-shadow:8px 0 22px rgba(67,77,95,.10);
   z-index:1000;
-  top:0;left:var(--sidebar);right:0;
-  height:var(--top);
-  background:rgba(231,235,240,.94);
-  border-bottom:1px solid rgba(80,90,105,.08);
+  overflow-y:auto;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0 8px 25px;
+  font-weight:800;
+  font-size:18px;
+}
+.brand i{font-size:22px;color:var(--accent)}
+.sidebar-heading{
+  margin:18px 8px 9px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.sport-list{display:grid;gap:7px}
+.sport-btn{
+  width:100%;
+  border:0;
+  background:transparent;
+  border-radius:13px;
+  padding:11px 12px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  cursor:pointer;
+  color:var(--muted);
+  font-weight:600;
+  text-align:left;
+}
+.sport-btn i{font-size:16px;width:20px;text-align:center}
+.sport-btn.active{
+  color:var(--accent);
+  box-shadow:var(--shadow-in);
+}
+.toast-settings{display:grid;gap:7px}
+.toast-row{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:0 28px;
-  box-shadow:0 5px 18px rgba(70,78,88,.08);
+  padding:9px 8px;
+  border-radius:12px;
 }
-.brand{
-  display:flex;align-items:center;gap:11px;
-  font-size:19px;font-weight:800;
-}
-.brand-mark{
-  width:38px;height:38px;border-radius:12px;
-  display:grid;place-items:center;
-  background:var(--panel);
-  box-shadow:var(--shadow);
-  color:var(--accent);
-}
-.top-right{display:flex;align-items:center;gap:24px}
-.clock{text-align:right;line-height:1.25}
-.clock .date{font-size:11px;color:var(--muted);font-weight:600}
-.clock .time{font-size:16px;font-weight:800}
-
-/* SIDEBAR */
-.sidebar{
-  position:fixed;z-index:1100;
-  left:0;top:0;bottom:0;width:var(--sidebar);
-  padding:25px 18px;
-  background:var(--bg);
-  box-shadow:7px 0 22px rgba(70,78,88,.08);
-  overflow-y:auto;
-}
-.side-brand{margin:0 7px 27px}
-.side-brand small{
-  color:var(--muted);font-size:10px;font-weight:700;
-  letter-spacing:1.2px;text-transform:uppercase
-}
-.side-title{font-size:22px;font-weight:800}
-.side-section-title{
-  margin:22px 8px 9px;
-  font-size:10px;color:var(--muted);
-  text-transform:uppercase;letter-spacing:1px;font-weight:800
-}
-.sport-btn{
-  width:100%;height:48px;padding:0 13px;
-  margin-bottom:8px;border-radius:14px;
-  display:flex;align-items:center;gap:12px;
-  background:transparent;color:var(--muted);
-  font-size:13px;font-weight:700;text-align:left;
-  transition:.18s ease;
-}
-.sport-btn i{font-size:17px;width:21px;text-align:center}
-.sport-btn:hover{color:var(--text)}
-.sport-btn.active{
-  color:var(--accent);
-  background:var(--panel);
-  box-shadow:var(--inset);
-}
-.push-box{
-  margin-top:24px;padding:15px;
-  border-radius:16px;
-  box-shadow:var(--inset);
-}
-.push-title{font-size:12px;font-weight:800;margin-bottom:3px}
-.push-note{font-size:9px;color:var(--muted);line-height:1.5;margin-bottom:12px}
-.toast-sport{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 0;border-top:1px solid rgba(90,100,110,.08);
-  font-size:10px;font-weight:600;
-}
-.mini-switch,.master-switch{
-  position:relative;display:inline-block;flex:none
-}
-.mini-switch{width:38px;height:21px}
-.master-switch{width:48px;height:27px}
-.mini-switch input,.master-switch input{
-  opacity:0;width:0;height:0;position:absolute
-}
-.slider{
-  position:absolute;inset:0;border-radius:30px;
-  background:#d0d5db;box-shadow:var(--inset);
-  transition:.2s;
-}
-.slider:before{
-  content:"";position:absolute;
-  width:15px;height:15px;left:3px;top:3px;
-  border-radius:50%;background:#fff;
-  box-shadow:2px 2px 5px #bcc2ca;
-  transition:.2s;
-}
-.master-switch .slider:before{width:19px;height:19px}
-input:checked+.slider{background:var(--accent)}
-input:checked+.slider:before{transform:translateX(17px)}
-.master-switch input:checked+.slider:before{transform:translateX(21px)}
-
-/* MAIN */
-.main{
-  width:min(1400px,100%);
-  margin:auto;padding:28px;
-}
-.page-head{
-  display:flex;justify-content:space-between;align-items:flex-end;
-  margin-bottom:22px;
-}
-.page-head h1{font-size:28px;line-height:1.1;font-weight:800}
-.page-head p{margin-top:5px;font-size:12px;color:var(--muted)}
-.refresh-status{
-  font-size:10px;color:var(--muted);
-  display:flex;align-items:center;gap:7px;
-}
-.refresh-dot{
-  width:7px;height:7px;border-radius:50%;
-  background:var(--accent2);
-}
-
-/* WEEK */
-.week-strip{
-  display:grid;
-  grid-template-columns:repeat(7,minmax(80px,1fr));
-  gap:10px;
-  margin-bottom:22px;
-}
-.day-btn{
-  min-height:67px;border-radius:16px;
-  background:var(--panel);
-  box-shadow:var(--shadow);
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
+.toast-row span{
+  display:flex;
+  align-items:center;
+  gap:8px;
   color:var(--muted);
+  font-size:11px;
+  font-weight:600;
 }
-.day-btn .dow{font-size:10px;font-weight:700;text-transform:uppercase}
-.day-btn .num{font-size:19px;font-weight:800;color:var(--text)}
-.day-btn .mon{font-size:9px}
-.day-btn.active{
-  color:#fff;background:var(--accent);
-  box-shadow:7px 7px 15px rgba(49,91,234,.25),
-             -5px -5px 12px rgba(255,255,255,.55);
+.toggle{
+  position:relative;
+  width:38px;
+  height:21px;
+  flex:none;
 }
-.day-btn.active .num,.day-btn.active .mon{color:#fff}
-
-/* CARD GRID */
-.score-grid{
+.toggle input{display:none}
+.toggle-slider{
+  position:absolute;
+  inset:0;
+  border-radius:20px;
+  background:#cbd0d8;
+  box-shadow:var(--shadow-in);
+  cursor:pointer;
+}
+.toggle-slider:before{
+  content:"";
+  position:absolute;
+  width:15px;height:15px;
+  left:3px;top:3px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:2px 2px 4px rgba(0,0,0,.18);
+  transition:.2s ease;
+}
+.toggle input:checked+.toggle-slider{background:var(--accent)}
+.toggle input:checked+.toggle-slider:before{transform:translateX(17px)}
+.main{
+  margin-left:225px;
+  min-width:0;
+}
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:900;
+  height:72px;
+  padding:12px 28px;
+  background:rgba(231,235,242,.94);
+  backdrop-filter:blur(12px);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+}
+.top-left h1{font-size:18px;font-weight:800}
+.top-left p{font-size:11px;color:var(--muted);margin-top:1px}
+.top-right{display:flex;align-items:center;gap:14px}
+.clock{
+  text-align:right;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.25;
+}
+.clock small{display:block;color:var(--muted);font-weight:500}
+.push-box{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:7px 10px;
+  border-radius:12px;
+  box-shadow:var(--shadow-soft);
+}
+.push-label{font-size:10px;font-weight:800;letter-spacing:.5px}
+.push-state{font-size:9px;color:var(--muted)}
+.content{padding:24px 28px 50px}
+.date-strip{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding:6px 3px 16px;
+  scrollbar-width:none;
+}
+.date-strip::-webkit-scrollbar{display:none}
+.date-btn{
+  min-width:82px;
+  border:0;
+  border-radius:15px;
+  padding:10px 8px;
+  background:var(--panel);
+  box-shadow:var(--shadow-soft);
+  cursor:pointer;
+}
+.date-btn .day{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:700;
+  text-transform:uppercase;
+}
+.date-btn strong{
+  display:block;
+  font-size:17px;
+  margin:1px 0;
+}
+.date-btn .month{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+}
+.date-btn.active{
+  background:var(--accent);
+  color:#fff;
+  box-shadow:inset 2px 2px 4px rgba(0,0,0,.14),4px 4px 10px #c3c8d1;
+}
+.date-btn.active .day,.date-btn.active .month{color:rgba(255,255,255,.78)}
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:2px 2px 14px;
+}
+.section-head h2{font-size:16px;font-weight:800}
+.section-head span{font-size:10px;color:var(--muted)}
+.games-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:18px;
+  gap:16px;
 }
 .game-card{
   min-width:0;
-  padding:18px;
-  border-radius:var(--radius);
+  padding:17px;
+  border-radius:19px;
   background:var(--panel);
-  box-shadow:var(--shadow);
-  transition:box-shadow .18s ease;
+  box-shadow:var(--shadow-out);
+  border:1px solid rgba(255,255,255,.45);
 }
+.game-card.live{box-shadow:var(--shadow-out),0 0 0 1px rgba(64,86,214,.16)}
 .card-head{
-  display:flex;justify-content:space-between;align-items:center;
-  gap:10px;margin-bottom:13px;
-}
-.league{
-  display:flex;align-items:center;gap:7px;
-  font-size:9px;font-weight:800;
-  text-transform:uppercase;letter-spacing:.7px;
-  color:var(--muted);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:13px;
 }
 .status{
-  padding:5px 9px;border-radius:8px;
-  box-shadow:var(--inset);
   color:var(--muted);
-  font-size:9px;font-weight:800;
-  white-space:nowrap;
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.5px;
 }
-.status.live{color:#fff;background:var(--red);box-shadow:none}
-.status.final{color:var(--accent2)}
-.card-body{
-  border-radius:15px;
-  padding:13px;
-  box-shadow:var(--inset);
+.status.live{color:var(--green)}
+.alert-btn{
+  border:0;
+  border-radius:10px;
+  background:var(--panel);
+  box-shadow:var(--shadow-soft);
+  padding:7px 9px;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:10px;
+  font-weight:700;
 }
+.alert-btn.active{color:var(--accent);box-shadow:var(--shadow-in)}
+.teams{display:grid;gap:10px}
 .team{
   display:grid;
-  grid-template-columns:35px 1fr auto;
+  grid-template-columns:34px minmax(0,1fr) auto;
   align-items:center;
   gap:10px;
-  min-height:47px;
 }
-.team+.team{border-top:1px solid rgba(70,80,90,.08)}
-.logo{
-  width:31px;height:31px;object-fit:contain;
+.team-logo{
+  width:30px;height:30px;
+  object-fit:contain;
 }
-.team-name{font-size:13px;font-weight:700}
-.record{display:block;font-size:8px;color:var(--muted);margin-top:1px}
-.score{font-size:23px;font-weight:800}
-.team.leading .score{color:var(--accent)}
+.team-name{
+  font-size:13px;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.team-record{display:block;color:var(--muted);font-size:9px}
+.score{font-size:21px;font-weight:800}
 .game-meta{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:8px;margin-top:12px;
-}
-.start{
-  font-size:10px;color:var(--muted);font-weight:600;
-}
-.countdown{
-  font-size:10px;font-weight:800;color:var(--accent)
-}
-.alert-btn{
-  min-width:84px;padding:7px 10px;border-radius:9px;
-  background:var(--panel);box-shadow:var(--inset);
-  font-size:9px;font-weight:800;color:var(--muted);
-}
-.alert-btn.active{color:var(--accent)}
-.live-detail{
-  margin-top:10px;padding:9px 10px;
-  border-radius:10px;
-  background:rgba(49,91,234,.055);
+  margin-top:13px;
+  padding-top:11px;
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
   color:var(--muted);
-  font-size:9px;font-weight:600;
-  line-height:1.55;
+  font-size:10px;
+  font-weight:600;
 }
-.live-detail strong{color:var(--text)}
-.no-games{
+.situation{
+  margin-top:8px;
+  padding:10px;
+  border-radius:11px;
+  box-shadow:var(--shadow-in);
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+}
+.situation strong{color:var(--text)}
+.countdown{color:var(--accent)}
+.empty,.error{
   grid-column:1/-1;
-  padding:50px 20px;text-align:center;
-  border-radius:20px;box-shadow:var(--inset);
-  color:var(--muted);font-size:12px;
+  padding:45px 20px;
+  text-align:center;
+  color:var(--muted);
 }
-
-/* TOASTS */
-#toast-area{
-  position:fixed;z-index:2000;
-  top:90px;right:24px;
-  width:min(390px,calc(100vw - 32px));
-  display:flex;flex-direction:column;gap:10px;
+.error{color:var(--red)}
+.toast-stack{
+  position:fixed;
+  right:20px;
+  top:84px;
+  width:min(390px,calc(100vw - 30px));
+  z-index:2000;
+  display:grid;
+  gap:10px;
   pointer-events:none;
 }
 .toast{
-  pointer-events:auto;
-  padding:13px 15px;
-  border-radius:14px;
+  display:grid;
+  grid-template-columns:34px 1fr;
+  gap:10px;
+  padding:12px;
+  border-radius:15px;
   background:var(--panel);
-  box-shadow:10px 10px 22px #c3c8cf,-7px -7px 18px #fff;
-  border-left:4px solid var(--accent);
-  display:grid;grid-template-columns:32px 1fr;
-  gap:11px;animation:toastIn .18s ease;
+  box-shadow:var(--shadow-out);
+  animation:toastIn .22s ease;
 }
-@keyframes toastIn{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
 .toast-logo{width:30px;height:30px;object-fit:contain}
-.toast-title{font-size:10px;font-weight:800;color:var(--accent)}
-.toast-text{font-size:10px;line-height:1.5;font-weight:600;margin-top:2px}
-.toast-time{font-size:8px;color:var(--muted);margin-top:3px}
-
-/* INSTALL NOTICE */
-.install-banner{
-  display:none;
-  margin-bottom:18px;
-  padding:14px 16px;border-radius:15px;
-  background:var(--panel);box-shadow:var(--inset);
+.toast-title{font-size:10px;color:var(--accent);font-weight:800;text-transform:uppercase}
+.toast-text{font-size:11px;line-height:1.45;font-weight:600}
+.toast-score{font-size:10px;color:var(--muted);margin-top:2px}
+@keyframes toastIn{
+  from{opacity:0;transform:translateY(-8px)}
+  to{opacity:1;transform:translateY(0)}
 }
-.install-banner.show{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.install-banner p{font-size:10px;color:var(--muted);line-height:1.5}
-.install-btn{
-  flex:none;padding:8px 11px;border-radius:9px;
-  background:var(--accent);color:#fff;font-size:9px;font-weight:800
+.install-note{
+  margin-top:15px;
+  padding:10px;
+  border-radius:12px;
+  box-shadow:var(--shadow-in);
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.45;
 }
+.hidden{display:none!important}
 
-/* MOBILE */
 @media(max-width:900px){
-  :root{--sidebar:76px}
-  .sidebar{padding:18px 10px}
-  .side-brand{margin:0 0 20px;text-align:center}
-  .side-brand small,.side-title,.side-section-title,.push-box{display:none}
-  .sport-btn{height:52px;justify-content:center;padding:0}
-  .sport-btn span{display:none}
-  .sport-btn i{font-size:18px}
-  .topbar{left:76px;padding:0 17px}
-  .main{padding:22px 18px}
+  .sidebar{width:190px}
+  .main{margin-left:190px}
+  .content{padding:20px}
+  .topbar{padding:12px 20px}
 }
-@media(max-width:620px){
-  :root{--sidebar:0px;--top:68px}
-  body{padding-left:0}
+@media(max-width:680px){
   .sidebar{
-    top:auto;right:0;width:100%;height:69px;
-    bottom:0;padding:6px 8px;
-    display:flex;overflow-x:auto;box-shadow:0 -5px 20px rgba(70,78,88,.12)
+    position:sticky;
+    top:0;
+    width:100%;
+    height:auto;
+    max-height:none;
+    padding:10px 12px;
+    z-index:1100;
+    box-shadow:0 5px 15px rgba(67,77,95,.12);
   }
-  .side-brand,.side-section-title,.push-box{display:none}
-  .sport-btn{flex:0 0 66px;height:56px;margin:0;padding:4px;
-    display:flex;flex-direction:column;gap:2px;justify-content:center;
-    border-radius:12px}
-  .sport-btn span{display:block;font-size:8px}
-  .sport-btn i{font-size:16px}
-  .topbar{left:0;height:68px;padding:0 14px}
-  .brand{font-size:15px}
-  .brand-mark{width:32px;height:32px}
-  .top-right{gap:10px}
-  .clock .date{font-size:9px}
-  .clock .time{font-size:13px}
-  .main{padding:18px 12px 88px}
-  .page-head{align-items:flex-start}
-  .page-head h1{font-size:22px}
-  .refresh-status{display:none}
-  .week-strip{gap:6px;overflow-x:auto}
-  .day-btn{min-width:66px;min-height:61px}
-  .score-grid{grid-template-columns:1fr;gap:14px}
-  #toast-area{top:78px;right:12px}
+  .brand{display:none}
+  .sidebar-heading{display:none}
+  .sport-list{
+    display:flex;
+    overflow-x:auto;
+    scrollbar-width:none;
+    padding-bottom:3px;
+  }
+  .sport-list::-webkit-scrollbar{display:none}
+  .sport-btn{
+    width:auto;
+    min-width:max-content;
+    padding:9px 12px;
+  }
+  .toast-settings{
+    display:flex;
+    overflow-x:auto;
+    scrollbar-width:none;
+    margin-top:5px;
+  }
+  .toast-row{
+    min-width:max-content;
+    background:rgba(255,255,255,.22);
+  }
+  .main{margin-left:0}
+  .topbar{
+    height:auto;
+    min-height:66px;
+    padding:10px 14px;
+  }
+  .top-left h1{font-size:15px}
+  .top-right{gap:8px}
+  .clock{display:none}
+  .push-box{padding:6px 7px}
+  .push-label{font-size:9px}
+  .content{padding:15px 13px 40px}
+  .games-grid{grid-template-columns:1fr}
+  .game-card{padding:15px}
+  .toast-stack{right:10px;top:76px;width:calc(100vw - 20px)}
 }
 </style>
 </head>
 
 <body>
+<div class="app-shell">
 
-<aside class="sidebar">
-  <div class="side-brand">
-    <small>Live sports</small>
-    <div class="side-title">Alerts</div>
-  </div>
-
-  <div class="side-section-title">Sports</div>
-
-  <button class="sport-btn active" data-sport="mlb" onclick="switchSport('mlb',this)">
-    <i class="fi fi-rr-baseball"></i><span>MLB</span>
-  </button>
-  <button class="sport-btn" data-sport="nba" onclick="switchSport('nba',this)">
-    <i class="fi fi-rr-basketball"></i><span>NBA</span>
-  </button>
-  <button class="sport-btn" data-sport="nfl" onclick="switchSport('nfl',this)">
-    <i class="fi fi-rr-football"></i><span>NFL</span>
-  </button>
-  <button class="sport-btn" data-sport="nhl" onclick="switchSport('nhl',this)">
-    <i class="fi fi-rr-hockey-puck"></i><span>NHL</span>
-  </button>
-  <button class="sport-btn" data-sport="soccer" onclick="switchSport('soccer',this)">
-    <i class="fi fi-rr-soccer"></i><span>Soccer</span>
-  </button>
-  <button class="sport-btn" data-sport="mma" onclick="switchSport('mma',this)">
-    <i class="fi fi-rr-boxing-glove"></i><span>MMA</span>
-  </button>
-
-  <div class="push-box">
-    <div class="push-title">Toast alerts</div>
-    <div class="push-note">Scoring events only. Configure each sport below.</div>
-
-    <div id="toast-settings"></div>
-  </div>
-</aside>
-
-<header class="topbar">
-  <div class="brand">
-    <div class="brand-mark"><i class="fi fi-rr-bolt"></i></div>
-    Sports Alerts
-  </div>
-
-  <div class="top-right">
-    <div class="clock">
-      <div class="date" id="top-date"></div>
-      <div class="time" id="top-time"></div>
+  <aside class="sidebar">
+    <div class="brand">
+      <i class="fi fi-rr-bolt"></i>
+      <span>Sports Alerts</span>
     </div>
 
-    <label class="master-switch" title="Main push alerts">
-      <input id="master-push-toggle" type="checkbox">
-      <span class="slider"></span>
-    </label>
-  </div>
-</header>
+    <div class="sidebar-heading">Sports</div>
+    <div class="sport-list" id="sport-list"></div>
 
-<main class="main">
+    <div class="sidebar-heading">Scoring Toasts</div>
+    <div class="toast-settings" id="toast-settings"></div>
 
-  <div id="install-banner" class="install-banner">
-    <p><strong>Add Sports Alerts to your Home Screen</strong><br>
-    Home Screen installation is required before push alerts can be enabled.</p>
-    <button class="install-btn" onclick="showInstallHelp()">How to install</button>
-  </div>
-
-  <section class="page-head">
-    <div>
-      <h1 id="section-title">MLB Scores</h1>
-      <p id="section-subtitle">Live scores and scoring alerts</p>
+    <div class="install-note" id="install-note">
+      Install this app to your Home Screen before Push Alerts can be activated.
     </div>
-    <div class="refresh-status">
-      <span class="refresh-dot"></span>
-      <span id="refresh-text">Live</span>
-    </div>
-  </section>
+  </aside>
 
-  <div id="week-strip" class="week-strip"></div>
-  <section id="games-container" class="score-grid"></section>
+  <main class="main">
+    <header class="topbar">
+      <div class="top-left">
+        <h1 id="page-title">MLB Scores</h1>
+        <p id="selected-date-label"></p>
+      </div>
 
-</main>
+      <div class="top-right">
+        <div class="clock">
+          <span id="clock-time">--:-- AM</span>
+          <small id="clock-date"></small>
+        </div>
 
-<div id="toast-area"></div>
+        <div class="push-box">
+          <div>
+            <div class="push-label">PUSH ALERTS</div>
+            <div class="push-state" id="master-status-text">OFF</div>
+          </div>
+          <label class="toggle">
+            <input id="master-push-toggle" type="checkbox">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="date-strip" id="date-strip"></div>
+
+      <div class="section-head">
+        <h2 id="games-title">Today's Games</h2>
+        <span id="refresh-status">Live data</span>
+      </div>
+
+      <div class="games-grid" id="games-container">
+        <div class="empty">Loading scores...</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
 
 <script>
-const VAPID_KEY='BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E';
+const VAPID_KEY =
+'BA8NXZjt4Aj2NsNFZwFQJPvNHoGdz87nVB_0MJCQdbXFMhgOmkWsd-STbCKtgPIBPrWF7-Umqrili8Ef4xS352E';
+
 const APP_ID='d1eje7SvxRjIFsdB6c3TuQLlF8v6zExAMBzChgXa';
 const JS_KEY='eQqLLilvkNhy04m0OF5J4ry17vw0FKeeEHfPT2mq';
 
 const URLS={
- mlb:'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard',
- nba:'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
- nfl:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
- nhl:'https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard',
- soccer:'https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard',
- mma:'https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard'
+  mlb:'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard',
+  nba:'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
+  nfl:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
+  nhl:'https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard',
+  soccer:'https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard',
+  mma:'https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard'
 };
 
-const SPORT_NAMES={mlb:'MLB',nba:'NBA',nfl:'NFL',nhl:'NHL',soccer:'Soccer',mma:'MMA'};
-const STORAGE='sportsAlertsV3';
-const state={
- sport:localStorage.getItem('sport')||'mlb',
- date:dateKey(new Date()),
- cards:new Map(),
- selected:new Set(JSON.parse(localStorage.getItem('selectedGameIds')||'[]')),
- master:localStorage.getItem('masterPushEnabled')==='true',
- toast:{mlb:true,nba:true,nfl:true,nhl:true,soccer:true,mma:true},
- lastScores:new Map()
+const SPORTS={
+  mlb:{name:'MLB',icon:'fi-rr-baseball'},
+  nba:{name:'NBA',icon:'fi-rr-basketball'},
+  nfl:{name:'NFL',icon:'fi-rr-football'},
+  nhl:{name:'NHL',icon:'fi-rr-hockey-puck'},
+  soccer:{name:'Soccer',icon:'fi-rr-soccer'},
+  mma:{name:'MMA',icon:'fi-rr-boxing-glove'}
 };
 
-Object.assign(state.toast,JSON.parse(localStorage.getItem('toastSettings')||'{}'));
+let currentSport=localStorage.getItem('activeSport')||'mlb';
+let selectedDate=localDate(new Date());
+let gamesCache=new Map();
+let previousScores=JSON.parse(localStorage.getItem('espnScoreCache')||'{}');
+let selectedGameIds=new Set(JSON.parse(localStorage.getItem('selectedGameIds')||'[]'));
+let masterEnabled=localStorage.getItem('masterPushEnabled')==='true';
+let toastPrefs=JSON.parse(localStorage.getItem('toastPrefs')||'{}');
 
-function dateKey(d){
-  return d.toLocaleDateString('en-CA',{timeZone:'America/New_York'});
+Object.keys(SPORTS).forEach(s=>{
+  if(typeof toastPrefs[s]!=='boolean')toastPrefs[s]=true;
+});
+
+function localDate(d){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
 }
-function fmtDate(d){
-  return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+function espnDate(d){
+  return d.replaceAll('-','');
 }
-function fmtTime(d){
-  return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-}
+
 function esc(v){
-  return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-function isInstalled(){
-  return window.matchMedia('(display-mode: standalone)').matches ||
-         window.navigator.standalone===true;
+  return String(v??'').replace(/[&<>"']/g,m=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[m]));
 }
 
-/* CLOCK */
-function updateClock(){
-  const now=new Date();
-  document.getElementById('top-date').textContent=fmtDate(now);
-  document.getElementById('top-time').textContent=fmtTime(now);
-}
-setInterval(updateClock,1000);
-updateClock();
-
-/* WEEK */
-function buildWeek(){
-  const strip=document.getElementById('week-strip');
-  const today=new Date();
-  today.setHours(0,0,0,0);
-  strip.innerHTML='';
-
-  for(let i=0;i<7;i++){
-    const d=new Date(today);
-    d.setDate(today.getDate()+i);
-    const key=dateKey(d);
-    const b=document.createElement('button');
-    b.className='day-btn '+(key===state.date?'active':'');
-    b.innerHTML=`
-      <span class="dow">${d.toLocaleDateString('en-US',{weekday:'short'})}</span>
-      <span class="num">${d.getDate()}</span>
-      <span class="mon">${d.toLocaleDateString('en-US',{month:'short'})}</span>`;
-    b.onclick=()=>selectDate(key);
-    strip.appendChild(b);
-  }
-}
-function selectDate(key){
-  state.date=key;
-  buildWeek();
-  loadSchedule(state.sport,true);
-}
-
-/* TOAST SETTINGS */
-function buildToastSettings(){
-  const root=document.getElementById('toast-settings');
-  root.innerHTML=Object.entries(SPORT_NAMES).map(([key,name])=>`
-    <div class="toast-sport">
-      <span>${name}</span>
-      <label class="mini-switch">
-        <input type="checkbox" data-toast="${key}" ${state.toast[key]?'checked':''}>
-        <span class="slider"></span>
-      </label>
-    </div>`).join('');
-
-  root.querySelectorAll('[data-toast]').forEach(input=>{
-    input.onchange=()=>{
-      state.toast[input.dataset.toast]=input.checked;
-      localStorage.setItem('toastSettings',JSON.stringify(state.toast));
-    };
+function formatTime(iso){
+  if(!iso)return '';
+  const d=new Date(iso);
+  return d.toLocaleTimeString([],{
+    hour:'numeric',
+    minute:'2-digit',
+    hour12:true
   });
 }
 
-/* PUSH / PWA */
-document.getElementById('master-push-toggle').checked=state.master;
-
-function showInstallHelp(){
-  alert(
-    'iPhone/iPad: tap Share, then Add to Home Screen.\\n\\n'+
-    'Android: use the browser menu and choose Install app or Add to Home screen.'
-  );
+function formatLongDate(date){
+  return new Date(date+'T12:00:00').toLocaleDateString([],{
+    weekday:'long',month:'long',day:'numeric'
+  });
 }
 
-function checkInstallRequirement(){
-  const banner=document.getElementById('install-banner');
-  if(isInstalled()) banner.classList.remove('show');
-  else banner.classList.add('show');
-
-  document.getElementById('master-push-toggle').disabled=!isInstalled();
+function dateLabel(date){
+  const d=new Date(date+'T12:00:00');
+  return {
+    day:d.toLocaleDateString([],{weekday:'short'}),
+    num:d.getDate(),
+    month:d.toLocaleDateString([],{month:'short'})
+  };
 }
-checkInstallRequirement();
 
-window.matchMedia('(display-mode: standalone)').addEventListener?.('change',checkInstallRequirement);
+function buildDates(){
+  const strip=document.getElementById('date-strip');
+  strip.innerHTML='';
 
-document.getElementById('master-push-toggle').onchange=async e=>{
-  if(e.target.checked && !isInstalled()){
-    e.target.checked=false;
-    state.master=false;
-    localStorage.setItem('masterPushEnabled','false');
-    showInstallHelp();
+  const today=new Date();
+  for(let i=0;i<7;i++){
+    const d=new Date(today);
+    d.setDate(today.getDate()+i);
+    const key=localDate(d);
+    const x=dateLabel(key);
+    const b=document.createElement('button');
+    b.className='date-btn'+(key===selectedDate?' active':'');
+    b.innerHTML=`
+      <span class="day">${esc(i===0?'Today':x.day)}</span>
+      <strong>${x.num}</strong>
+      <span class="month">${esc(x.month)}</span>`;
+    b.onclick=()=>{
+      selectedDate=key;
+      buildDates();
+      loadSchedule();
+    };
+    strip.appendChild(b);
+  }
+}
+
+function buildSports(){
+  const list=document.getElementById('sport-list');
+  const settings=document.getElementById('toast-settings');
+  list.innerHTML='';
+  settings.innerHTML='';
+
+  Object.entries(SPORTS).forEach(([key,s])=>{
+    const b=document.createElement('button');
+    b.className='sport-btn'+(key===currentSport?' active':'');
+    b.innerHTML=`<i class="fi ${s.icon}"></i><span>${s.name}</span>`;
+    b.onclick=()=>{
+      currentSport=key;
+      localStorage.setItem('activeSport',key);
+      buildSports();
+      loadSchedule();
+    };
+    list.appendChild(b);
+
+    const row=document.createElement('div');
+    row.className='toast-row';
+    row.innerHTML=`
+      <span><i class="fi ${s.icon}"></i>${s.name}</span>
+      <label class="toggle">
+        <input type="checkbox" ${toastPrefs[key]?'checked':''}>
+        <span class="toggle-slider"></span>
+      </label>`;
+    row.querySelector('input').onchange=e=>{
+      toastPrefs[key]=e.target.checked;
+      localStorage.setItem('toastPrefs',JSON.stringify(toastPrefs));
+    };
+    settings.appendChild(row);
+  });
+
+  document.getElementById('page-title').textContent=SPORTS[currentSport].name+' Scores';
+}
+
+function isInstalled(){
+  return window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone===true;
+}
+
+function updateInstallUI(){
+  const installed=isInstalled();
+  const toggle=document.getElementById('master-push-toggle');
+  const note=document.getElementById('install-note');
+
+  toggle.disabled=!installed;
+
+  note.textContent=installed
+    ? 'Push Alerts are available. The main PUSH ALERTS switch must be ON before push delivery is enabled.'
+    : 'Install this app to your Home Screen before Push Alerts can be activated.';
+
+  if(!installed && masterEnabled)revertMasterSwitch(false);
+}
+
+function updateMasterLabel(){
+  const el=document.getElementById('master-status-text');
+  el.textContent=masterEnabled?'ON':'OFF';
+  el.style.color=masterEnabled?'var(--green)':'var(--muted)';
+}
+
+async function toggleMasterPush(enabled){
+  if(enabled&&!isInstalled()){
+    revertMasterSwitch(false);
+    showToastMessage('Push Alerts','Install the app to your Home Screen first.');
     return;
   }
 
-  state.master=e.target.checked;
-  localStorage.setItem('masterPushEnabled',state.master);
+  masterEnabled=enabled;
+  localStorage.setItem('masterPushEnabled',enabled);
+  updateMasterLabel();
 
-  if(!state.master){
+  if(enabled){
+    if(!('serviceWorker' in navigator)||!('PushManager' in window)){
+      revertMasterSwitch(false);
+      showToastMessage('Push Alerts','Web Push is not available on this device.');
+      return;
+    }
+
+    try{
+      const permission=await Notification.requestPermission();
+      if(permission!=='granted'){
+        revertMasterSwitch(false);
+        showToastMessage('Push Alerts','Notification permission was not granted.');
+        return;
+      }
+      await syncSubscriptionWithServer();
+    }catch(e){
+      console.error(e);
+      revertMasterSwitch(false);
+    }
+  }else{
     await syncSubscriptionWithServer();
-    return;
   }
+}
 
-  if(!('serviceWorker' in navigator)||!('PushManager' in window)){
-    e.target.checked=false;
-    state.master=false;
-    localStorage.setItem('masterPushEnabled','false');
-    alert('Push notifications are not supported by this browser.');
-    return;
-  }
-
-  try{
-    const permission=await Notification.requestPermission();
-    if(permission!=='granted') throw new Error('Notification permission denied');
-
-    await syncSubscriptionWithServer();
-  }catch(err){
-    console.error(err);
-    e.target.checked=false;
-    state.master=false;
-    localStorage.setItem('masterPushEnabled','false');
-  }
-};
+function revertMasterSwitch(state){
+  masterEnabled=state;
+  localStorage.setItem('masterPushEnabled',state);
+  document.getElementById('master-push-toggle').checked=state;
+  updateMasterLabel();
+}
 
 async function syncSubscriptionWithServer(){
-  if(!isInstalled()||!('serviceWorker' in navigator)) return;
-
   try{
     const reg=await navigator.serviceWorker.register('/sw.js',{scope:'/'});
     await navigator.serviceWorker.ready;
 
-    let subscription=null;
-
-    if(state.master){
-      subscription=await reg.pushManager.subscribe({
-        userVisibleOnly:true,
-        applicationServerKey:urlBase64ToUint8Array(VAPID_KEY)
-      });
-    }
-
-    await fetch('https://parseapi.back4app.com/parse/functions/saveSubscription',{
-      method:'POST',
-      headers:{
-        'X-Parse-Application-Id':APP_ID,
-        'X-Parse-JavaScript-Key':JS_KEY,
-        'Content-Type':'application/json'
-      },
-      body:JSON.stringify({
-        subscription:state.master?subscription.toJSON():null,
-        gameIds:state.master?[...state.selected]:[]
-      })
-    });
-  }catch(err){
-    console.error('Push sync error:',err);
-  }
-}
-
-function urlBase64ToUint8Array(base64){
-  const padding='='.repeat((4-base64.length%4)%4);
-  const raw=atob((base64+padding).replace(/-/g,'+').replace(/_/g,'/'));
-  return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
-}
-
-/* SPORT */
-function switchSport(cat,btn){
-  state.sport=cat;
-  localStorage.setItem('sport',cat);
-  document.querySelectorAll('.sport-btn').forEach(x=>x.classList.remove('active'));
-  btn.classList.add('active');
-  loadSchedule(cat,true);
-}
-
-/* CARD HELPERS */
-function eventStart(e){
-  return new Date(e.date||e.competitions?.[0]?.date||Date.now());
-}
-function statusText(e){
-  const s=e.status?.type;
-  if(s?.state==='in') return s.detail||s.shortDetail||'LIVE';
-  if(s?.completed) return 'FINAL';
-  return s?.detail||s?.shortDetail||'UPCOMING';
-}
-function getTeams(e){
-  const c=e.competitions?.[0]?.competitors||[];
-  return {
-    away:c.find(x=>x.homeAway==='away')||c[0],
-    home:c.find(x=>x.homeAway==='home')||c[1]
-  };
-}
-function teamData(t){
-  return {
-    name:t?.team?.shortDisplayName||t?.team?.displayName||t?.athlete?.displayName||'Team',
-    logo:t?.team?.logo||t?.athlete?.headshot?.href||'',
-    record:t?.records?.[0]?.summary||'',
-    score:t?.score??'0'
-  };
-}
-function startLabel(e){
-  const d=eventStart(e);
-  return fmtTime(d);
-}
-function countdown(e){
-  const start=eventStart(e);
-  const diff=start-Date.now();
-  if(diff<=0)return '';
-  const mins=Math.floor(diff/60000);
-  const h=Math.floor(mins/60);
-  const m=mins%60;
-  return `Starts in ${h?`${h}h `:''}${m}m`;
-}
-
-/* LIVE DETAILS */
-function liveDetails(cat,e){
-  const c=e.competitions?.[0]||{};
-  const s=c.situation||e.situation||{};
-  const stateType=e.status?.type?.state;
-
-  if(stateType!=='in') return '';
-
-  if(cat==='mlb'){
-    const inning=s?.outs!==undefined?
-      `${s.inningHalf||s.halfInning||''} ${s.inning||''}`.trim():'Live';
-    const outs=s.outs!==undefined?`Outs: ${s.outs}`:'';
-    const balls=s.balls!==undefined?`Balls: ${s.balls}`:'';
-    const strikes=s.strikes!==undefined?`Strikes: ${s.strikes}`:'';
-    const bases=[
-      s.onFirst?'1B':'',
-      s.onSecond?'2B':'',
-      s.onThird?'3B':''
-    ].filter(Boolean).join(' ');
-    return [inning,balls,strikes,outs,bases?`Runners: ${bases}`:''].filter(Boolean).join(' • ');
-  }
-
-  if(cat==='nfl'){
-    return [e.status?.type?.detail,s.shortDownDistance,s.possession?.team?.abbreviation?
-      `Possession: ${s.possession.team.abbreviation}`:''].filter(Boolean).join(' • ');
-  }
-
-  if(cat==='nba'){
-    return [e.status?.type?.detail,s.lastPlay?.text||''].filter(Boolean).join(' • ');
-  }
-
-  if(cat==='nhl'){
-    return [e.status?.type?.detail,s.period?.displayValue||s.period,s.clock?.displayValue?
-      `Clock: ${s.clock.displayValue}`:''].filter(Boolean).join(' • ');
-  }
-
-  if(cat==='soccer'){
-    return [e.status?.type?.detail,s.possession?.team?.abbreviation?
-      `Possession: ${s.possession.team.abbreviation}`:''].filter(Boolean).join(' • ');
-  }
-
-  return e.status?.type?.detail||'Live';
-}
-
-/* CARD CREATION */
-function createCard(id){
-  const card=document.createElement('article');
-  card.className='game-card';
-  card.dataset.id=id;
-  card.innerHTML=`
-    <div class="card-head">
-      <div class="league"><i class="fi fi-rr-broadcast-tower"></i><span class="league-name"></span></div>
-      <span class="status"></span>
-    </div>
-    <div class="card-body">
-      <div class="team away team-a">
-        <img class="logo" alt="">
-        <div><span class="team-name"></span><span class="record"></span></div>
-        <strong class="score"></strong>
-      </div>
-      <div class="team home team-h">
-        <img class="logo" alt="">
-        <div><span class="team-name"></span><span class="record"></span></div>
-        <strong class="score"></strong>
-      </div>
-    </div>
-    <div class="game-meta">
-      <span class="start"></span>
-      <span class="countdown"></span>
-      <button class="alert-btn"></button>
-    </div>
-    <div class="live-detail"></div>`;
-  return card;
-}
-
-function updateCard(card,cat,e){
-  const {away,home}=getTeams(e);
-  const a=teamData(away),h=teamData(home);
-  const live=e.status?.type?.state==='in';
-  const final=e.status?.type?.completed;
-
-  card.className='game-card '+(state.selected.has(String(e.id))?'selected':'');
-  card.querySelector('.league-name').textContent=SPORT_NAMES[cat];
-
-  const status=card.querySelector('.status');
-  status.textContent=statusText(e);
-  status.className='status '+(live?'live ':'')+(final?'final':'');
-
-  setTeam(card.querySelector('.team-a'),a,Number(a.score)>Number(h.score));
-  setTeam(card.querySelector('.team-h'),h,Number(h.score)>Number(a.score));
-
-  card.querySelector('.start').textContent=
-    final||live?'':`Start: ${startLabel(e)}`;
-
-  card.querySelector('.countdown').textContent=live?'':countdown(e);
-
-  const alertBtn=card.querySelector('.alert-btn');
-  const selected=state.selected.has(String(e.id));
-  alertBtn.textContent=selected?'Alerts On':'Alerts Off';
-  alertBtn.className='alert-btn '+(selected?'active':'');
-  alertBtn.onclick=()=>toggleGameAlert(e.id,card);
-
-  card.querySelector('.live-detail').innerHTML=
-    live?`<strong>${esc(statusText(e))}</strong> ${esc(liveDetails(cat,e))}`:'';
-
-  return {
-    awayScore:a.score,
-    homeScore:h.score,
-    live,
-    final,
-    away:a,
-    home:h,
-    event:e
-  };
-}
-
-function setTeam(row,t,leading){
-  row.classList.toggle('leading',leading);
-  row.querySelector('.logo').src=t.logo||'';
-  row.querySelector('.logo').alt=t.name;
-  row.querySelector('.team-name').textContent=t.name;
-  row.querySelector('.record').textContent=t.record;
-  row.querySelector('.score').textContent=t.score;
-}
-
-/* SCORING TOAST DETECTION */
-function scoreChanged(id,data){
-  const old=state.lastScores.get(id);
-  const changed=old &&
-    (String(old.away)!==String(data.awayScore)||
-     String(old.home)!==String(data.homeScore));
-
-  state.lastScores.set(id,{
-    away:data.awayScore,
-    home:data.homeScore
-  });
-
-  return changed;
-}
-
-function scoringToast(cat,data){
-  if(!state.toast[cat]||!data.live)return;
-
-  const oldAway=Number(data.awayScore);
-  const oldHome=Number(data.homeScore);
-  const key=`toast:${cat}:${data.event.id}:${oldAway}-${oldHome}`;
-
-  /* The exact scoring-play description should come from your backend/
-     ESPN summary payload when available. This fallback remains detailed. */
-  if(sessionStorage.getItem(key))return;
-  sessionStorage.setItem(key,'1');
-
-  const scoringTeam=oldAway>oldHome?data.away:data.home;
-  const other=oldAway>oldHome?data.home:data.away;
-
-  let title='Score update';
-  let detail=`${scoringTeam.name} scored. ${data.away.name}: ${data.awayScore} - ${data.home.name}: ${data.homeScore} - ${data.event.status?.type?.detail||'Live'}`;
-
-  addToast(title,detail,scoringTeam.logo);
-}
-
-function addToast(title,text,logo){
-  const area=document.getElementById('toast-area');
-  const el=document.createElement('div');
-  el.className='toast';
-  el.innerHTML=`
-    <img class="toast-logo" src="${esc(logo)}" alt="">
-    <div>
-      <div class="toast-title">${esc(title)}</div>
-      <div class="toast-text">${esc(text)}</div>
-      <div class="toast-time">${fmtTime(new Date())}</div>
-    </div>`;
-  area.prepend(el);
-  setTimeout(()=>el.remove(),8000);
-}
-
-/*
-  Optional backend enhancement:
-  If your existing backend supplies scoring-play text, return it with
-  the scoreboard payload as e.scoringPlay / e.scoringText and replace
-  the fallback detail above with that value.
-*/
-
-/* LOAD WITHOUT FLICKER */
-async function loadSchedule(cat,force=false){
-  const container=document.getElementById('games-container');
-  document.getElementById('section-title').textContent=`${SPORT_NAMES[cat]} Scores`;
-
-  try{
-    const url=`${URLS[cat]}?dates=${state.date.replaceAll('-','')}`;
-    const res=await fetch(url,{cache:'no-store'});
-    if(!res.ok)throw new Error('Score request failed');
-    const data=await res.json();
-    const events=data.events||[];
-
-    const incoming=new Set(events.map(e=>String(e.id)));
-
-    if(!events.length){
-      if(container.children.length!==1||
-         !container.querySelector('.no-games')){
-        container.innerHTML='<div class="no-games">No games scheduled for this date.</div>';
-      }
-      return;
-    }
-
-    const empty=container.querySelector('.no-games');
-    if(empty)empty.remove();
-
-    /* Remove games that disappeared without replacing the entire grid. */
-    [...container.children].forEach(card=>{
-      if(card.dataset.id&&!incoming.has(card.dataset.id))card.remove();
-    });
-
-    events.forEach(e=>{
-      const id=String(e.id);
-      let card=state.cards.get(id);
-
-      if(!card||!card.isConnected){
-        card=createCard(id);
-        state.cards.set(id,card);
-        container.appendChild(card);
-      }
-
-      const dataForCard=updateCard(card,cat,e);
-
-      if(!force&&scoreChanged(id,dataForCard)){
-        scoringToast(cat,dataForCard);
-      }else if(force){
-        state.lastScores.set(id,{
-          away:dataForCard.awayScore,
-          home:dataForCard.homeScore
+    let sub=null;
+    if(masterEnabled){
+      sub=await reg.pushManager.getSubscription();
+      if(!sub){
+        sub=await reg.pushManager.subscribe({
+          userVisibleOnly:true,
+          applicationServerKey:urlBase64ToUint8Array(VAPID_KEY)
         });
       }
-    });
-
-    document.getElementById('refresh-text').textContent=
-      `Updated ${fmtTime(new Date())}`;
-  }catch(err){
-    console.error(err);
-    if(!container.children.length){
-      container.innerHTML='<div class="no-games">Unable to load scores.</div>';
+    }else{
+      sub=await reg.pushManager.getSubscription();
     }
-    document.getElementById('refresh-text').textContent='Update unavailable';
+
+    await fetch(
+      'https://parseapi.back4app.com/parse/functions/saveSubscription',
+      {
+        method:'POST',
+        headers:{
+          'X-Parse-Application-Id':APP_ID,
+          'X-Parse-JavaScript-Key':JS_KEY,
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify({
+          subscription:masterEnabled&&sub?sub.toJSON():null,
+          gameIds:masterEnabled?Array.from(selectedGameIds):[]
+        })
+      }
+    );
+
+    if(!masterEnabled&&sub){
+      try{await sub.unsubscribe()}catch(e){}
+    }
+  }catch(e){
+    console.error('Subscription Sync Error:',e);
   }
 }
 
-/* GAME ALERTS */
 function toggleGameAlert(id,card){
   id=String(id);
 
-  if(state.selected.has(id))state.selected.delete(id);
-  else state.selected.add(id);
+  if(selectedGameIds.has(id)){
+    selectedGameIds.delete(id);
+  }else{
+    if(!masterEnabled){
+      showToastMessage(
+        'Push Alerts',
+        'Turn on the main PUSH ALERTS switch before enabling game alerts.'
+      );
+      return;
+    }
+    selectedGameIds.add(id);
+  }
 
-  localStorage.setItem('selectedGameIds',JSON.stringify([...state.selected]));
+  localStorage.setItem(
+    'selectedGameIds',
+    JSON.stringify([...selectedGameIds])
+  );
 
-  const active=state.selected.has(id);
-  card.querySelector('.alert-btn').textContent=active?'Alerts On':'Alerts Off';
-  card.querySelector('.alert-btn').classList.toggle('active',active);
-  card.classList.toggle('selected',active);
+  updateCardAlert(card,id);
 
-  if(state.master)syncSubscriptionWithServer();
+  if(masterEnabled)syncSubscriptionWithServer();
 }
 
-/* INITIALIZE */
-buildWeek();
-buildToastSettings();
+function updateCardAlert(card,id){
+  const on=selectedGameIds.has(id);
+  const btn=card.querySelector('.alert-btn');
+  if(!btn)return;
+  btn.classList.toggle('active',on);
+  btn.innerHTML=`<i class="fi ${on?'fi-rr-bell':'fi-rr-bell-slash'}"></i> ${on?'Alerts On':'Alerts Off'}`;
+}
 
-document.querySelectorAll('.sport-btn').forEach(b=>{
-  b.classList.toggle('active',b.dataset.sport===state.sport);
+function teamData(c){
+  const team=c?.team||c?.athlete||{};
+  return {
+    name:team.shortDisplayName||team.displayName||team.name||'Team',
+    logo:team.logo||'https://a.espncdn.com/i/espn/espn_logos/espn_red.png',
+    record:c?.records?.[0]?.summary||'',
+    score:c?.score??'0'
+  };
+}
+
+function getSituation(event){
+  const comp=event.competitions?.[0];
+  const s=comp?.situation||event?.situation||{};
+  const status=event.status?.type||{};
+  const state=status.state;
+
+  if(state!=='in')return '';
+
+  const sport=currentSport;
+
+  if(sport==='mlb'){
+    const inning=s.inning||s.inningHalf||'';
+    const outs=s.outs!=null?`${s.outs} out${s.outs===1?'':'s'}`:'';
+    const balls=s.balls!=null?`Balls ${s.balls}`:'';
+    const strikes=s.strikes!=null?`Strikes ${s.strikes}`:'';
+    const runners=[];
+
+    if(s.onFirst)runners.push('1st');
+    if(s.onSecond)runners.push('2nd');
+    if(s.onThird)runners.push('3rd');
+
+    return [
+      inning,
+      balls,
+      strikes,
+      outs,
+      runners.length?'Runners: '+runners.join(', '):'Bases empty'
+    ].filter(Boolean).join(' · ');
+  }
+
+  if(sport==='nfl'){
+    return [
+      s.down?s.down+' down':'',
+      s.distance?s.distance+' to go':'',
+      s.yardLine?'Ball on '+s.yardLine:'',
+      status.detail||''
+    ].filter(Boolean).join(' · ');
+  }
+
+  if(sport==='nba'){
+    return [status.period?'Q'+status.period:'',status.displayClock||'']
+      .filter(Boolean).join(' · ');
+  }
+
+  if(sport==='nhl'){
+    return [status.period?'P'+status.period:'',status.displayClock||'']
+      .filter(Boolean).join(' · ');
+  }
+
+  if(sport==='soccer'){
+    return status.detail||status.shortDetail||'Live';
+  }
+
+  return status.detail||'Live';
+}
+
+function gameMeta(event){
+  const status=event.status?.type||{};
+  const state=status.state;
+
+  if(state==='in'){
+    return status.detail||status.shortDetail||'Live';
+  }
+
+  if(state==='post'){
+    return status.detail||'Final';
+  }
+
+  return `Start ${formatTime(event.date)}`;
+}
+
+function countdown(iso){
+  const diff=new Date(iso)-Date.now();
+  if(diff<=0)return '';
+
+  const mins=Math.ceil(diff/60000);
+  const hours=Math.floor(mins/60);
+  const rem=mins%60;
+
+  if(hours)return `Starts in ${hours}h ${String(rem).padStart(2,'0')}m`;
+  return `Starts in ${mins}m`;
+}
+
+function createCard(event){
+  const id=String(event.id);
+  const card=document.createElement('article');
+  card.className='game-card';
+  card.dataset.id=id;
+
+  card.innerHTML=`
+    <div class="card-head">
+      <span class="status"></span>
+      <button class="alert-btn" type="button"></button>
+    </div>
+    <div class="teams">
+      <div class="team away">
+        <img class="team-logo" alt="">
+        <div>
+          <div class="team-name"></div>
+          <span class="team-record"></span>
+        </div>
+        <div class="score"></div>
+      </div>
+      <div class="team home">
+        <img class="team-logo" alt="">
+        <div>
+          <div class="team-name"></div>
+          <span class="team-record"></span>
+        </div>
+        <div class="score"></div>
+      </div>
+    </div>
+    <div class="game-meta">
+      <span class="meta-left"></span>
+      <span class="meta-right"></span>
+    </div>
+    <div class="situation hidden"></div>
+  `;
+
+  card.querySelector('.alert-btn').onclick=()=>{
+    toggleGameAlert(id,card);
+  };
+
+  return card;
+}
+
+function updateCard(card,event){
+  const comps=event.competitions?.[0]?.competitors||[];
+  const away=teamData(comps.find(c=>c.homeAway==='away')||comps[0]);
+  const home=teamData(comps.find(c=>c.homeAway==='home')||comps[1]);
+  const status=event.status?.type||{};
+  const live=status.state==='in';
+
+  card.classList.toggle('live',live);
+
+  const statusEl=card.querySelector('.status');
+  statusEl.className='status'+(live?' live':'');
+  statusEl.textContent=live
+    ? 'Live'
+    : status.state==='post'
+      ? 'Final'
+      : 'Upcoming';
+
+  const setTeam=(selector,data)=>{
+    const root=card.querySelector(selector);
+    const img=root.querySelector('.team-logo');
+    img.src=data.logo;
+    img.alt=data.name;
+    img.onerror=()=>img.src='https://a.espncdn.com/i/espn/espn_logos/espn_red.png';
+    root.querySelector('.team-name').textContent=data.name;
+    root.querySelector('.team-record').textContent=data.record;
+    root.querySelector('.score').textContent=data.score;
+  };
+
+  setTeam('.away',away);
+  setTeam('.home',home);
+
+  const meta=card.querySelector('.game-meta');
+  const left=gameMeta(event);
+  const right=live?'Live tracking':'';
+
+  meta.querySelector('.meta-left').textContent=left;
+  meta.querySelector('.meta-right').textContent=right;
+
+  const situation=getSituation(event);
+  const sit=card.querySelector('.situation');
+
+  if(situation){
+    sit.classList.remove('hidden');
+    sit.innerHTML=`<strong>Game Detail</strong><br>${esc(situation)}`;
+  }else{
+    const cd=status.state==='pre'?countdown(event.date):'';
+    if(cd){
+      sit.classList.remove('hidden');
+      sit.innerHTML=`<strong class="countdown">${cd}</strong>`;
+    }else{
+      sit.classList.add('hidden');
+      sit.textContent='';
+    }
+  }
+
+  updateCardAlert(card,String(event.id));
+}
+
+function scoreValue(event){
+  const comps=event.competitions?.[0]?.competitors||[];
+  return comps.map(c=>`${c.homeAway}:${c.score??''}`).join('|');
+}
+
+function scoringChange(event){
+  const id=String(event.id);
+  const current=scoreValue(event);
+  const old=previousScores[id];
+
+  previousScores[id]=current;
+
+  if(!old||old===current)return;
+
+  const comps=event.competitions?.[0]?.competitors||[];
+  const away=teamData(comps.find(c=>c.homeAway==='away')||comps[0]);
+  const home=teamData(comps.find(c=>c.homeAway==='home')||comps[1]);
+
+  const oldParts=Object.fromEntries(
+    old.split('|').map(x=>x.split(':'))
+  );
+
+  const changed=comps.find(c=>{
+    const oldScore=oldParts[c.homeAway];
+    return oldScore!=null&&String(oldScore)!==String(c.score??'');
+  });
+
+  if(!changed)return;
+
+  const scoring=teamData(changed);
+  const detail=buildScoringDetail(event,scoring,away,home);
+
+  if(toastPrefs[currentSport]){
+    showScoringToast(scoring,detail);
+  }
+}
+
+function buildScoringDetail(event,scoring,away,home){
+  const status=event.status?.type||{};
+  const note=
+    event.competitions?.[0]?.notes?.[0]?.headline||
+    event.competitions?.[0]?.details||
+    status.shortDetail||
+    status.detail||
+    'Scoring play';
+
+  return {
+    title:note,
+    score:`${away.name}: ${away.score} - ${home.name}: ${home.score}`
+  };
+}
+
+function showScoringToast(scoring,detail){
+  const stack=document.getElementById('toast-stack');
+  const toast=document.createElement('div');
+  toast.className='toast';
+
+  toast.innerHTML=`
+    <img class="toast-logo" src="${esc(scoring.logo)}" alt="${esc(scoring.name)}">
+    <div>
+      <div class="toast-title">${esc(scoring.name)} scored</div>
+      <div class="toast-text">${esc(detail.title)}</div>
+      <div class="toast-score">${esc(detail.score)}</div>
+    </div>`;
+
+  stack.prepend(toast);
+  setTimeout(()=>toast.remove(),6500);
+}
+
+function showToastMessage(title,text){
+  const stack=document.getElementById('toast-stack');
+  const toast=document.createElement('div');
+  toast.className='toast';
+
+  toast.innerHTML=`
+    <div></div>
+    <div>
+      <div class="toast-title">${esc(title)}</div>
+      <div class="toast-text">${esc(text)}</div>
+    </div>`;
+
+  stack.prepend(toast);
+  setTimeout(()=>toast.remove(),4500);
+}
+
+async function loadSchedule(){
+  const container=document.getElementById('games-container');
+  document.getElementById('selected-date-label').textContent=
+    formatLongDate(selectedDate);
+
+  document.getElementById('games-title').textContent=
+    selectedDate===localDate(new Date())
+      ? "Today's Games"
+      : 'Games';
+
+  const url=URLS[currentSport]+'?dates='+espnDate(selectedDate);
+
+  try{
+    const res=await fetch(url,{cache:'no-store'});
+    if(!res.ok)throw new Error('ESPN request failed');
+
+    const data=await res.json();
+    const events=data.events||[];
+    const incoming=new Set();
+
+    if(!events.length){
+      container.innerHTML='<div class="empty">No games scheduled for this date.</div>';
+      gamesCache.clear();
+      return;
+    }
+
+    const empty=container.querySelector('.empty');
+    if(empty)empty.remove();
+
+    events.forEach(event=>{
+      const id=String(event.id);
+      incoming.add(id);
+
+      let card=gamesCache.get(id);
+
+      if(!card){
+        card=createCard(event);
+        gamesCache.set(id,card);
+        container.appendChild(card);
+      }
+
+      scoringChange(event);
+      updateCard(card,event);
+    });
+
+    [...gamesCache.entries()].forEach(([id,card])=>{
+      if(!incoming.has(id)){
+        card.remove();
+        gamesCache.delete(id);
+      }
+    });
+
+    localStorage.setItem(
+      'espnScoreCache',
+      JSON.stringify(previousScores)
+    );
+
+    document.getElementById('refresh-status').textContent=
+      'Updated '+formatTime(new Date().toISOString());
+
+  }catch(err){
+    console.error(err);
+
+    if(!gamesCache.size){
+      container.innerHTML=
+        '<div class="error">Unable to load live scores.</div>';
+    }
+  }
+}
+
+function updateClock(){
+  const now=new Date();
+
+  document.getElementById('clock-time').textContent=
+    now.toLocaleTimeString([],{
+      hour:'numeric',
+      minute:'2-digit',
+      hour12:true
+    });
+
+  document.getElementById('clock-date').textContent=
+    now.toLocaleDateString([],{
+      weekday:'short',
+      month:'short',
+      day:'numeric'
+    });
+
+  document.querySelectorAll('.countdown').forEach(el=>{
+    const card=el.closest('.game-card');
+    const id=card?.dataset.id;
+    const event=gamesCache.get(id)?.__event;
+    if(event){
+      const cd=countdown(event.date);
+      el.textContent=cd;
+    }
+  });
+}
+
+function urlBase64ToUint8Array(base64String){
+  const padding='='.repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding)
+    .replace(/-/g,'+')
+    .replace(/_/g,'/');
+  const rawData=atob(base64);
+  const outputArray=new Uint8Array(rawData.length);
+
+  for(let i=0;i<rawData.length;i++){
+    outputArray[i]=rawData.charCodeAt(i);
+  }
+
+  return outputArray;
+}
+
+document.getElementById('master-push-toggle').onchange=e=>{
+  toggleMasterPush(e.target.checked);
+};
+
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden)loadSchedule();
 });
 
-loadSchedule(state.sport,true);
+buildSports();
+buildDates();
+updateMasterLabel();
+updateInstallUI();
+loadSchedule();
+updateClock();
 
-/* Silent refresh: update every 20 seconds without clearing cards. */
+setInterval(updateClock,30000);
 setInterval(()=>{
-  loadSchedule(state.sport,false);
-},20000);
+  if(!document.hidden)loadSchedule();
+},30000);
 
-/* Keep countdown labels current without refetching/repainting cards. */
-setInterval(()=>{
-  document.querySelectorAll('.game-card').forEach(card=>{
-    const id=card.dataset.id;
-    const cached=state.cards.get(id);
-    if(!cached)return;
-
-    /* Countdown is refreshed by the next silent API update. */
-  });
-},60000);
+window.addEventListener('appinstalled',()=>{
+  updateInstallUI();
+});
 </script>
 </body>
 </html>
